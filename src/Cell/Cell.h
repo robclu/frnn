@@ -33,7 +33,7 @@ namespace cublrnn {
 	template <Class Type>
 	class Cell {
 		public:
-			Type input;			// Input value to the cell (if the actual input should be used)
+			Type input;         // Input value to the cell (if the actual input should be used)
 			Type output;        // Output value of the cell (if the computed output should be used)
 			Type forget;        // Forget value of the cell (if the cell must forget its state)
 			Type state_t;       // Current state of the cell
