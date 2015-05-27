@@ -32,15 +32,93 @@ namespace cublrnn {
 	 * Description  : Layer class that defines a layer of the network using
 	 *                template parameters for the number of inputs, outputs and 
 	 *                number of cells
+	 *
+	 * Params (T)	: num_inputs_x	: The number of inputs to the layer from data.
+	 *              : num_inputs_h  : The number of inputs from the hidden layer
+	 *                                at the previous time step.
+	 *              : num_cells		: The number of cells (vertically) in the layer.
+	 *              : num_outputs   : The number of outputs from the layer.
+	 *              : Precision		: What precision to use (double, float ...)
 	 * ============================================================================
 	 */
-	tenplate<size_t num_inputs, size_t num_cells, size_t num_outputs, class Type>
+	tenplate<size_t num_inputs_x, size_t num_inputs_h, size_t num_cells, 
+	         size_t num_outputs , class Precision>
 	class Layer {
 
+		public:
+			/* 
+			 * ====================================================================
+			 * Function     : Layer 
+			 *
+			 * Description  : Constructs the layer class, initializing the size
+			 *                parameters.	
+			 * ====================================================================
+			 */
+			explicit Layer() : 
+				numInputsX( num_inputs_x ), numInputsH( num_inputs_h ), 
+				numCells( num_cells )     , numOutputs( num_outputs ) {}
+
+		    /* 
+			 * ====================================================================
+			 * Function     : GetOutputs 
+			 *
+			 * Description  : Gets a constant reference to the Layer outputs 
+			 * ====================================================================
+			 */
+			// NOTE : Maybe inline
+			const Precision& GetOutputs() const { return outputs; }
+
+			/* 
+			 * ====================================================================
+			 * Function		: Update
+			 *
+			 * Description	: Updates the layer by forward propagating the
+			 *                inputs through the layer.
+			 *
+			 * Params       : inputsX   : The inputs to the layer from (new)
+			 *                            data which is used to update the
+			 *                            layer.
+			 *              : inputsH   : The inputs from the previous or future
+			 *                            hidden layer that are used to update the 
+			 *                            layer
+			 * ====================================================================
+			 */
+			void Update( const Precision* inputsX, const Precision* inputsH ); 
+
 		private:
-			Type        inputs[ num_inputs ];       // Layer inputs
-			Type        outputs[ num_outputs ];     // Layer outputs
-			Cell<Type>  cells[ num_cells ];         // Layer cells 
+			/* ------------------------ Size Variables -------------------------- */
+
+			size_t           numInputsX;                        // Number of inputs from data
+			size_t           numInputsH;                        // Number of inputs from the hidden layer at the previous time step
+			size_t           numCells;                          // Number of cells 
+			size_t           numOutputs;                        // Number of outputs 
+			
+			/* -------------------------- Layer Data ---------------------------- */
+			
+			// Probably wont need to store the inputs and the hidden 
+			Precision        inputsX[ num_inputs_x ];           // Layer data inputs
+			Precision        inputsH[ num_inputs_h ];           // Layer hidden inputs
+			Precision        outputs[ num_outputs ];            // Layer outputs
+			Cell<Precision>  cells[ num_cells ];                // Layer cells
+
+			/* --------------------- Layer Weight matrices ---------------------- */
+
+			// NOTE : The wight matrices for the cells are diagonal, which means
+			//        that the only input that matters to the cell at time t, is the
+			//        output of the same cell at time t-1.
+			Precision		 Wxi[ num_inputs_x * num_cells ];    // Weight matrix for the data inputs to cell inputs
+			Precision        Whi[ num_inputs_h * num_cells ];    // Weight matrix for the prev hidden outputs to the cell inputs
+			Precision        Wci[ num_inputs_h * num_cells ];    // Weight matrix for the prev cell outputs to currecnt cell inputs
+
+			Precision        Whh[ num_cells * num_cells ];       // Weight matrix for the connections between the outputs at this time step
+
+			
+
+		private:	
+			/* 
+			 * ====================================================================
+			 * ====================================================================
+			 */
 	};
 }           // End namespace cublrnn
-#endif      // CUBLRNN_LAYER_INCLUDED
+#endif      // CUBLRNN_LAYER_INCLUDE
