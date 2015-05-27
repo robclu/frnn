@@ -1,5 +1,5 @@
 /*
- *  Layer header file for CUBLRNN that defines a layer of the 
+ *  Layer header file for CUBDLRNN that defines a layer of the 
  *  neural network.
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
@@ -20,11 +20,11 @@
  */
 
 #ifndef CUNLRNN_LAYER_INCLUDED
-#define CUBLRNN_LAYER_INCLUDED
+#define CUBDLRNN_LAYER_INCLUDED
 
-#include "../Cell.h"
+#include "../Cell/Cell.h"
 
-namespace cublrnn {
+namespace cubdlrnn {
 	/*
 	 * ============================================================================
 	 * Class        : Layer
@@ -41,7 +41,7 @@ namespace cublrnn {
 	 *              : Precision		: What precision to use (double, float ...)
 	 * ============================================================================
 	 */
-	tenplate<size_t num_inputs_x, size_t num_inputs_h, size_t num_cells, 
+	template<size_t num_inputs_x, size_t num_inputs_h, size_t num_cells, 
 	         size_t num_outputs , class Precision>
 	class Layer {
 
@@ -120,5 +120,5 @@ namespace cublrnn {
 			 * ====================================================================
 			 */
 	};
-}           // End namespace cublrnn
-#endif      // CUBLRNN_LAYER_INCLUDE
+}           // End namespace cubdlrnn
+#endif      // CUBDLRNN_LAYER_INCLUDE

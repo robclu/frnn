@@ -1,5 +1,5 @@
 /*
- *  Cell header file for CUBLRNN that defines a LSTM cell.
+ *  Cell header file for CUBDLRNN that defines a LSTM cell.
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
@@ -18,21 +18,21 @@
  *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef CUBLRNN_CELL_INCLUDED
-#define CUBLRNN_CELL_INCLUDED
+#ifndef CUBDLRNN_CELL_INCLUDED
+#define CUBDLRNN_CELL_INCLUDED
 
-namespace cublrnn {
+namespace cubdlrnn {
 	/*
 	 * ============================================================================
 	 * Class        : Cell
 	 *
 	 * Description  : Cell class that defines a Long Short-Term Memory cell for
-	 *                the Bi-directional recurrent neural network.
+	 *                the deep bi-directional recurrent neural network.
 	 *
 	 * Params (T)   : The precision of the computation (Double, Float etc ...)
 	 * ============================================================================
 	 */
-	template <Class Precision>
+	template <class Precision>
 	class Cell {
 		public:
 			Precision input;         // Input value to the cell (if the actual input should be used)
@@ -41,5 +41,5 @@ namespace cublrnn {
 			Precision state_t;       // Current state of the cell
 			Precision state_t1;      // Previous state of the cell
 	};	
-}           // End namespace CUBLRNN
-#endif      // CUBLRNN_CELL_INCLUDED
+}           // End namespace CUBDLRNN
+#endif      // CUBDLRNN_CELL_INCLUDED
