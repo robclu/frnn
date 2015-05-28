@@ -1,6 +1,6 @@
 TARGET_NAME     = cublrnn
 SRC_DIR         = src
-OBJ_DIR         = obj
+OBJ_DIR         = objs
 REL_DIR         = release
 
 TARGET          = $(addprefix $(REL_DIR)/,$(TARGET_NAME))
@@ -49,4 +49,4 @@ $(OBJ_DIR)/%.o : $(SRC_DIR)/*/%.cpp $(H_FILES)
 	touch $@
 
 clean:
-	rm -rf $(REL_DIR)/*
+	rm -rf $(REL_DIR)/* $(OBJ_DIR)/*.o
