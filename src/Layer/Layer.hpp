@@ -112,7 +112,7 @@ namespace cubdlrnn {
 
 			Precision        Wxf[ num_inputs_x * num_cells ];    // Weight matrix for the data inputs to the cell forget gates 
             Precision        Whf[ num_inputs_h * num_cells ];    // Weight matrix for the prev hidden outputs to the cell forget gates
-			Precision        Whc[ num_inputs_h * num_cells ];    // Weight matrix for the prev cell outputs to the cell forget gates
+			Precision        Wcf[ num_inputs_h * num_cells ];    // Weight matrix for the prev cell outputs to the cell forget gates
 
 			Precision        Wxo[ num_inputs_x * num_cells ];    // Weight matrix for the data inputs to the cell output gates
 			Precision        Who[ num_inputs_h * num_cells ];    // Weight matrix for the prev hidden outputs to the cell output gates

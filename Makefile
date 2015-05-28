@@ -49,4 +49,4 @@ $(OBJ_DIR)/%.o : $(SRC_DIR)/*/%.cpp $(H_FILES)
 	touch $@
 
 clean:
-	$(OBJ_DIR)/*.o
+	rm -rf $(REL_DIR)/*
