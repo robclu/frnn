@@ -106,9 +106,20 @@ namespace cubdlrnn {
 			// NOTE : The wight matrices for the cells are diagonal, which means
 			//        that the only input that matters to the cell at time t, is the
 			//        output of the same cell at time t-1.
-			Precision		 Wxi[ num_inputs_x * num_cells ];    // Weight matrix for the data inputs to cell inputs
-			Precision        Whi[ num_inputs_h * num_cells ];    // Weight matrix for the prev hidden outputs to the cell inputs
-			Precision        Wci[ num_inputs_h * num_cells ];    // Weight matrix for the prev cell outputs to currecnt cell inputs
+			Precision		 Wxi[ num_inputs_x * num_cells ];    // Weight matrix for the data inputs to cell input gates
+			Precision        Whi[ num_inputs_h * num_cells ];    // Weight matrix for the prev hidden outputs to the cell input gates
+			Precision        Wci[ num_inputs_h * num_cells ];    // Weight matrix for the prev cell outputs to the cell input gates
+
+			Precision        Wxf[ num_inputs_x * num_cells ];    // Weight matrix for the data inputs to the cell forget gates 
+            Precision        Whf[ num_inputs_h * num_cells ];    // Weight matrix for the prev hidden outputs to the cell forget gates
+			Precision        Whc[ num_inputs_h * num_cells ];    // Weight matrix for the prev cell outputs to the cell forget gates
+
+			Precision        Wxo[ num_inputs_x * num_cells ];    // Weight matrix for the data inputs to the cell output gates
+			Precision        Who[ num_inputs_h * num_cells ];    // Weight matrix for the prev hidden outputs to the cell output gates
+			Precision        Wco[ num_cells * num_cells ];       // Weight matrix for the current cell state gates to the cell output gates
+
+			Precision        Wxc[ num_inputs_x * num_cells ];    // Weight matrix for the data inputs to the current cell stat gates
+			Precision        Whc[ num_inputs_h * num_cells ];    // Weight matrix for the prev hidden outputs to the current cell state gates
 
 			Precision        Whh[ num_cells * num_cells ];       // Weight matrix for the connections between the outputs at this time step
 
