@@ -36,7 +36,7 @@ namespace cubdlrnn {
 	 * Params (T)	: num_inputs_x	: The number of inputs to the layer from data.
 	 *              : num_inputs_h  : The number of inputs from the hidden layer
 	 *                                at the previous time step.
-	 *              : num_cells		: The number of cells (vertically) in the layer.
+	 *              : num_cells	    : The number of cells (vertically) in the layer.
 	 *              : num_outputs   : The number of outputs from the layer.
 	 *              : Precision		: What precision to use (double, float ...)
 	 * ============================================================================
@@ -58,7 +58,7 @@ namespace cubdlrnn {
 				numInputsX( num_inputs_x ), numInputsH( num_inputs_h ), 
 				numCells( num_cells )     , numOutputs( num_outputs ) {}
 
-		    /* 
+            /* 
 			 * ====================================================================
 			 * Function     : GetOutputs 
 			 *
@@ -106,7 +106,7 @@ namespace cubdlrnn {
 			// NOTE : The wight matrices for the cells are diagonal, which means
 			//        that the only input that matters to the cell at time t, is the
 			//        output of the same cell at time t-1.
-			Precision		 Wxi[ num_inputs_x * num_cells ];    // Weight matrix for the data inputs to cell input gates
+			Precision        Wxi[ num_inputs_x * num_cells ];    // Weight matrix for the data inputs to cell input gates
 			Precision        Whi[ num_inputs_h * num_cells ];    // Weight matrix for the prev hidden outputs to the cell input gates
 			Precision        Wci[ num_inputs_h * num_cells ];    // Weight matrix for the prev cell outputs to the cell input gates
 
