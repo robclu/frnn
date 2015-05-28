@@ -36,7 +36,7 @@ namespace cubdlrnn {
 	 * Params (T)	: num_inputs_x	: The number of inputs to the layer from data.
 	 *              : num_inputs_h  : The number of inputs from the hidden layer
 	 *                                at the previous time step.
-	 *              : num_cells	    : The number of cells (vertically) in the layer.
+	 *              : num_cells     : The number of cells (vertically) in the layer.
 	 *              : num_outputs   : The number of outputs from the layer.
 	 *              : Precision		: What precision to use (double, float ...)
 	 * ============================================================================
@@ -122,8 +122,6 @@ namespace cubdlrnn {
 			Precision        Whc[ num_inputs_h * num_cells ];    // Weight matrix for the prev hidden outputs to the current cell state gates
 
 			Precision        Whh[ num_cells * num_cells ];       // Weight matrix for the connections between the outputs at this time step
-
-			
 
 		private:	
 			/* 
