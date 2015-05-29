@@ -40,7 +40,7 @@ namespace cubdlrnn {
 	 * ============================================================================
 	 */
 	template <typename Precision> 
-	__global__ void reductionSum( Precision* a, int N, T* c ) {}
+	__global__ void MatrixSum( Precision* a, int N, T* c ) {}
 
 	/*
 	 * ============================================================================	 
@@ -73,11 +73,16 @@ namespace cubdlrnn {
 		int idy = blockId.y * blockDim.y + threadId.y;        // Y index ( cell index  )
         int idz = blockId.z * blockDim.z + threadId.z;        // Z index ( input type  )
 
-		// Copy weight data to shared memory
-		__shared__ float sharedWeights[ max_inputs_size *     // Size of weights x dimension
-			                            num_cells       *     // Size of weights y dimension 
-										num_input_types       // Size of weights z dimension
-									   ];
+		// Array (actually a flattened 3D matrix) for shared weights
+		__shared__ Precision sharedWeights[ max_inputs_size *     // Size of weights x dimension
+			                                num_cells       *     // Size of weights y dimension 
+										    num_input_types       // Size of weights z dimension
+									      ];
+
+		// Array (actually a flattened matrix) for shared inputs
+		__shared__ Precision sharedInputs[ num_input_types *      // Size of inputs x dimension
+			                               max_inputs_size        // Size of inputs y dimension 
+										  ];
 
 		// Copy the weights into shared memory
 		sharedWeights[ ( idz * grdDim.x * gridDim.y ) +      // Offset due to pages (z)
@@ -88,6 +93,12 @@ namespace cubdlrnn {
 			         ( idy * gridDim.x ) +          
 					 ( idx )                            
 				  ];
+
+		// The last thread along the y dimension must also 
+		// also move an input into shared memory
+		if ( idy == max_input_size ) {
+			sharedInputs[] = inputs[];
+		}
 
 		// Make sure all threads are done
 		__syncthreads();
