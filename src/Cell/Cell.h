@@ -29,17 +29,17 @@ namespace cubdlrnn {
 	 * Description  : Cell class that defines a Long Short-Term Memory cell for
 	 *                the deep bi-directional recurrent neural network.
 	 *
-	 * Params (T)   : The precision of the computation (Double, Float etc ...)
+	 * Params (T)   : Type	: The type used for the computation (Double, Float etc ...)
 	 * ============================================================================
 	 */
-	template <class Precision>
+	template <class Type>
 	class Cell {
 		public:
-			Precision input;         // Input value to the cell (if the actual input should be used)
-			Precision output;        // Output value of the cell (if the computed output should be used)
-			Precision forget;        // Forget value of the cell (if the cell must forget its state)
-			Precision state_t;       // Current state of the cell
-			Precision state_t1;      // Previous state of the cell
+			Type input;         // Input value to the cell (if the actual input should be used)
+			Type output;        // Output value of the cell (if the computed output should be used)
+			Type forget;        // Forget value of the cell (if the cell must forget its state)
+			Type state_t;       // Current state of the cell
+			Type state_t1;      // Previous state of the cell
 	};	
 }           // End namespace CUBDLRNN
 #endif      // CUBDLRNN_CELL_INCLUDED

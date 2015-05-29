@@ -38,11 +38,11 @@ namespace cubdlrnn {
 	 *                                at the previous time step.
 	 *              : num_cells     : The number of cells (vertically) in the layer.
 	 *              : num_outputs   : The number of outputs from the layer.
-	 *              : Precision		: What precision to use (double, float ...)
+	 *              : Type		    : What class type to use (double, float ...)
 	 * ============================================================================
 	 */
 	template<size_t num_inputs_x, size_t num_inputs_h, size_t num_cells, 
-	         size_t num_outputs , class Precision>
+	         size_t num_outputs , class Type>
 	class Layer {
 
 		public:
@@ -66,7 +66,7 @@ namespace cubdlrnn {
 			 * ====================================================================
 			 */
 			// NOTE : Maybe inline
-			const Precision& GetOutputs() const { return outputs; }
+			const Type& GetOutputs() const { return outputs; }
 
 			/* 
 			 * ====================================================================
@@ -83,45 +83,45 @@ namespace cubdlrnn {
 			 *                            layer
 			 * ====================================================================
 			 */
-			void Update( const Precision* inputsX, const Precision* inputsH ); 
+			void Update( const Type* inputsX, const Type* inputsH ); 
 
 		private:
 			/* ------------------------ Size Variables -------------------------- */
 
-			size_t           numInputsX;                        // Number of inputs from data
-			size_t           numInputsH;                        // Number of inputs from the hidden layer at the previous time step
-			size_t           numCells;                          // Number of cells 
-			size_t           numOutputs;                        // Number of outputs 
+			size_t      numInputsX;                        // Number of inputs from data
+			size_t      numInputsH;                        // Number of inputs from the hidden layer at the previous time step
+			size_t      numCells;                          // Number of cells 
+			size_t      numOutputs;                        // Number of outputs 
 			
 			/* -------------------------- Layer Data ---------------------------- */
 			
 			// Probably wont need to store the inputs and the hidden 
-			Precision        inputsX[ num_inputs_x ];           // Layer data inputs
-			Precision        inputsH[ num_inputs_h ];           // Layer hidden inputs
-			Precision        outputs[ num_outputs ];            // Layer outputs
-			Cell<Precision>  cells[ num_cells ];                // Layer cells
+			Type        inputsX[ num_inputs_x ];           // Layer data inputs
+			Type        inputsH[ num_inputs_h ];           // Layer hidden inputs
+			Type        outputs[ num_outputs ];            // Layer outputs
+			Cell<Type>  cells[ num_cells ];                // Layer cells
 
 			/* --------------------- Layer Weight matrices ---------------------- */
 
 			// NOTE : The wight matrices for the cells are diagonal, which means
 			//        that the only input that matters to the cell at time t, is the
 			//        output of the same cell at time t-1.
-			Precision        Wxi[ num_inputs_x * num_cells ];    // Weight matrix for the data inputs to cell input gates
-			Precision        Whi[ num_inputs_h * num_cells ];    // Weight matrix for the prev hidden outputs to the cell input gates
-			Precision        Wci[ num_inputs_h * num_cells ];    // Weight matrix for the prev cell outputs to the cell input gates
+			Type        Wxi[ num_inputs_x * num_cells ];    // Weight matrix for the data inputs to cell input gates
+			Type        Whi[ num_inputs_h * num_cells ];    // Weight matrix for the prev hidden outputs to the cell input gates
+			Type        Wci[ num_inputs_h * num_cells ];    // Weight matrix for the prev cell outputs to the cell input gates
 
-			Precision        Wxf[ num_inputs_x * num_cells ];    // Weight matrix for the data inputs to the cell forget gates 
-            Precision        Whf[ num_inputs_h * num_cells ];    // Weight matrix for the prev hidden outputs to the cell forget gates
-			Precision        Wcf[ num_inputs_h * num_cells ];    // Weight matrix for the prev cell outputs to the cell forget gates
+			Type        Wxf[ num_inputs_x * num_cells ];    // Weight matrix for the data inputs to the cell forget gates 
+            Type        Whf[ num_inputs_h * num_cells ];    // Weight matrix for the prev hidden outputs to the cell forget gates
+			Type        Wcf[ num_inputs_h * num_cells ];    // Weight matrix for the prev cell outputs to the cell forget gates
 
-			Precision        Wxo[ num_inputs_x * num_cells ];    // Weight matrix for the data inputs to the cell output gates
-			Precision        Who[ num_inputs_h * num_cells ];    // Weight matrix for the prev hidden outputs to the cell output gates
-			Precision        Wco[ num_cells * num_cells ];       // Weight matrix for the current cell state gates to the cell output gates
+			Type        Wxo[ num_inputs_x * num_cells ];    // Weight matrix for the data inputs to the cell output gates
+			Type        Who[ num_inputs_h * num_cells ];    // Weight matrix for the prev hidden outputs to the cell output gates
+			Type        Wco[ num_cells * num_cells ];       // Weight matrix for the current cell state gates to the cell output gates
 
-			Precision        Wxc[ num_inputs_x * num_cells ];    // Weight matrix for the data inputs to the current cell stat gates
-			Precision        Whc[ num_inputs_h * num_cells ];    // Weight matrix for the prev hidden outputs to the current cell state gates
+			Type        Wxc[ num_inputs_x * num_cells ];    // Weight matrix for the data inputs to the current cell stat gates
+			Type        Whc[ num_inputs_h * num_cells ];    // Weight matrix for the prev hidden outputs to the current cell state gates
 
-			Precision        Whh[ num_cells * num_cells ];       // Weight matrix for the connections between the outputs at this time step
+			Type        Whh[ num_cells * num_cells ];       // Weight matrix for the connections between the outputs at this time step
 
 		private:	
 			/* 
