@@ -23,6 +23,9 @@
 #define CUBDLRNN_LAYER_INCLUDED
 
 #include "../Cell/Cell.h"
+#include "LayerKernels.cu"
+
+#define INPUT_TYPES 4						// The number of types of inputs for the cell gates
 
 namespace cubdlrnn {
 	/*
@@ -56,7 +59,10 @@ namespace cubdlrnn {
 			 */
 			explicit Layer() : 
 				numInputsX( num_inputs_x ), numInputsH( num_inputs_h ), 
-				numCells( num_cells )     , numOutputs( num_outputs ) {}
+				numCells( num_cells )     , numOutputs( num_outputs ) {
+				    num_inputs_x >= num_inputs_h ? maxInputs = num_inputs_x :
+			                                       maxInputs = num_inputs_h;	
+				}
 
             /* 
 			 * ====================================================================
@@ -83,13 +89,14 @@ namespace cubdlrnn {
 			 *                            layer
 			 * ====================================================================
 			 */
-			void Update( const Type* inputsX, const Type* inputsH ); 
+			void Update( const Type* inputs_x, const Type* inputs_h ); 
 
 		private:
 			/* ------------------------ Size Variables -------------------------- */
 
 			size_t      numInputsX;                        // Number of inputs from data
 			size_t      numInputsH;                        // Number of inputs from the hidden layer at the previous time step
+			size_t      maxInputs;                         // The maximum number of inputs
 			size_t      numCells;                          // Number of cells 
 			size_t      numOutputs;                        // Number of outputs 
 			

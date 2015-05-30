@@ -11,12 +11,12 @@ CXX             = g++
 CUD_INCLUDES    = /usr/local/cuda-7.0/include
 CXX_INCLUDES    = 
 
-CUD_LDFLAGS     = -lcuda
+CUD_LDFLAGS     = -lcuda 
 CXX_LDFLAGS     = 
 
 CUD_FLAGS       = $(GEN_SM35)
 CUD_FLAGS       += $(foreach includedir,$(CUD_INCLUDES),-I$(includedir))
-CXX_FLAGS       = -std=c++11
+CXX_FLAGS       = -std=c++11 
 
 CPP_FILES       = $(wildcard $(SRC_DIR)/*/*.cpp)
 CU_FILES        = $(wildcard $(SRC_DIR)/*/*.cu)
