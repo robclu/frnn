@@ -22,24 +22,39 @@
 #define CUBDLRNN_CELL_INCLUDED
 
 namespace cubdlrnn {
-	/*
-	 * ============================================================================
-	 * Class        : Cell
-	 *
-	 * Description  : Cell class that defines a Long Short-Term Memory cell for
-	 *                the deep bi-directional recurrent neural network.
-	 *
-	 * Params (T)   : Type	: The type used for the computation (Double, Float etc ...)
-	 * ============================================================================
-	 */
-	template <class Type>
-	class Cell {
-		public:
-			Type input;         // Input value to the cell (if the actual input should be used)
-			Type output;        // Output value of the cell (if the computed output should be used)
-			Type forget;        // Forget value of the cell (if the cell must forget its state)
-			Type state_t;       // Current state of the cell
-			Type state_t1;      // Previous state of the cell
-	};	
-}           // End namespace CUBDLRNN
+	namespace cell {
+
+        #define NUM_INPUT_TYPES 4  // The number of available input type for a cell
+
+		/*
+		 * ============================================================================
+		 * Class        : Cell
+		 *
+		 * Description  : Cell class that defines a Long Short-Term Memory cell for
+		 *                the deep bi-directional recurrent neural network.
+		 *
+		 * Params (T)   : Type	: The type used for the computation (Double, Float etc ...)
+		 * ============================================================================
+		 */
+		template <class Type>
+		class Cell {
+			public:
+				Type input;         // Input value to the cell (if the actual input should be used)
+				Type output;        // Output value of the cell (if the computed output should be used)
+				Type forget;        // Forget value of the cell (if the cell must forget its state)
+				Type state_t;       // Current state of the cell
+				Type state_t1;      // Previous state of the cell
+		};
+
+		/* 
+		 * ============================================================================
+		 * Enum			: InputType
+		 *
+		 * Description  : The possible input types for the cell 
+		 * ============================================================================
+		 */
+		enum InputType{ INPUT, OUTPUT, FORGET, CELL };
+	
+	}       // End namespace cell
+}           // End namespace cubdlrnn
 #endif      // CUBDLRNN_CELL_INCLUDED

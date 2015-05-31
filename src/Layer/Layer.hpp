@@ -25,9 +25,11 @@
 #include "../Cell/Cell.h"
 #include "LayerKernels.cu"
 
-#define INPUT_TYPES 4						// The number of types of inputs for the cell gates
+using namespace cubdlrnn;
+using namespace cubdlrnn::cell;
 
 namespace cubdlrnn {
+
 	/*
 	 * ============================================================================
 	 * Class        : Layer
@@ -113,6 +115,12 @@ namespace cubdlrnn {
 			// NOTE : The wight matrices for the cells are diagonal, which means
 			//        that the only input that matters to the cell at time t, is the
 			//        output of the same cell at time t-1.
+	
+			// Weight matrix for the inputs (data, prev hidden values, prev cell
+			// states) to the cell input gates
+		    Type        Wi[ num_inputs_x * num_cells +
+				            num_inputs_h * num_cells * 2 ];
+
 			Type        Wxi[ num_inputs_x * num_cells ];    // Weight matrix for the data inputs to cell input gates
 			Type        Whi[ num_inputs_h * num_cells ];    // Weight matrix for the prev hidden outputs to the cell input gates
 			Type        Wci[ num_inputs_h * num_cells ];    // Weight matrix for the prev cell outputs to the cell input gates
@@ -133,8 +141,17 @@ namespace cubdlrnn {
 		private:	
 			/* 
 			 * ====================================================================
+			 * Function		: GetPreviousCellOutputs
+			 *
+			 * Description  : Adds the cell outputs at the previous iteration to
+			 *                the array of all inputs (x, h and c)
+			 *
+			 * Params       : input_array	: The current input array.
+			 *              : start_index   : The index that the elements must
+			 *                                be added from 
 			 * ====================================================================
 			 */
+			void GetPreviousCellOutputs( Type* input_array, size_t start_index ) const;
 	};
 }           // End namespace cubdlrnn
 #endif      // CUBDLRNN_LAYER_INCLUDE
