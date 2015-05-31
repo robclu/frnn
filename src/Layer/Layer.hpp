@@ -22,6 +22,8 @@
 #ifndef CUNLRNN_LAYER_INCLUDED
 #define CUBDLRNN_LAYER_INCLUDED
 
+#include <cstdlib>
+#include <time.h>
 #include "../Cell/Cell.h"
 #include "LayerKernels.cu"
 
@@ -92,6 +94,21 @@ namespace cubdlrnn {
 			 * ====================================================================
 			 */
 			void Update( const Type* inputs_x, const Type* inputs_h ); 
+
+			/* 
+			 * ====================================================================
+			 * Function     : InitializeWeights 
+			 *
+			 * Description  : Initialize the weight in the range specified.
+			 *
+			 * Params       : min	: The min value to use for initialization.
+			 *              : max   : The max value to use for initialization.
+			 *
+			 * NOTE         : Must add that the weights can be optimally
+			 *                randomized if the 0, 0 are the params
+			 * ====================================================================
+			 */
+			void InitializeWeights( Type min, Type max );
 
 		private:
 			/* ------------------------ Size Variables -------------------------- */

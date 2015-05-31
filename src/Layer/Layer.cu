@@ -72,6 +72,23 @@ void Layer< num_inputs_x, num_inputs_h, num_cells, num_outputs, Type >
 	cudaFree( updated_results_d );
 }
 
+template< size_t num_inputs_x, size_t num_inputs_h, size_t num_cells,
+	      size_t num_outputs , class Type > 
+void Layer< num_inputs_x, num_inputs_h, num_cells, num_outputs, Type >
+     ::InitializeWeights( Type min, Type max ) {
+
+	 srand( time( NULL ) );
+
+	 // This needs to change (not true for system)
+	 size_t numWeights = num_inputs_x * num_cells + num_inputs_h * 3;
+
+     for ( size_t i = 0; i < numWeights; i++ ) {
+		Wi[ i ] = min + static_cast<Type>( rand() ) / 
+				        ( static_cast<Type>( RAND_MAX / ( max - min ) ) );  
+	 }
+}
+
+
 template< size_t num_inputs_x, size_t num_inputs_h, size_t num_cells, 
 	      size_t num_outputs , class Type>
 void Layer< num_inputs_x, num_inputs_h, num_cells, num_outputs , Type >
