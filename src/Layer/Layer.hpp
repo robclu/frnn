@@ -119,7 +119,7 @@ namespace cubdlrnn {
 			// Weight matrix for the inputs (data, prev hidden values, prev cell
 			// states) to the cell input gates
 		    Type        Wi[ num_inputs_x * num_cells +
-				            num_inputs_h * num_cells * 2 ];
+				            num_inputs_h * num_cells * 3 ];
 
 			Type        Wxi[ num_inputs_x * num_cells ];    // Weight matrix for the data inputs to cell input gates
 			Type        Whi[ num_inputs_h * num_cells ];    // Weight matrix for the prev hidden outputs to the cell input gates

@@ -42,7 +42,7 @@ void Layer< num_inputs_x, num_inputs_h, num_cells, num_outputs, Type >
 
 	// Create device inputs
 	Type* inputs_d;
-	cudaMalloc( (void**)&inputs_d, maxInputs * NUM_INPUT_TYPES * sizeof(  Type ) ); 
+	cudaMalloc( (void**)&inputs_d, maxInputs * NUM_INPUT_TYPES * sizeof( Type ) ); 
 	cudaMemcpy( inputs, inputs_d, maxInputs * NUM_INPUT_TYPES * sizeof( Type ),
 			     cudaMemcpyHostToDevice );
 
@@ -54,7 +54,8 @@ void Layer< num_inputs_x, num_inputs_h, num_cells, num_outputs, Type >
 	// Create weight matrix for device
 	Type* weights_d;
 	cudaMalloc( (void**)&weights_d, numCells * maxInputs * NUM_INPUT_TYPES * sizeof( Type ) );
-    // Do all the memcpy's	
+    cudaMemcpy( Wi, weights_d, numCells * maxInputs * NUM_INPUT_TYPES * sizeof( Type ), 
+			    cudaMemcpyHostToDevice );	
 
 	// Define the grid size 
 	dim3 dimBlock( 1 );
