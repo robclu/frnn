@@ -23,6 +23,6 @@ __Note__: See the wiki for details on the functions and conceptual explanations.
 
 The following system parameters are used for testing:
 
-OS&nbsp; : Linux Ubuntu 14.04  
+OS &nbsp; : Linux Ubuntu 14.04  
 CPU : Intel i7-3615QM (Quad-core @ 2.3GHz)  
 GPU : Nvidia GeForce GT 650M (344 cores, 900Mhz)  
