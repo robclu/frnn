@@ -1,5 +1,5 @@
 /*
- *  Header file for cuRNN math functions.
+ *  Implementation file for cuRNN error functions.
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
@@ -18,32 +18,19 @@
  *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __CURNN_MATH__
-#define	__CURNN_MATH__
-
-#include <cuda_runtime.h>
-#include <cublas_v2.h>
-
-#include <vector>
-
-#include "../util/errors.hpp"
+#include "errors.hpp"
 
 namespace curnn {
-	namespace math  {
-		/*
-		 * ==================================================================================================     
-		 * Function		: saxpy
-		 *
-		 * Description	: performs a*X + Y
-		 *
-		 * Inputs		: a		: Constant for multiplication 
-		 *              : x     : Vector to multiply with a
-		 * 
-		 * Outputs		: y		: Vector which the result of a*X + Y is stored in
-		 * ==================================================================================================
-		 */
-		void saxpy( const float a, const std::vector<float>& x, std::vector<float>& y );	
+	namespace util {
+		namespace err {
+
+			void allocError( char * varname ) {
+				std::cerr << "Error allocation memory for " << varname << "\n";
+			}				
+			
+			void copyError( char* varname ) {
+				std::cerr << "Error copying to/from variable " << varname << "\n";
+			}
+		}
 	}
 }
-
-#endif

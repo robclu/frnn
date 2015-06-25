@@ -1,5 +1,5 @@
 /*
- *  Header file for cuRNN math functions.
+ *  Test file for cuRNN math functions.
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
@@ -18,32 +18,37 @@
  *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __CURNN_MATH__
-#define	__CURNN_MATH__
+#include <gtest/gtest.h>
+#include <iostream>
 
-#include <cuda_runtime.h>
-#include <cublas_v2.h>
+#include "math.hpp"
 
-#include <vector>
+using std::vector;
 
-#include "../util/errors.hpp"
+TEST( curnnMath, TestTest ) {
+	const size_t NUM_ELEMENTS = 3;
+	const float  MULTIPLIER   = 2.0f;
 
-namespace curnn {
-	namespace math  {
-		/*
-		 * ==================================================================================================     
-		 * Function		: saxpy
-		 *
-		 * Description	: performs a*X + Y
-		 *
-		 * Inputs		: a		: Constant for multiplication 
-		 *              : x     : Vector to multiply with a
-		 * 
-		 * Outputs		: y		: Vector which the result of a*X + Y is stored in
-		 * ==================================================================================================
-		 */
-		void saxpy( const float a, const std::vector<float>& x, std::vector<float>& y );	
+	// Create data vectors
+	vector<float> x;
+	vector<float> y;
+
+	// Fill vectors with data
+	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+		x.push_back( float( i ) ); 
+		y.push_back( float( i ) );
 	}
+
+	// Execute saxpy
+	curnn::math::saxpy( MULTIPLIER, x, y );
+
+	// Check result
+	EXPECT_EQ( y[1], MULTIPLIER * 1 + 1 );
 }
 
-#endif
+int main(int argc, char** argv) 
+{
+	testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
+}
+

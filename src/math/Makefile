@@ -2,7 +2,7 @@
 #					EXECUTABLE NAME 				   #
 ########################################################
 
-EXE 			:= mathTests
+EXE 			:= math_tests
 
 ########################################################
 #					COMPILERS						   #
@@ -10,12 +10,14 @@ EXE 			:= mathTests
 
 HOST_COMPILER	:= g++
 NVCC 			:= nvcc -ccbin $(HOST_COMPILER)
+CXX 			:= $(HOST_COMPILER)
 
 ########################################################
 #				INCLUDE DIRECTORIES 				   #
 ########################################################
 
-INCLUDES 		:= -I/usr/local/cuda-7.0/include
+INCLUDES 		:= -I/usr/local/cuda-7.0/include \
+				   -I../Util
 
 ########################################################
 #					LIBRARIES 						   #
@@ -31,7 +33,7 @@ LIB_DIR 		:= -L/usr/local/cuda/lib64
 #					COMPILER FLAGS 					   #
 ########################################################
 
-CCFLAGS 		:= -g -std=c++11 \
+CCFLAGS 		:= -std=c++11 \
 				   #--relaxed-constexpr
 
 ########################################################
@@ -43,15 +45,17 @@ all: tests cleanobs
 tests: tests
 
 math.o : math.cpp
-	$(NVCC) -x cu $(INLCUDES) $(CCFLAGS) -o $@ -c $<
+	$(NVCC) -x cu $(INLCUDES) $(CCFLAGS) -o $@ -dc $<
 
-tests_math.o: tests_math.cpp math.cpp
-	$(NVCC)  -x cu $(INCLUDES) $(CCFLAGS) -o $@ -c $<
+math_tests.o: math_tests.cpp 
+	$(CXX) $(INCLUDES) $(CCFLAGS) -o $@ -c $<
 
-tests: math.o tests_math.o
+errors.o: ../util/errors.cpp 
+	$(NVCC) $(INCLUDES) $(CCFLAGS) -o $@ -c $<
+
+tests: errors.o math.o math_tests.o
 	$(NVCC) $(LDFLAGS) -o $(EXE) $+ $(LIB_DIR) \
-		$(CUDA_LIBS) $(TEST_LIBS)
-	@rm -rf *.o	
+		$(CUDA_LIBS) $(TEST_LIBS)	
 		
 cleanobs:
 	rm -rf *.o
