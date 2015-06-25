@@ -18,41 +18,9 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <vector>
+#include "error.hpp"
 
 #include <gtest/gtest.h>
-
-#include "math.hpp"
-
-namespace curnn {
-	void saxpy( const float a, const std::vector<float>& x, std::vector<float>& y );
-}
-
-TEST( currnMath, SaxpyCorrectlyPerformed ) {
-	using std::vector;
-	using std::cout;
-	using std::endl;
-
-	const size_t NUM_ELEMENTS = 3;
-	const float  MULTIPLIER   = 2.0f;
-
-	// Create data vectors
-	vector<float> x;
-	vector<float> y;
-
-	// Fill vectors with data
-	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-		x.push_back( float( i ) ); 
-		y.push_back( float( i ) );
-		cout << x[ i ] << endl;
-	}
-
-	// Execute saxpy
-	curnn::saxpy( MULTIPLIER, x, y );
-
-	// Check result
-	EXPECT_EQ( y[1], MULTIPLIER * 1 + 1 );
-}
 
 int main(int argc, char **argv) {
 	::testing::InitGoogleTest(&argc, argv);
