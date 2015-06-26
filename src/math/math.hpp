@@ -30,19 +30,52 @@
 
 namespace curnn {
 	namespace math  {
+		
 		/*
 		 * ==================================================================================================     
-		 * Function		: saxpy
+		 * Function		: axpy
 		 *
-		 * Description	: performs a*X + Y
+		 * Description	: Performs simgle precision a*X + Y
 		 *
-		 * Inputs		: a		: Constant for multiplication 
-		 *              : x     : Vector to multiply with a
+		 * Inputs		: status	: Cublas status for determining correct completion of operation
+		 *				: a			: Constant for multiplication 
+		 *              : x			: Vector to multiply with a
 		 * 
-		 * Outputs		: y		: Vector which the result of a*X + Y is stored in
+		 * Outputs/(I)	: y			: Vector used in a*X + Y, and where the result of a*X + Y is stored
 		 * ==================================================================================================
 		 */
-		void saxpy( const float a, const std::vector<float>& x, std::vector<float>& y );	
+		void axpy( cublasStatus_t& status, const float a, const std::vector<float>& x, std::vector<float>& y );	
+
+		/*
+		 * ==================================================================================================     
+		 * Function		: axpy
+		 *
+		 * Description	: Performs double precision a*X + Y
+		 *
+		 * Inputs		: status	: Cublas status for determining correct completion of operation
+		 *				: a			: Constant for multiplication 
+		 *              : x			: Vector to multiply with a
+		 * 
+		 * Outputs/(I)	: y			: Vector used in a*X + Y, and where the result of a*X + Y is stored
+		 * ==================================================================================================
+		 */
+		void axpy( cublasStatus_t& status, const double a, const std::vector<double>& x, std::vector<double>& y );	
+
+	
+		/*
+		 * ==================================================================================================     
+		 * Function		: softmax
+		 *
+		 * Description	: Performs the softmax function of a vector of floats x, which is 
+		 *					
+		 *				  softmax( x_i ) = exp( x_i ) / sum[ j=1 to J ]( exp( x_j )
+		 *
+		 * Inputs		: status	: Cublas status for determining correct completion of operation
+		 *        
+		 * Outputs/(I)  : x			: Vector to compute the softmax of, and to store the result in
+		 * ==================================================================================================
+		 */	 
+		void softmax( cublasStatus_t& status, std::vector<float>& x );
 	}
 }
 

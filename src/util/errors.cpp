@@ -24,11 +24,11 @@ namespace curnn {
 	namespace util {
 		namespace err {
 
-			void allocError( char * varname ) {
+			void allocError( const char * varname ) {
 				std::cerr << "Error allocation memory for " << varname << "\n";
 			}				
 			
-			void copyError( char* varname ) {
+			void copyError( const char* varname ) {
 				std::cerr << "Error copying to/from variable " << varname << "\n";
 			}
 		}

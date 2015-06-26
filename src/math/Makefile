@@ -33,8 +33,7 @@ LIB_DIR 		:= -L/usr/local/cuda/lib64
 #					COMPILER FLAGS 					   #
 ########################################################
 
-CCFLAGS 		:= -std=c++11 \
-				   #--relaxed-constexpr
+CCFLAGS 		:= -std=c++11 -O3
 
 ########################################################
 # 					TARGET RULES 					   #

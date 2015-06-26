@@ -26,7 +26,7 @@
 
 // To convert variable names to strings
 #define stringify( name ) varname( #name )
-inline char* varname( char* name ) { return name; }
+inline const char* varname( const char* name ) { return name; }
 
 namespace currn {
 	namespace util {
@@ -40,7 +40,7 @@ namespace currn {
 			 * Inputs		: varname	: The name of the variable that could not be allocated
 			 * ==============================================================================================
 			 */
-			void allocError( char * varname );	
+			void allocError( const char * varname );	
 
 			/*
 			 * ==============================================================================================
@@ -51,7 +51,7 @@ namespace currn {
 			 * Inputs		: varname	: The name of the variable that could not be copied to/from
 			 * ==============================================================================================
 			 */
-			void copyError( char* varname );}
+			void copyError( const char* varname );}
 	}
 }
 

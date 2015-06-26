@@ -25,9 +25,18 @@
 
 using std::vector;
 
-TEST( curnnMath, TestTest ) {
-	const size_t NUM_ELEMENTS = 3;
-	const float  MULTIPLIER   = 2.0f;
+// Constants for faster (but less thorough) testing
+#define FAST_TEST 1
+
+// General tesing parameres 
+// Note : Do not make this so big that the GPU will run out of memory,
+//        which is only really a problem for the double precision functions
+const size_t NUM_ELEMENTS = 3e6;
+
+TEST( curnnMath, AxpyOperationComputesCorrectlyWithFloats ) {
+	// Create cublas status
+	cublasStatus_t status;
+	const float A = 2.0f;
 
 	// Create data vectors
 	vector<float> x;
@@ -39,13 +48,60 @@ TEST( curnnMath, TestTest ) {
 		y.push_back( float( i ) );
 	}
 
-	// Execute saxpy
-	curnn::math::saxpy( MULTIPLIER, x, y );
+	// Execute axpy with floats
+	curnn::math::axpy( status, A, x, y );
 
-	// Check result
-	EXPECT_EQ( y[1], MULTIPLIER * 1 + 1 );
+	if ( FAST_TEST ) {											// FAST testing
+		if ( NUM_ELEMENTS < 10 ) {
+			for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+				EXPECT_EQ( y[i], A * i + i );
+			}
+		} else {
+			for ( size_t i = NUM_ELEMENTS - 10; i < NUM_ELEMENTS; i++ ) {
+				EXPECT_EQ( y[i], A * i + i );
+			}
+		}	
+	} else {													// THOROUGH testing
+		for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+			EXPECT_EQ( y[i], A * i + i );
+		}
+	}
 }
 
+TEST( curnnMath, AxpyOperationComputesCorrectlyWithDoubles ) {
+	// Create cublas status
+	cublasStatus_t status;
+	const double A = 2.0f;
+
+	// Create data vectors
+	vector<double> x;
+	vector<double> y;
+
+	// Fill vectors with data
+	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+		x.push_back( double( i ) ); 
+		y.push_back( double( i ) );
+	}
+
+	// Performs axpy with doubles
+	curnn::math::axpy( status, A, x, y );
+
+	if ( FAST_TEST ) {											// FAST testing
+		if ( NUM_ELEMENTS < 10 ) {
+			for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+				EXPECT_EQ( y[i], A * i + i );
+			}
+		} else {
+			for ( size_t i = NUM_ELEMENTS - 10; i < NUM_ELEMENTS; i++ ) {
+				EXPECT_EQ( y[i], A * i + i );
+			}
+		}	
+	} else {													// THOROUGH testing
+		for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+			EXPECT_EQ( y[i], A * i + i );
+		}
+	}
+}
 int main(int argc, char** argv) 
 {
 	testing::InitGoogleTest(&argc, argv);

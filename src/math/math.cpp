@@ -24,15 +24,15 @@
 namespace curnn {
 	namespace util {
 		namespace err {
-			void allocError( char* );
-			void copyError(  char* );
+			void allocError( const char* );
+			void copyError(  const char* );
 		}
 	}
 }	
 
-void curnn::math::saxpy( const float a, const std::vector<float>& x, std::vector<float>& y ) {
+void curnn::math::axpy( cublasStatus_t& status     , const float a, 
+		                 const std::vector<float>& x, std::vector<float>& y ) {
 
-	cublasStatus_t status;			
 	cublasHandle_t handle;
 	float* da = 0, *dx = 0, *dy = 0;
 
@@ -40,10 +40,7 @@ void curnn::math::saxpy( const float a, const std::vector<float>& x, std::vector
 	status = cublasCreate( &handle );
 	cublasSetPointerMode( handle, CUBLAS_POINTER_MODE_DEVICE );
 
-	// Allocate and fill device vectors with host vector data (checks for errors)
-	//curnn::util::mem::allocVector( status, &a, 1, da );	
-	//curnn::util::mem::allocVector( status, &x[0], x.size(), dx );
-	//curnn::util::mem::allocVector( status, &y[0], y.size(), dy );
+	// Allocate and fill device vectors with host vector data 
 	if ( cudaMalloc( (void**)&da, sizeof( float ) ) != cudaSuccess ) {
 		curnn::util::err::allocError( stringify( da ) );
 	}
@@ -58,18 +55,79 @@ void curnn::math::saxpy( const float a, const std::vector<float>& x, std::vector
 	if ( cudaMemcpy( da, &a, sizeof( float ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
 		curnn::util::err::copyError( stringify( da ) );
 	}
+	if ( cudaMemcpy( dx, &x[0], x.size() * sizeof( float ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
+		curnn::util::err::copyError( stringify( da ) );
+	}
+	if ( cudaMemcpy( dy, &y[0], y.size() * sizeof( float ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
+		curnn::util::err::copyError( stringify( da ) );
+	}
 
 	// Perform CUBLAS saxpy
-	//status = cublasSaxpy( handle, x.size(), da, dx, 1, dy, 1 );
+	status = cublasSaxpy( handle, x.size(), da, dx, 1, dy, 1 );
 
 	// Get the result (checks for errors)
-	//curnn::util::mem::getVector( status, dy, y.size(), &y[0] );	
+	if ( cudaMemcpy( &y[0], dy, y.size() * sizeof( float ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
+		curnn::util::err::copyError( stringify( y ) );
+	}
 
 	// Destroy cublas handle
 	status = cublasDestroy( handle );
 
+	// Free device memory
 	cudaFree( da );
 	cudaFree( dx );
 	cudaFree( dy );
+}
+
+void curnn::math::axpy( cublasStatus_t& status      , const double a, 
+		                 const std::vector<double>& x, std::vector<double>& y ) {
+
+	cublasHandle_t handle;
+	double* da = 0, *dx = 0, *dy = 0;
+
+	// Initialize handle
+	status = cublasCreate( &handle );
+	cublasSetPointerMode( handle, CUBLAS_POINTER_MODE_DEVICE );
+
+	// Allocate and fill device vectors with host vector data 
+	if ( cudaMalloc( (void**)&da, sizeof( double ) ) != cudaSuccess ) {
+		curnn::util::err::allocError( stringify( da ) );
+	}
+	if ( cudaMalloc( (void**)&dx, x.size() * sizeof( double ) ) != cudaSuccess ) {
+		curnn::util::err::allocError( stringify( dx ) );	
+	}
+	if ( cudaMalloc( (void**)&dy, y.size() * sizeof( double ) ) != cudaSuccess ) {
+		curnn::util::err::allocError( stringify( dy ) );	
+	}
+
+	// Fill device vectors with data
+	if ( cudaMemcpy( da, &a, sizeof( double ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
+		curnn::util::err::copyError( stringify( da ) );
+	}
+	if ( cudaMemcpy( dx, &x[0], x.size() * sizeof( double ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
+		curnn::util::err::copyError( stringify( da ) );
+	}
+	if ( cudaMemcpy( dy, &y[0], y.size() * sizeof( double ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
+		curnn::util::err::copyError( stringify( da ) );
+	}
+
+	// Perform CUBLAS saxpy
+	status = cublasDaxpy( handle, x.size(), da, dx, 1, dy, 1 );
+
+	// Get the result (checks for errors)
+	if ( cudaMemcpy( &y[0], dy, y.size() * sizeof( double ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
+		curnn::util::err::copyError( stringify( y ) );
+	}
+
+	// Destroy cublas handle
+	status = cublasDestroy( handle );
+
+	// Free device memory
+	cudaFree( da );
+	cudaFree( dx );
+	cudaFree( dy );
+}
+
+void curnn::math::softmax( cublasStatus_t& status, std::vector<float>& x ) {
 }
 
