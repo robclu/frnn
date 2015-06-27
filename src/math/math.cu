@@ -18,12 +18,43 @@
  *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef _CURNN_MATH_KERNELS_
+#define _CURNN_MATH_KERNELS_
+
+#include <cuda.h>
+
 namespace curnn {
 	namespace math {
+		/* 
+		 * ==================================================================================================
+		 * Struct		: vectorizeddType	 
+		 * 
+		 * Description	: Gets a vectorzed (2) version of dType. For example, if dType is a float this 
+		 *                will then get float2, similarity for int or double.
+		 * ==================================================================================================
+		 */
+		template <typename dType> struct vectorizeddType;
 
-		
+		// Different specifications for the dTypes (will add more later)
+		template <> struct vectorizedDtype<double> { typedef double2 vectType; }    // Double implementation
+		template <> struct vectorizeddType<float>  { typedef float2  vectType; }	// Float implementation
+
+		/*
+		 * ==================================================================================================     
+		 * Function		: warpReduce
+		 *
+		 * Description	: Performs reduction sum (log(N) sum) within a warp.
+		 *
+		 * Inputs		: status	: Cublas status for determining correct completion of operation
+		 *				: a			: Constant for multiplication 
+		 *              : x			: Vector to multiply with a
+		 * 
+		 * Outputs/(I)	: y			: Vector used in a*X + Y, and where the result of a*X + Y is stored
+		 * ==================================================================================================
+		 */
+		void axpy	
 		template <typename dType>
-		__device__ 
+		__device__void  
 		template <typename dType, size_t blockSize>
 		__global__ void reductionSum( dType* xIn, dType* xOut, size_t N ) {
 			
@@ -36,3 +67,5 @@ namespace curnn {
 		}
 	}
 }
+
+#endif
