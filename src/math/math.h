@@ -22,11 +22,11 @@
 #define _CURNN_MATH_KERNELS_
 
 #include <cuda.h>
+#include <cuda_runtime.h>
 
-#include "../util/types.h"
+#include "../curnn/types.h"
 
-namespace curnn {
-	namespace math {
+using namespace curnn;
 
 		/* NOTE : Need to make these funcitons handle any value array and test if it is better to pad with
 		 *        zeros or to just add one or two steps */
@@ -47,7 +47,7 @@ namespace curnn {
 		__inline__ __device__ dType warpReduce( dType val ) {
 			// Add top half elements to bottom half elements
 			for ( int offset = ( WARP_SIZE / 2); offset > 0; offset /= 2 ) {
-				res += __shfl_down( val, offset );	
+				val += __shfl_down( val, offset );	
 			}
 			return val;
 		}
@@ -103,16 +103,15 @@ namespace curnn {
 		 * Params		: dType		: The data type (double, float, int)
 		 * ==================================================================================================
 		 */	
-		template <typename dType>
-		__global__ void blockReduceAtomicVectorized( dtype* in, dType* out, size_t N ) {
+		template <class dType>
+		__global__ void blockReduceAtomicVectorized( dType* in, dType* out, size_t N ) {
 			dType sum = dType( 0 );
 			int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
 			// Add values to sum
 			for ( int i = idx; i <(  N / 2 ); i += blockDim.x * gridDim.x ) {
 				// Convert to vectorized type and all to sum 
-				curnn::vectorizedType<dType>::vectType val = 
-					reinterpret_cast<curnn::vertorizedType<dType>::vectType*>( in )[ i ];
+				float2 val = reinterpret_cast<curnn::vectorizedType<dType>::vectType*>( in )[ i ];
 				sum += val.x + val.y;
 			}
 
@@ -125,7 +124,5 @@ namespace curnn {
 			
 			// Add all results from each block
 			if ( threadIdx.x == 0 ) atomicAdd( out, sum );
-	}
-}
-
+		}
 #endif

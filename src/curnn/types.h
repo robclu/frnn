@@ -22,9 +22,11 @@
 #define _CURNN_TYPES_
 
 #include <cuda.h>
+#include <type_traits>
 
 // Change if necessary
 #define WARP_SIZE 32
+#define MAX_BLOCKS 2048
 
 namespace curnn {
 	/* 
@@ -35,12 +37,15 @@ namespace curnn {
 	 *                will then get float2, similarity for int or double.
 	 * ======================================================================================================
 	 */
-	template <typename dType> struct vectorizedType;
+	template <typename dType> 
+	struct vectorizedType { typedef dType vectType; };
 
 	// Different specifications for the dTypes (will add more later)
 	template <> struct vectorizedType<double> { typedef double2 vectType; };    // Double implementation
 	template <> struct vectorizedType<float>  { typedef float2  vectType; };	// Float implementation 
 	template <> struct vectorizedType<int>    { typedef int2    vectType; };    // Integer implementation
+	template <> struct vectorizedType<float*> { typedef float2* vectType; };	// Float pointer implementation
+
 	/*
 	 * ======================================================================================================
 	 * Enum			: curnnError

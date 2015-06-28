@@ -22,6 +22,7 @@
 #include <iostream>
 
 #include "math.hpp"
+#include "math.cuh"
 
 using std::vector;
 
@@ -34,7 +35,7 @@ using std::vector;
 const size_t NUM_ELEMENTS = 3e6;
 
 TEST( curnnMath, AxpyOperationComputesCorrectlyWithFloats ) {
-	// Create cublas status
+	// Create curnn error status
 	curnn::curnnError error;
 	const float A = 2.0f;
 
@@ -69,7 +70,7 @@ TEST( curnnMath, AxpyOperationComputesCorrectlyWithFloats ) {
 }
 
 TEST( curnnMath, AxpyOperationComputesCorrectlyWithDoubles ) {
-	// Create cublas status
+	// Create curnn error status
 	curnn::curnnError error;
 	const double A = 2.0f;
 
@@ -101,4 +102,19 @@ TEST( curnnMath, AxpyOperationComputesCorrectlyWithDoubles ) {
 			EXPECT_EQ( y[i], A * i + i );
 		}
 	}
+}
+
+TEST( curnnMath, ReductionSumComputesCorrectlyWithFloats ) {
+	// Create curnn error status
+	curnn::curnnError error;
+
+	// Create data vector 
+	vector<float> x;
+
+	// Fill x with data 
+	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+		x.push_back( 1.f );
+	}
+
+	EXPECT_EQ( NUM_ELEMENTS, curnn::math::sum( error, x ) );
 }

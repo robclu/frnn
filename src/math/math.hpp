@@ -18,8 +18,8 @@
  *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __CURNN_MATH__
-#define	__CURNN_MATH__
+#ifndef _CURNN_MATH_
+#define	_CURNN_MATH_
 
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
@@ -28,6 +28,7 @@
 
 #include "../util/errors.h"
 #include "../curnn/curnn.h"
+#include "math.h"
 
 namespace curnn {
 	namespace math  {
@@ -45,7 +46,7 @@ namespace curnn {
 		 * Outputs/(I)	: y			: Vector used in a*X + Y, and where the result of a*X + Y is stored
 		 * ==================================================================================================
 		 */
-		void axpy( curnn::curnnError& error   , const float a, 
+		void axpy( curnnError& error   , const float a, 
 				   const std::vector<float>& x, std::vector<float>& y );	
 
 		/*
@@ -61,10 +62,27 @@ namespace curnn {
 		 * Outputs/(I)	: y			: Vector used in a*X + Y, and where the result of a*X + Y is stored
 		 * ==================================================================================================
 		 */
-		void axpy( curnn::curnnError& error    , const double a, 
+		void axpy( curnnError& error    , const double a, 
 				   const std::vector<double>& x, std::vector<double>& y );	
 
-	
+
+		/*
+		 * ==================================================================================================     
+		 * Function		: sum 
+		 *
+		 * Description	: Performs the sum of the elements in a vector
+		 *					
+		 * Inputs		: error		: cuRNN error type for results of operations
+		 *				: x			: The vector, araary etc.. (data) to comupte the sum of
+		 *        
+		 * Outputs		: val		: The result of the sum of the array 
+		 *
+		 * Params		: dType		: The data type of the array elements
+		 * ==================================================================================================
+		 */	 
+		template <typename dType>
+		dType sum( curnnError& error, const std::vector<dType>& x );
+		
 		/*
 		 * ==================================================================================================     
 		 * Function		: softmax
@@ -79,6 +97,49 @@ namespace curnn {
 		 * ==================================================================================================
 		 */	 
 		void softmax( cublasStatus_t& status, std::vector<float>& x );
+
+		/* ===================== Implementations for templated functions ================================== */
+
+		template <typename dType>
+		dType sum( curnnError& error, const std::vector<dType>& x ) {
+
+			// Declare device pointers, and (non-pointer) result val
+			dType* in = 0, *out = 0, val = 0;
+
+			// Alllocate memory on the device
+			if ( cudaMalloc( (void**)&in, x.size() * sizeof( dType ) ) != cudaSuccess ) {
+				curnn::err::allocError( error, stringify( in ) );
+			}
+			if ( cudaMalloc( (void**)&out, sizeof( dType) ) != cudaSuccess ) {
+				curnn::err::allocError( error, stringify( out ) );
+			}
+
+			// Copy data from x to in
+			if ( cudaMemcpy( in, &x[0], x.size() * sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
+				curnn::err::copyError( error, stringify( in ) );
+			}
+			// Set out to 0 on the device
+			if ( cudaMemsetAsync( out, 0, sizeof( dType) ) != cudaSuccess ) {
+				curnn::err::copyError( error, stringify( out ) );
+			}
+
+			// Determine the size of the grids for the kernel
+			int threads = 256;
+			int blocks  = min( ( ( x.size() / 2 ) + threads - 1 ) / threads, MAX_BLOCKS );
+
+			// Execute kernel
+			blockReduceAtomicVectorized<<<blocks, threads>>>( in, out, x.size() );
+
+			// copy result from out to val 
+			if ( cudaMemcpy( &val, out, sizeof( dType ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
+				curnn::err::copyError( error, stringify( out ) );
+			}
+
+			// Free device memory
+			cudaFree( in ); cudaFree( out );
+
+			return val;
+		}
 	}
 }
 
