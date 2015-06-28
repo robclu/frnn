@@ -35,7 +35,7 @@ __Note__: See the wiki for details on the functions and conceptual explanations.
 __Note__: All makefiles assume that CUDA is installed as the default cuda-7.0 in /usr/local.
           If this is not the case you will need to change this in the Makefiles. 
 
-Tests are written for each of the components of the library. The tests for the infividual components can be
+Tests are written for each of the components of the library. The tests for the individual components can be
 run or all tests can be run.
 
 ### Running All Tests
@@ -48,11 +48,11 @@ make
 
 ### Running Individual Component Tests
 
-To run the tests for an indivdual component, got the __src/<component>__ directory, where __<component>__ is
+To run the tests for an indivdual component, got the __src/component__ directory, where __component__ is
 the component you want to run the tests for, then similarly issue
 ```
 make 
-./<component>_tests
+./component_tests
 ```
 
 ### Cleaning
