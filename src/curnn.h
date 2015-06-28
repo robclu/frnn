@@ -1,5 +1,7 @@
 /*
- *  Implementation file for cuRNN error functions.
+ *  Namespace declarations for cuRNN. I honestly don't know why these 
+ *  functions can be forward declared in this file but not found in their
+ *  header files, but this works!
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
@@ -18,19 +20,17 @@
  *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "errors.h"
+#ifndef _CURNN_CURNN_
+#define _CURNN_CURNN_
+
+#include "types.h"
+#include "util/errors.h"
 
 namespace curnn {
 	namespace err {
-
-		void allocError( curnn::curnnError& error, const char * varname ) {
-			std::cerr << "Error allocating memory for " << varname << "\n";
-			error = curnn::curnnError::CURNN_ALLOC_ERROR;
-		}				
-		
-		void copyError( curnn::curnnError& error, const char* varname ) {
-			std::cerr << "Error copying to/from variable " << varname << "\n";
-			error = curnn::curnnError::CURNN_COPY_ERROR;
-		}
+		void allocError( curnn::curnnError&, const char* );
+		void copyError(  curnn::curnnError&, const char* );
 	}
 }
+
+#endif 

@@ -13,7 +13,7 @@
  *  MERCHANTABILIT_size.y or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
- *  _size.you should have received a copy of the GNU General Public License along
+ *  You should have received a copy of the GNU General Public License along
  *  with this program; if not, write to the Free Software Foundation,
  *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */

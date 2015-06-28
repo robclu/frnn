@@ -18,40 +18,40 @@
  *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
-#ifndef __CURNN_UTIL_ERRORS__
-#define __CURNN_UTIL_ERRORS__
+#ifndef _CURNN_ERRORS_
+#define _CURNN_ERRORS_
 
 #include <iostream>
+
+#include "../types.h"
 
 // To convert variable names to strings
 #define stringify( name ) varname( #name )
 inline const char* varname( const char* name ) { return name; }
 
 namespace currn {
-	namespace util {
-		namespace err {
-			/*
-			 * ==============================================================================================
-			 * Function		: allocError
-			 *
-			 * Description	: Prints an error message of allocation failed
-			 *
-			 * Inputs		: varname	: The name of the variable that could not be allocated
-			 * ==============================================================================================
-			 */
-			void allocError( const char * varname );	
+	namespace err {
+		/*
+		 * ==============================================================================================
+		 * Function		: allocError
+		 *
+		 * Description	: Prints an error message of allocation failed
+		 *
+		 * Inputs		: varname	: The name of the variable that could not be allocated
+		 * ==============================================================================================
+		 */
+		void allocError( curnn::curnnError& error, const char * varname );	
 
-			/*
-			 * ==============================================================================================
-			 * Function		: copyError
-			 *
-			 * Description	: Prints an error message if host to device, or device to host copy failed
-			 *
-			 * Inputs		: varname	: The name of the variable that could not be copied to/from
-			 * ==============================================================================================
-			 */
-			void copyError( const char* varname );}
+		/*
+		 * ==============================================================================================
+		 * Function		: copyError
+		 *
+		 * Description	: Prints an error message if host to device, or device to host copy failed
+		 *
+		 * Inputs		: varname	: The name of the variable that could not be copied to/from
+		 * ==============================================================================================
+		 */
+		void copyError( curnn::curnnError& error, const char* varname );
 	}
 }
 

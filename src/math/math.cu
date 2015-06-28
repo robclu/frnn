@@ -13,7 +13,7 @@
  *  MERCHANTABILIT_size.y or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
- *  _size.you should have received a copy of the GNU General Public License along
+ *  You should have received a copy of the GNU General Public License along
  *  with this program; if not, write to the Free Software Foundation,
  *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
@@ -23,21 +23,10 @@
 
 #include <cuda.h>
 
+#include "../util/types.h"
+
 namespace curnn {
 	namespace math {
-		/* 
-		 * ==================================================================================================
-		 * Struct		: vectorizeddType	 
-		 * 
-		 * Description	: Gets a vectorzed (2) version of dType. For example, if dType is a float this 
-		 *                will then get float2, similarity for int or double.
-		 * ==================================================================================================
-		 */
-		template <typename dType> struct vectorizeddType;
-
-		// Different specifications for the dTypes (will add more later)
-		template <> struct vectorizedDtype<double> { typedef double2 vectType; }    // Double implementation
-		template <> struct vectorizeddType<float>  { typedef float2  vectType; }	// Float implementation
 
 		/*
 		 * ==================================================================================================     
