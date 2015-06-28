@@ -23,7 +23,7 @@
 
 #include <iostream>
 
-#include "../types.h"
+#include "../curnn/types.h"
 
 // To convert variable names to strings
 #define stringify( name ) varname( #name )

@@ -24,7 +24,7 @@
 #define _CURNN_CURNN_
 
 #include "types.h"
-#include "util/errors.h"
+#include "../util/errors.h"
 
 namespace curnn {
 	namespace err {

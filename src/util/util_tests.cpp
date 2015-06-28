@@ -21,10 +21,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
-#include "../curnn.h"
-
-// Constants for faster (but less thorough) testing
-#define FAST_TEST 1
+#include "../curnn/curnn.h"
 
 TEST( curnnErrors, DeterminesErrorForBadAlloc ) {
 	

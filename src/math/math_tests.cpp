@@ -35,7 +35,7 @@ const size_t NUM_ELEMENTS = 3e6;
 
 TEST( curnnMath, AxpyOperationComputesCorrectlyWithFloats ) {
 	// Create cublas status
-	cublasStatus_t status;
+	curnn::curnnError error;
 	const float A = 2.0f;
 
 	// Create data vectors
@@ -49,7 +49,7 @@ TEST( curnnMath, AxpyOperationComputesCorrectlyWithFloats ) {
 	}
 
 	// Execute axpy with floats
-	curnn::math::axpy( status, A, x, y );
+	curnn::math::axpy( error, A, x, y );
 
 	if ( FAST_TEST ) {											// FAST testing
 		if ( NUM_ELEMENTS < 10 ) {
@@ -70,7 +70,7 @@ TEST( curnnMath, AxpyOperationComputesCorrectlyWithFloats ) {
 
 TEST( curnnMath, AxpyOperationComputesCorrectlyWithDoubles ) {
 	// Create cublas status
-	cublasStatus_t status;
+	curnn::curnnError error;
 	const double A = 2.0f;
 
 	// Create data vectors
@@ -84,7 +84,7 @@ TEST( curnnMath, AxpyOperationComputesCorrectlyWithDoubles ) {
 	}
 
 	// Performs axpy with doubles
-	curnn::math::axpy( status, A, x, y );
+	curnn::math::axpy( error, A, x, y );
 
 	if ( FAST_TEST ) {											// FAST testing
 		if ( NUM_ELEMENTS < 10 ) {

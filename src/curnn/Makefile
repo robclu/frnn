@@ -2,7 +2,7 @@
 #					EXECUTABLE NAME 				   #
 ########################################################
 
-EXE 			:= math_tests
+EXE 			:= general_tests
 
 ########################################################
 #					COMPILERS						   #
@@ -16,14 +16,13 @@ CXX 			:= $(HOST_COMPILER)
 #				INCLUDE DIRECTORIES 				   #
 ########################################################
 
-INCLUDES 		:= -I/usr/local/cuda-7.0/include \
-				   -I../Util
+INCLUDES 		:= -I/usr/local/cuda-7.0/include -I.
 
 ########################################################
 #					LIBRARIES 						   #
 ########################################################
 
-CUDA_LIBS 		:= -lcuda -lcublas
+CUDA_LIBS 		:= -lcuda
 TEST_LIBS 		:= -lgtest -lgtest_main \
 				   -lpthread
 
@@ -43,16 +42,10 @@ all: tests cleanobs
 
 tests: tests
 
-math.o : math.cpp
-	$(NVCC) -x cu $(INLCUDES) $(CCFLAGS) -o $@ -dc $<
-
-math_tests.o: math_tests.cpp 
+general_tests.o: general_tests.cpp 
 	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) -o $@ -c $<
 
-errors.o: ../util/errors.cpp 
-	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) -o $@ -c $<
-
-tests: errors.o math.o math_tests.o
+tests: general_tests.o
 	$(NVCC) $(LDFLAGS) -o $(EXE) $+ $(LIB_DIR) \
 		$(CUDA_LIBS) $(TEST_LIBS)	
 		

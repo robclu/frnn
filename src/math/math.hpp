@@ -26,7 +26,8 @@
 
 #include <vector>
 
-#include "../util/errors.hpp"
+#include "../util/errors.h"
+#include "../curnn/curnn.h"
 
 namespace curnn {
 	namespace math  {
@@ -37,14 +38,15 @@ namespace curnn {
 		 *
 		 * Description	: Performs simgle precision a*X + Y
 		 *
-		 * Inputs		: status	: Cublas status for determining correct completion of operation
+		 * Inputs		: error		: cuRNN error type for result of operations
 		 *				: a			: Constant for multiplication 
 		 *              : x			: Vector to multiply with a
 		 * 
 		 * Outputs/(I)	: y			: Vector used in a*X + Y, and where the result of a*X + Y is stored
 		 * ==================================================================================================
 		 */
-		void axpy( cublasStatus_t& status, const float a, const std::vector<float>& x, std::vector<float>& y );	
+		void axpy( curnn::curnnError& error   , const float a, 
+				   const std::vector<float>& x, std::vector<float>& y );	
 
 		/*
 		 * ==================================================================================================     
@@ -52,14 +54,15 @@ namespace curnn {
 		 *
 		 * Description	: Performs double precision a*X + Y
 		 *
-		 * Inputs		: status	: Cublas status for determining correct completion of operation
+		 * Inputs		: error		: cuRNN error type for result of operations
 		 *				: a			: Constant for multiplication 
 		 *              : x			: Vector to multiply with a
 		 * 
 		 * Outputs/(I)	: y			: Vector used in a*X + Y, and where the result of a*X + Y is stored
 		 * ==================================================================================================
 		 */
-		void axpy( cublasStatus_t& status, const double a, const std::vector<double>& x, std::vector<double>& y );	
+		void axpy( curnn::curnnError& error    , const double a, 
+				   const std::vector<double>& x, std::vector<double>& y );	
 
 	
 		/*

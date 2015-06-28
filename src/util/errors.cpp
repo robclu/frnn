@@ -24,12 +24,12 @@ namespace curnn {
 	namespace err {
 
 		void allocError( curnn::curnnError& error, const char * varname ) {
-			std::cerr << "Error allocating memory for " << varname << "\n";
+			std::cerr << "Error : Could not allocate memory for variable " << varname << "\n";
 			error = curnn::curnnError::CURNN_ALLOC_ERROR;
 		}				
 		
 		void copyError( curnn::curnnError& error, const char* varname ) {
-			std::cerr << "Error copying to/from variable " << varname << "\n";
+			std::cerr << "Error : Could not cpoy to/from variable " << varname << "\n";
 			error = curnn::curnnError::CURNN_COPY_ERROR;
 		}
 	}

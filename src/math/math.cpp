@@ -20,18 +20,11 @@
 
 #include "math.hpp"
 
-// Forward declare util function for compiler
-namespace curnn {
-	namespace err {
-		void allocError( const char* );
-		void copyError(  const char* );
-	}
-}	
-
-void curnn::math::axpy( cublasStatus_t& status      , const float a, 
+void curnn::math::axpy( curnn::curnnError& error    , const float a, 
 		                 const std::vector<float>& x, std::vector<float>& y ) {
 
 	cublasHandle_t handle;
+	cublasStatus_t status;
 	float* da = 0, *dx = 0, *dy = 0;
 
 	// Initialize handle
@@ -40,24 +33,24 @@ void curnn::math::axpy( cublasStatus_t& status      , const float a,
 
 	// Allocate and fill device vectors with host vector data 
 	if ( cudaMalloc( (void**)&da, sizeof( float ) ) != cudaSuccess ) {
-		curnn::err::allocError( stringify( da ) );
+		curnn::err::allocError( error, stringify( da ) );
 	}
 	if ( cudaMalloc( (void**)&dx, x.size() * sizeof( float ) ) != cudaSuccess ) {
-		curn::err::allocError( stringify( dx ) );	
+		curnn::err::allocError( error, stringify( dx ) );	
 	}
 	if ( cudaMalloc( (void**)&dy, y.size() * sizeof( float ) ) != cudaSuccess ) {
-		curnn::err::allocError( stringify( dy ) );	
+		curnn::err::allocError( error, stringify( dy ) );	
 	}
 
 	// Fill device vectors with data
 	if ( cudaMemcpy( da, &a, sizeof( float ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
-		curnn::err::copyError( stringify( da ) );
+		curnn::err::copyError( error, stringify( da ) );
 	}
 	if ( cudaMemcpy( dx, &x[0], x.size() * sizeof( float ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
-		curnn::err::copyError( stringify( da ) );
+		curnn::err::copyError( error, stringify( da ) );
 	}
 	if ( cudaMemcpy( dy, &y[0], y.size() * sizeof( float ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
-		curnn::err::copyError( stringify( da ) );
+		curnn::err::copyError( error, stringify( da ) );
 	}
 
 	// Perform CUBLAS saxpy
@@ -65,7 +58,7 @@ void curnn::math::axpy( cublasStatus_t& status      , const float a,
 
 	// Get the result (checks for errors)
 	if ( cudaMemcpy( &y[0], dy, y.size() * sizeof( float ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
-		curnn::err::copyError( stringify( y ) );
+		curnn::err::copyError( error, stringify( y ) );
 	}
 
 	// Destroy cublas handle
@@ -77,10 +70,11 @@ void curnn::math::axpy( cublasStatus_t& status      , const float a,
 	cudaFree( dy );
 }
 
-void curnn::math::axpy( cublasStatus_t& status      , const double a, 
+void curnn::math::axpy( curnn::curnnError& error     , const double a, 
 		                 const std::vector<double>& x, std::vector<double>& y ) {
 
 	cublasHandle_t handle;
+	cublasStatus_t status;
 	double* da = 0, *dx = 0, *dy = 0;
 
 	// Initialize handle
@@ -89,24 +83,24 @@ void curnn::math::axpy( cublasStatus_t& status      , const double a,
 
 	// Allocate and fill device vectors with host vector data 
 	if ( cudaMalloc( (void**)&da, sizeof( double ) ) != cudaSuccess ) {
-		curnn::err::allocError( stringify( da ) );
+		curnn::err::allocError( error, stringify( da ) );
 	}
 	if ( cudaMalloc( (void**)&dx, x.size() * sizeof( double ) ) != cudaSuccess ) {
-		curnn::err::allocError( stringify( dx ) );	
+		curnn::err::allocError( error, stringify( dx ) );	
 	}
 	if ( cudaMalloc( (void**)&dy, y.size() * sizeof( double ) ) != cudaSuccess ) {
-		curnn::err::allocError( stringify( dy ) );	
+		curnn::err::allocError( error, stringify( dy ) );	
 	}
 
 	// Fill device vectors with data
 	if ( cudaMemcpy( da, &a, sizeof( double ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
-		curnn::err::copyError( stringify( da ) );
+		curnn::err::copyError( error, stringify( da ) );
 	}
 	if ( cudaMemcpy( dx, &x[0], x.size() * sizeof( double ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
-		curnn::err::copyError( stringify( da ) );
+		curnn::err::copyError( error, stringify( da ) );
 	}
 	if ( cudaMemcpy( dy, &y[0], y.size() * sizeof( double ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
-		curnn::err::copyError( stringify( da ) );
+		curnn::err::copyError( error, stringify( da ) );
 	}
 
 	// Perform CUBLAS saxpy
@@ -114,7 +108,7 @@ void curnn::math::axpy( cublasStatus_t& status      , const double a,
 
 	// Get the result (checks for errors)
 	if ( cudaMemcpy( &y[0], dy, y.size() * sizeof( double ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
-		curnn::err::copyError( stringify( y ) );
+		curnn::err::copyError( error, stringify( y ) );
 	}
 
 	// Destroy cublas handle
