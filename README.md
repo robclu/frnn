@@ -8,8 +8,18 @@ The long term goal is to provide support for both CUDA and OpenCL. CUDA provides
 
 ## Support 
 
+### Software
+
+* C++ : 11 (Testing with gtest)
 * CUDA   : Cuda 7.0 API
 * OpenCL : Not yet supported
+* Linux  : Tested and working
+* Windows : Not yet tested
+* OSX : Not yet tested
+
+### Hardware
+
+* CUDA Compute Capability >= 3.0 
 
 ## Current Functionality 
 
@@ -17,7 +27,41 @@ The current version is v1.0.0 and supports the following functionality:
 
 __Note__: See the wiki for details on the functions and conceptual explanations. 
 
-## Compiling
+* Math :
+  * axpy (double and float)
+
+## Compiling and Running 
+
+__Note__: All makefiles assume that CUDA is installed as the default cuda-7.0 in /usr/local.
+          If this is not the case you will need to change this in the Makefiles. 
+
+Tests are written for each of the components of the library. The tests for the infividual components can be
+run or all tests can be run.
+
+### Running All Tests
+
+To run all tests, go to the __src__ directory and issue the following commands
+```
+make 
+./all_tests
+```
+
+### Running Individual Component Tests
+
+To run the tests for an indivdual component, got the __src/<component>__ directory, where __<component>__ is
+the component you want to run the tests for, then similarly issue
+```
+make 
+./<component>_tests
+```
+
+### Cleaning
+
+Issuing 
+```
+make clean
+```
+will clean any executable after making it.
 
 ### Development system 
 
