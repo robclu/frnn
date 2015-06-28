@@ -59,10 +59,3 @@ TEST( curnnTypes, CanDetermineInt2FromInt ) {
 	// Check equivalence
 	EXPECT_EQ( typeid( cudaInt2 ).name(), typeid( curnnInt2 ).name() );
 }
-
-int main(int argc, char** argv) 
-{
-	testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
-}
-

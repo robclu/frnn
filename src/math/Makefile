@@ -43,6 +43,9 @@ all: tests cleanobs
 
 tests: tests
 
+main.o : main.cpp
+	$(CXX) $(INLCUDES) $(CCFLAGS) -o $@ -c $<
+
 math.o : math.cpp
 	$(NVCC) -x cu $(INLCUDES) $(CCFLAGS) -o $@ -dc $<
 
@@ -52,7 +55,7 @@ math_tests.o: math_tests.cpp
 errors.o: ../util/errors.cpp 
 	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) -o $@ -c $<
 
-tests: errors.o math.o math_tests.o
+tests: errors.o math.o math_tests.o main.o
 	$(NVCC) $(LDFLAGS) -o $(EXE) $+ $(LIB_DIR) \
 		$(CUDA_LIBS) $(TEST_LIBS)	
 		

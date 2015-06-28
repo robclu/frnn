@@ -60,10 +60,3 @@ TEST( curnnErrors, DeterminesErrorForBadCopy ) {
 
 	EXPECT_EQ( error, curnn::curnnError::CURNN_COPY_ERROR );
 }
-
-int main(int argc, char** argv) 
-{
-	testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
-}
-

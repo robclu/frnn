@@ -48,7 +48,10 @@ util_tests.o: util_tests.cpp
 errors.o: errors.cpp 
 	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) -o $@ -c $<
 
-tests: errors.o util_tests.o
+main.o : main.cpp
+	$(CXX) $(INCLUDES) $(CCFLAGS) -o $@ -c $<
+
+tests: errors.o util_tests.o main.o
 	$(NVCC) $(LDFLAGS) -o $(EXE) $+ $(LIB_DIR) \
 		$(CUDA_LIBS) $(TEST_LIBS)	
 		

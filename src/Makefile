@@ -2,7 +2,7 @@
 #					EXECUTABLE NAME 				   #
 ########################################################
 
-EXE 			:= general_tests
+EXE 			:= all_tests
 
 ########################################################
 #					COMPILERS						   #
@@ -22,7 +22,7 @@ INCLUDES 		:= -I/usr/local/cuda-7.0/include -I.
 #					LIBRARIES 						   #
 ########################################################
 
-CUDA_LIBS 		:= -lcuda
+CUDA_LIBS 		:= -lcuda -lcublas
 TEST_LIBS 		:= -lgtest -lgtest_main \
 				   -lpthread
 
@@ -30,9 +30,13 @@ LIB_DIR 		:= -L/usr/local/cuda/lib64
 
 ########################################################
 #					COMPILER FLAGS 					   #
+#                                                      #
+# To enable compiler warnings, remove -w and replace   #
+# with :                                               #
+# 			--compiler-options -Wall                   #
 ########################################################
 
-CCFLAGS 		:= -std=c++11 -O3
+CCFLAGS 		:= -std=c++11 -O3 -w
 
 ########################################################
 # 					TARGET RULES 					   #
@@ -42,13 +46,34 @@ all: tests cleanobs
 
 tests: tests
 
-general_tests.o: general_tests.cpp 
+##################### UTIL #############################
+
+util_tests.o: util/util_tests.cpp 
 	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) -o $@ -c $<
 
-main.o : main.cpp
-	$(CXX) $(INCLUDES) $(CCFLAGS) -o $@ -c $<
+errors.o: util/errors.cpp 
+	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) -o $@ -c $<
 
-tests: general_tests.o main.o
+##################### GENERAL ##########################
+
+general_tests.o : curnn/general_tests.cpp
+	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) -o $@ -c $<
+
+###################### MATH ############################
+
+math.o : math/math.cpp
+	$(NVCC) -x cu $(INLCUDES) $(CCFLAGS) -o $@ -dc $<
+
+math_tests.o: math/math_tests.cpp 
+	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) -o $@ -c $<
+
+###################### MAIN ############################
+
+main.o : main.cpp
+	$(NVCC) $(INCLUDES) $(CCFLAGS) -o $@ -c $<
+
+tests: errors.o util_tests.o general_tests.o \
+	   math.o math_tests.o main.o
 	$(NVCC) $(LDFLAGS) -o $(EXE) $+ $(LIB_DIR) \
 		$(CUDA_LIBS) $(TEST_LIBS)	
 		
