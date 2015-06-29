@@ -120,6 +120,3 @@ void curnn::math::axpy( curnn::curnnError& error     , const double a,
 	cudaFree( dy );
 }
 
-void curnn::math::softmax( cublasStatus_t& status, std::vector<float>& x ) {
-}
-

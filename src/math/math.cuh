@@ -86,7 +86,7 @@ using namespace curnn;
 		 * Function		: blockReduce
 		 *
 		 * Description	: Performs reduction sum (log(N) sum) within a block using the above warpReduce
-		 *                function
+		 *                function and the result is only available to the first thread
 		 *
 		 * Outputs/(I)	: val		: Value of first element in array, and where the result is stored
 		 *
@@ -95,7 +95,7 @@ using namespace curnn;
 		 */	
 		template <typename dType>
 		__inline__ __device__ dType blockReduce( dType val ) {
-			// Allocate shared memory (this should be a parameter of the kernel, not explicitly declared)
+			// Allocate shared memory
 			static __shared__ dType shared[ 32 ];
 			int lane = threadIdx.x % warpSize;				// Index in warp
 			int wid  = threadIdx.x / warpSize;				// Warp index
@@ -116,6 +116,50 @@ using namespace curnn;
 			return val;
 		}
 
+		/*
+		 * ==================================================================================================     
+		 * Function		: blockReduceAll
+		 *
+		 * Description	: Performs reduction sum (log(N) sum) within a block using the above warpReduceAll
+		 *                function and the result is available to all threads
+		 *
+		 * Outputs/(I)	: val		: Value of first element in array, and where the result is stored
+		 *
+		 * Params		: dType		: The data type (double, float, int)
+		 * ==================================================================================================
+		 */	
+		template <typename dType>
+		__inline__ __device__ dType blockReduceAll( dType val ) {
+			// Allocate shared memory 
+			static __shared__ dType shared[ 32 ];
+			int lane = threadIdx.x % warpSize;				// Index in warp
+			int wid  = threadIdx.x / warpSize;				// Warp index
+
+			val = warpReduceAll( val );						// Do reduction on warp (all threads have result)
+
+			// For first index in each warp, write result to shared memory
+			if ( lane == 0 ) shared[ wid ] = val;	
+			__syncthreads();								// Make sure all threads are finished
+
+			// Read from shared memory the results of all warps (essentially 
+			// moving the results so that the first warp can use them)
+			val = ( threadIdx.x < blockDim.x / warpSize ) ? shared[ lane ] : 0;
+
+			// Do the reduction on the first warp (now all 32 (if SM3.0)
+			// threads in the first warp have the result)
+			if ( wid == 0 ) val = warpReduceAll( val );
+
+			// Each thread in the first warp that has
+			//  the result writes it to shred memory
+			if ( wid == 0 ) shared[ lane ] = val;
+
+			// Each lane in warps 1-N without results 
+			// add their value with the value in the 
+			// corresponding lane in warp 0
+			if ( wid > 0 ) AtomicAdd( &val, shared[ lane ] );
+
+			return val;
+		}
 		/*
 		 * ==================================================================================================     
 		 * Function		: blockReduceAtomicVectorized
