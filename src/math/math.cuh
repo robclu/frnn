@@ -26,6 +26,14 @@
 
 #include "../curnn/types.h"
 
+/* ============================================= NOTES ======================================================
+ *
+ * 1.See Justin Luitjens excellence post on using the __shfl functinos at 
+ *   http://devblogs.nvidia.com/parallelforall/faster-parallel-reductions-kepler/
+ *
+ * ==========================================================================================================
+ */
+
 using namespace curnn;
 
 		/* NOTE : Need to make these funcitons handle any value array and test if it is better to pad with
@@ -36,7 +44,7 @@ using namespace curnn;
 		 * Function		: warpReduce
 		 *
 		 * Description	: Performs reduction sum (log(N) sum) within a warp (Thanks to Nvidia for making this
-		 *                so easy with __shfl_down)
+		 *                so easy with __shfl_down). Only the first thread gets the result.
 		 *
 		 * Outputs/(I)	: val		: Value of first element in array, and where the result is stored
 		 *
@@ -48,6 +56,27 @@ using namespace curnn;
 			// Add top half elements to bottom half elements
 			for ( int offset = ( warpSize / 2); offset > 0; offset /= 2 ) {
 				val += __shfl_down( val, offset );	
+			}
+			return val;
+		}
+
+		/*
+		 * ==================================================================================================     
+		 * Function		: warpReduceAll
+		 *
+		 * Description	: Performs reduction sum (log(N) sum) within a warp (Thanks to Nvidia for making this
+		 *                so easy with __shfl_down). All threads in warp get the results
+		 *
+		 * Outputs/(I)	: val		: Value of first element in array, and where the result is stored
+		 *
+		 * Params		: dType		: The data type (double, float, int)
+		 * ==================================================================================================
+		 */	
+		template <typename dType>
+		__inline__ __device__ dType warpReduceAll( dType val ) {
+			// Xor each element (butterfly operation)
+			for ( int offset = ( warpSize / 2); offset > 0; offset /= 2 ) {
+				val += __shfl_xor( val, offset );	
 			}
 			return val;
 		}

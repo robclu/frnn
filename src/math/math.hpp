@@ -87,16 +87,20 @@ namespace curnn {
 		 * ==================================================================================================     
 		 * Function		: softmax
 		 *
-		 * Description	: Performs the softmax function of a vector of floats x, which is 
+		 * Description	: Performs the softmax function of a vector of data x, which is 
 		 *					
 		 *				  softmax( x_i ) = exp( x_i ) / sum[ j=1 to J ]( exp( x_j )
 		 *
 		 * Inputs		: status	: Cublas status for determining correct completion of operation
 		 *        
 		 * Outputs/(I)  : x			: Vector to compute the softmax of, and to store the result in
+		 *
+		 * Params		: dType		: The type of data (float or int) double not supported due to lack of
+		 *                            support for doubles in some Nvidia kernel functions
 		 * ==================================================================================================
-		 */	 
-		void softmax( cublasStatus_t& status, std::vector<float>& x );
+		 */	
+		template <typename dType>
+		void softmax( curnn::curnnError& error, std::vector<dType>& x );
 
 		/* ===================== Implementations for templated functions ================================== */
 
@@ -139,6 +143,11 @@ namespace curnn {
 			cudaFree( in ); cudaFree( out );
 
 			return val;
+		}
+
+		template <typename dType>
+		void softmax( curnn::curnnError& error, std::vector<dType>& x ) {
+
 		}
 	}
 }
