@@ -46,7 +46,7 @@ using namespace curnn;
 		template <typename dType>
 		__inline__ __device__ dType warpReduce( dType val ) {
 			// Add top half elements to bottom half elements
-			for ( int offset = ( WARP_SIZE / 2); offset > 0; offset /= 2 ) {
+			for ( int offset = ( warpSize / 2); offset > 0; offset /= 2 ) {
 				val += __shfl_down( val, offset );	
 			}
 			return val;
@@ -68,8 +68,8 @@ using namespace curnn;
 		__inline__ __device__ dType blockReduce( dType val ) {
 			// Allocate shared memory (this should be a parameter of the kernel, not explicitly declared)
 			static __shared__ dType shared[ 32 ];
-			int lane = threadIdx.x % WARP_SIZE;				// Index in warp
-			int wid  = threadIdx.x / WARP_SIZE;				// Warp index
+			int lane = threadIdx.x % warpSize;				// Index in warp
+			int wid  = threadIdx.x / warpSize;				// Warp index
 
 			val = warpReduce( val );						// Do reduction on warp
 
@@ -79,7 +79,7 @@ using namespace curnn;
 
 			// Read from shared memory the results of all warps (essentially 
 			// moving the results so that the first warp can use them)
-			val = ( threadIdx.x < blockDim.x / WARP_SIZE ) ? shared[ lane ] : 0;
+			val = ( threadIdx.x < blockDim.x / warpSize ) ? shared[ lane ] : 0;
 
 			// Do the reduction on the first warp
 			if ( wid == 0 ) val = warpReduce( val );
@@ -111,7 +111,8 @@ using namespace curnn;
 			// Add values to sum
 			for ( int i = idx; i <(  N / 2 ); i += blockDim.x * gridDim.x ) {
 				// Convert to vectorized type and all to sum 
-				float2 val = reinterpret_cast<curnn::vectorizedType<dType>::vectType*>( in )[ i ];
+				typedef typename curnn::vectorizedType<dType, 2>::vectType vect2;
+				vect2 val = reinterpret_cast<vect2*>( in )[ i ];
 				sum += val.x + val.y;
 			}
 

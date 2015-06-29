@@ -24,38 +24,66 @@
 
 #include "types.h"
 
-TEST( curnnTypes, CanDetermineDouble2FromDouble ) {
+/* NOTE: When using the vectorized instances in device code with templated functions, 
+ *       you will need to first use a typedef, so for example if the template prameter 
+ *       is dType then
+ *
+ *       template <typename dType> 
+ *       void example_function( ... ) {
+ *			
+ *			typedef typename curnn::vectorizedType<dType, 2> vec2;
+ *
+ *			vec2 vectorized_dtype;
+ *		}			
+ *
+ */
+
+TEST( curnnTypes, CanDetermineVectorizedDoublesFromDouble ) {
 	
-	// Declare double2 variable using normal CUDA 
+	// Declare CUDA vectorized doubles
+	// NOTE: No double4 exists for cuda
+	double1 cudaDouble1;
 	double2 cudaDouble2;
 
-	// Declare a curnn vectorized double using type traits
-	curnn::vectorizedType<double>::vectType curnnDouble2;
+	// Declare a curnn vectorized doubles using type traits
+	curnn::vectorizedType<double, 1>::vectType curnnDouble1;
+	curnn::vectorizedType<double, 2>::vectType curnnDouble2;
 	
 	// Check equivalence
+	EXPECT_EQ( typeid( cudaDouble1 ).name(), typeid( curnnDouble1 ).name() );
 	EXPECT_EQ( typeid( cudaDouble2 ).name(), typeid( curnnDouble2 ).name() );
 }
 
-TEST( curnnTypes, CanDetermineFloat2FromFloat ) {
-	
-	// Declare float2 variable using normal CUDA 
+TEST( curnnTypes, CanDetermineVectorizedFloatFromFloat ) {
+	// Declare CUDA vectorized doubles
+	float1 cudaFloat1;
 	float2 cudaFloat2;
+	float4 cudaFloat4;
 
-	// Declare a curnn vectorized float using type traits
-	curnn::vectorizedType<float>::vectType curnnFloat2;
+	// Declare curnn vectorized floats using type traits
+	curnn::vectorizedType<float, 1>::vectType curnnFloat1;
+	curnn::vectorizedType<float, 2>::vectType curnnFloat2;
+	curnn::vectorizedType<float, 4>::vectType curnnFloat4;
 	
 	// Check equivalence
+	EXPECT_EQ( typeid( cudaFloat1 ).name(), typeid( curnnFloat1 ).name() );
 	EXPECT_EQ( typeid( cudaFloat2 ).name(), typeid( curnnFloat2 ).name() );
+	EXPECT_EQ( typeid( cudaFloat4 ).name(), typeid( curnnFloat4 ).name() );
 }
 
-TEST( curnnTypes, CanDetermineInt2FromInt ) {
-	
-	// Declare int2 variable using normal CUDA 
+TEST( curnnTypes, CanDetermineVectorizedIntFromInt ) {
+	// Declare CUDA vectorized doubles
+	int1 cudaInt1;
 	int2 cudaInt2;
+	int4 cudaInt4;
 
-	// Declare a curnn vectorized int using type traits
-	curnn::vectorizedType<int>::vectType curnnInt2;
+	// Declare curnn vectorized floats using type traits
+	curnn::vectorizedType<int, 1>::vectType curnnInt1;
+	curnn::vectorizedType<int, 2>::vectType curnnInt2;
+	curnn::vectorizedType<int, 4>::vectType curnnInt4;
 	
 	// Check equivalence
+	EXPECT_EQ( typeid( cudaInt1 ).name(), typeid( curnnInt1 ).name() );
 	EXPECT_EQ( typeid( cudaInt2 ).name(), typeid( curnnInt2 ).name() );
+	EXPECT_EQ( typeid( cudaInt4 ).name(), typeid( curnnInt4 ).name() );
 }

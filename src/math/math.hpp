@@ -125,7 +125,7 @@ namespace curnn {
 
 			// Determine the size of the grids for the kernel
 			int threads = 256;
-			int blocks  = min( ( ( x.size() / 2 ) + threads - 1 ) / threads, MAX_BLOCKS );
+			int blocks  = std::min( static_cast<int>( ( ( x.size() / 2 ) + threads - 1 ) / threads ), MAX_BLOCKS );
 
 			// Execute kernel
 			blockReduceAtomicVectorized<<<blocks, threads>>>( in, out, x.size() );

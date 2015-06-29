@@ -34,7 +34,7 @@ LIB_DIR 		:= -L/usr/local/cuda/lib64
 ########################################################
 
 CCFLAGS 		:= -std=c++11 -O3
-
+NVFLAGS 		:= -arch=sm_30
 ########################################################
 # 					TARGET RULES 					   #
 ########################################################
@@ -44,19 +44,19 @@ all: tests cleanobs
 tests: tests
 
 main.o : main.cpp
-	$(CXX) $(INLCUDES) $(CCFLAGS) -o $@ -c $<
+	$(NVCC) -x cu $(INLCUDES) $(CCFLAGS) $(NVFLAGS) -o $@ -c $<
 
 math.cu.o : math.cuh
-	$(NVCC) -x cu $(INLCUDES) $(CCFLAGS) -o $@ -dc $<
+	$(NVCC) -x cu $(INLCUDES) $(CCFLAGS) $(NVFLAGS) -o $@ -dc $<
 
 math.o : math.cpp
-	$(NVCC) -x cu $(INLCUDES) $(CCFLAGS) -o $@ -dc $<
+	$(NVCC) -x cu $(INLCUDES) $(CCFLAGS) $(NVFLAGS) -o $@ -dc $<
 
 math_tests.o: math_tests.cpp 
-	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) -o $@ -c $<
+	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) $(NVFLAGS) -o $@ -c $<
 
 errors.o: ../util/errors.cpp 
-	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) -o $@ -c $<
+	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) $(NVFLAGS) -o $@ -c $<
 
 tests: errors.o math.o math.cu.o math_tests.o main.o
 	$(NVCC) $(LDFLAGS) -o $(EXE) $+ $(LIB_DIR) \
