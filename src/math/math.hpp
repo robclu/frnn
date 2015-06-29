@@ -28,7 +28,7 @@
 
 #include "../util/errors.h"
 #include "../curnn/curnn.h"
-#include "math.h"
+#include "math.cuh"
 
 namespace curnn {
 	namespace math  {

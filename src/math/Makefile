@@ -46,7 +46,7 @@ tests: tests
 main.o : main.cpp
 	$(CXX) $(INLCUDES) $(CCFLAGS) -o $@ -c $<
 
-math.cu.o : math.h
+math.cu.o : math.cuh
 	$(NVCC) -x cu $(INLCUDES) $(CCFLAGS) -o $@ -dc $<
 
 math.o : math.cpp
