@@ -34,6 +34,14 @@ using std::vector;
 //        which is only really a problem for the double precision functions
 const size_t NUM_ELEMENTS = 3e6;
 
+/* =========================================== NOTES ========================================================
+ *
+ * 1. sum does not work with doubles since the kernels use the shfl operations which can only handle ints and
+ *    floats. (conversion from other params to these will be provided later on).
+ *
+ * ==========================================================================================================
+ */
+
 TEST( curnnMath, AxpyOperationComputesCorrectlyWithFloats ) {
 	// Create curnn error status
 	curnn::curnnError error;
@@ -114,6 +122,21 @@ TEST( curnnMath, ReductionSumComputesCorrectlyWithFloats ) {
 	// Fill x with data 
 	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
 		x.push_back( 1.f );
+	}
+
+	EXPECT_EQ( NUM_ELEMENTS, curnn::math::sum( error, x ) );
+}
+
+TEST( curnnMath, ReductionSumComputesCorrectlyWithInts ) {
+	// Create curnn error status
+	curnn::curnnError error;
+
+	// Create data vector 
+	vector<int> x;
+
+	// Fill x with data 
+	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+		x.push_back( int( 1 ) );
 	}
 
 	EXPECT_EQ( NUM_ELEMENTS, curnn::math::sum( error, x ) );

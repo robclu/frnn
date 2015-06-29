@@ -30,9 +30,14 @@ LIB_DIR 		:= -L/usr/local/cuda/lib64
 
 ########################################################
 #					COMPILER FLAGS 					   #
+#                                                      #
+# To enable compiler warnings, remove -w and replace   #
+# with :                                               #
+# 			--compiler-options -Wall                   #
 ########################################################
 
-CCFLAGS 		:= -std=c++11 -O3
+CCFLAGS 		:= -std=c++11 -O3 -w
+CUFLAGS 		:= -arch=sm_30
 
 ########################################################
 # 					TARGET RULES 					   #
@@ -43,7 +48,7 @@ all: tests cleanobs
 tests: tests
 
 general_tests.o: general_tests.cpp 
-	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) -o $@ -c $<
+	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -c $<
 
 main.o : main.cpp
 	$(CXX) $(INCLUDES) $(CCFLAGS) -o $@ -c $<
