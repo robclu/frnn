@@ -33,7 +33,7 @@ using std::vector;
 // Note : Do not make this so big that the GPU will run out of memory,
 //        which is only really a problem for the double precision functions
 const size_t NUM_ELEMENTS = 3e6;
-
+const size_t RESOLUTION	  = 1e5;
 /* =========================================== NOTES ========================================================
  *
  * 1. sum does not work with doubles since the kernels use the shfl operations which can only handle ints and
@@ -268,6 +268,70 @@ TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithIntsAndFullResultsVe
 	} else {													// THOROUGH testing
 		for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
 			EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
+		}
+	}
+}
+
+TEST( curnnMath, SoftmaxCorrectWithInts ) {
+	// Create curnn error status
+	curnn::curnnError error;
+
+	// Create data vector 
+	vector<int> x, results;
+
+	// Fill x with data 
+	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+		x.push_back( 1 );
+	}
+
+	// Get the results of the sum into the results vector
+	curnn::math::softmax( error, x, results );
+
+	if ( FAST_TEST ) {											// FAST testing
+		if ( NUM_ELEMENTS < 10 ) {
+			for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+				EXPECT_EQ( (int)exp( 1 ) * NUM_ELEMENTS, results[ i ]  );
+			}
+		} else {
+			for ( size_t i = NUM_ELEMENTS - 10; i < NUM_ELEMENTS; i++ ) {
+				EXPECT_EQ( (int)exp( 1 ) * NUM_ELEMENTS, results[ i ]  );
+			}
+		}	
+	} else {													// THOROUGH testing
+		for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+			EXPECT_EQ( (int)exp( 1 ) * NUM_ELEMENTS, results[ i ]  );
+		}
+	}
+}
+
+TEST( curnnMath, SoftmaxCorrectWithFloats ) {
+	// Create curnn error status
+	curnn::curnnError error;
+
+	// Create data vector 
+	vector<float> x, results;
+
+	// Fill x with data 
+	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+		x.push_back( 1.f );
+	}
+
+	// Get the results of the sum into the results vector
+	curnn::math::softmax( error, x, results );
+
+	if ( FAST_TEST ) {											// FAST testing
+		if ( NUM_ELEMENTS < 10 ) {
+			for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+				EXPECT_LE( (float)abs( exp( 1 ) * NUM_ELEMENTS - results[ i ] ), RESOLUTION  );
+			}
+		} else {
+			for ( size_t i = NUM_ELEMENTS - 10; i < NUM_ELEMENTS; i++ ) {
+				EXPECT_LE( (float)abs( exp( 1 ) * NUM_ELEMENTS - results[ i ] ), RESOLUTION  );
+			}
+		}	
+	} else {													// THOROUGH testing
+		for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+			EXPECT_LE( (float)abs( exp( 1 ) * NUM_ELEMENTS - results[ i ] ),  RESOLUTION );
 		}
 	}
 }

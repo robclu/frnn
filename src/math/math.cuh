@@ -24,6 +24,9 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 
+#include <math.h>
+#include <cmath>
+
 #include "../curnn/types.h"
 
 /* ============================================= NOTES ======================================================
@@ -33,9 +36,24 @@
  *
  * ==========================================================================================================
  */
-
+ 
 using namespace curnn;
 
+		struct expFunctor {
+			template <typename dType>
+			__host__ __device__ dType operator() ( const dType& value ) {
+				return exp( value );
+			}
+		};
+
+		struct voidFunctor {
+			template <typename dType>
+			__host__ __device__ dType operator() ( const dType& value ) {
+				return value; 
+			}
+		};
+
+		/*
 		/* NOTE : Need to make these funcitons handle any value array and test if it is better to pad with
 		 *        zeros or to just add one or two steps */
 
@@ -167,7 +185,7 @@ using namespace curnn;
 		 * Params		: dType		: The data type (double, float, int)
 		 * ==================================================================================================
 		 */	
-		template <class dType>
+		template <typename dType>
 		__global__ void blockReduceAtomicVectorized( dType* in, dType* out, size_t N ) {
 			dType sum = dType( 0 );
 			int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -207,8 +225,9 @@ using namespace curnn;
 		 * Params		: dType		: The data type (double, float, int)
 		 * ==================================================================================================
 		 */	
-		template <class dType>
-		__global__ void blockReduceAtomicVectorizedAll( dType* in, dType* out, size_t N ) {
+		template <typename dType, typename F = voidFunctor>
+		__global__ void blockReduceAtomicVectorizedAll( dType* in, dType* out, size_t N, F f = voidFunctor() ) {
+
 			typedef typename curnn::vectorizedType<dType, 4>::vectType vect4;
 			dType  sum  = dType( 0 );
 
@@ -219,12 +238,12 @@ using namespace curnn;
 			for ( int i = idx; i < ( N / 4 ); i += blockDim.x * gridDim.x ) {
 				// Convert to vectorized type and all to sum 
 				vect4 val = reinterpret_cast<vect4*>( in )[ i ];
-				sum += val.x + val.y + val.z + val.w;
+				sum += f( val.x ) + f( val.y ) + f( val.z ) + f( val.w );
 			}
 		
 			// Determine elements that were not vectorized
 			int i = idx + ( N / 4 * 4 );
-			if ( i < N ) sum += in[ i ];
+			if ( i < N ) sum += f( in[ i ] );
 
 			// Perform reduction on the blocks, each thread in the 
 			// block will have the sum of that block 
@@ -236,12 +255,12 @@ using namespace curnn;
 		    atomicAdd( &out[ out_index ], sum );
 		}
 
-/*
+		/*
 		 * ==================================================================================================     
 		 * Function		: blockScatter
 		 *
 		 * Description	: 'Scatters' the first element of a block to all other elements of the block. Block
-		 *                sizes greated than the number of threads per block get the values to scatter from 
+		 *                sizes greated than the number of thrGeads per block get the values to scatter from 
 		 *                blocks blockDim.x blocks before
 		 *
 		 * Inputs		: data		: A pointer to the data where the first element of the block must be
@@ -271,4 +290,22 @@ using namespace curnn;
 			// Copy from shared memory to each thread, if in range
 			if ( idx < N ) data[ idx ] = shared[ 0 ];
 		}
+
+		/*
+		 * ==================================================================================================     
+		 * Function		: softmaxKernel
+		 *
+		 * Description	: Computes the softmax function for each block. This should be called after 
+		 *                blockReduceAtomicVectorizedAll, which puts the sum of all the data elements 
+		 *                into the first blockDim.x blocks, which means each block can read from 
+		 *
+		 * Inputs		: data		: A pointer to the data where the first element of the block must be
+		 *                            scattered
+		 *              : N			: The number of elements in the array
+		 *
+		 * Outputs		: data		: The array where each thread in the block has the same value
+		 *
+		 * Params		: dType		: The data type (double, float, int)
+		 * ==================================================================================================
+		 */		
 #endif
