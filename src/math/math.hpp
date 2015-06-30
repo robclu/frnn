@@ -168,8 +168,6 @@ namespace curnn {
 		template <typename dType>
 		void sumVectorized( curnnError& error, const std::vector<dType>& x, std::vector<dType>& val ) {
 
-			cudaEvent_t start, stop;
-
 			// Declare device pointers, and (non-pointer) result val
 			dType* in = 0, *out = 0;
 			
