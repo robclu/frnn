@@ -197,8 +197,6 @@ namespace curnn {
 			// Rather use too many threads than not handle 
 			// non power-of-2 sizes
 			if ( blocks * threads < x.size() ) blocks++;
-			std::cout << "+++++++++\n\nBLOCK\n\n++++++++++++" << blocks << std::endl;
-
 
 			// Execute kernel
 			blockReduceAtomicVectorizedAll<<<blocks, threads>>>( in, out, x.size() );

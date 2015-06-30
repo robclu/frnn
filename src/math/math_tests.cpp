@@ -32,7 +32,7 @@ using std::vector;
 // General tesing parameres 
 // Note : Do not make this so big that the GPU will run out of memory,
 //        which is only really a problem for the double precision functions
-const size_t NUM_ELEMENTS = 260;
+const size_t NUM_ELEMENTS = 6;
 
 /* =========================================== NOTES ========================================================
  *
