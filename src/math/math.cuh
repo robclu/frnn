@@ -143,30 +143,31 @@ using namespace curnn;
 
 			// Read from shared memory the results of all warps (essentially 
 			// moving the results so that the first warp can use them)
-			val = ( threadIdx.x < blockDim.x / warpSize ) ? shared[ lane ] : 0;
+			val = ( lane < blockDim.x / warpSize ) ? shared[ lane ] : 0;
 
 			// Do the reduction on the first warp (now all 32 (if SM3.0)
 			// threads in the first warp have the result)
-			if ( wid == 0 ) val = warpReduceAll( val );
+			val = warpReduceAll( val );
 
 			// Each thread in the first warp that has
 			//  the result writes it to shred memory
-			if ( wid == 0 ) shared[ lane ] = val;
+			//if ( wid == 0 ) shared[ lane ] = val;
 
 			// Each lane in warps 1-N without results 
 			// add their value with the value in the 
 			// corresponding lane in warp 0
-			if ( wid > 0 ) AtomicAdd( &val, shared[ lane ] );
+			//if ( wid > 0 ) val = shared[ lane ];
 
 			return val;
 		}
+
 		/*
 		 * ==================================================================================================     
 		 * Function		: blockReduceAtomicVectorized
 		 *
 		 * Description	: Performs reduction sum (log(N) sum) on an entire array using vectorized types (2
 		 *                - this will become general, to include 4 and 8, later) and atomic adds across the 
-		 *                blocks which is better for floats and doubles.
+		 *                blocks which is better for floats 
 		 *
 		 * Inputs		: in		: A pointer to the data to compute the sum of 
 		 *              : N			: The number of elements to sum (in the array)
@@ -182,7 +183,7 @@ using namespace curnn;
 			int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
 			// Add values to sum
-			for ( int i = idx; i <(  N / 2 ); i += blockDim.x * gridDim.x ) {
+			for ( int i = idx; i < ( N / 2 ); i += blockDim.x * gridDim.x ) {
 				// Convert to vectorized type and all to sum 
 				typedef typename curnn::vectorizedType<dType, 2>::vectType vect2;
 				vect2 val = reinterpret_cast<vect2*>( in )[ i ];
@@ -199,4 +200,51 @@ using namespace curnn;
 			// Add all results from each block
 			if ( threadIdx.x == 0 ) atomicAdd( out, sum );
 		}
+
+		/*
+		 * ==================================================================================================     
+		 * Function		: blockReduceAtomicVectorizedAll
+		 *
+		 * Description	: Performs reduction sum (log(N) sum) on an entire array using vectorized types (2
+		 *                - this will become general, to include 4 and 8, later) and atomic adds across the 
+		 *                blocks which is better for floats, each thread then has the result of the sum.
+		 *
+		 * Inputs		: in		: A pointer to the data to compute the sum of 
+		 *              : N			: The number of elements to sum (in the array)
+		 *
+		 * Outputs		: out		: A poiinter to where the result will reside
+		 *
+		 * Params		: dType		: The data type (double, float, int)
+		 * ==================================================================================================
+		 */	
+		template <class dType>
+		__global__ void blockReduceAtomicVectorizedAll( dType* in, dType* out, size_t N ) {
+			dType  sum  = dType( 0 );
+			
+			// Allocate and set memory
+			static __shared__ dType shared[ 256 ];
+
+			// Get global index
+			int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+			// Add values to sum
+			for ( int i = idx; i < ( N / 2 ); i += blockDim.x * gridDim.x ) {
+				// Convert to vectorized type and all to sum 
+				typedef typename curnn::vectorizedType<dType, 2>::vectType vect2;
+				vect2 val = reinterpret_cast<vect2*>( in )[ i ];
+				sum += val.x + val.y;
+			}
+
+			// Add 'extra' elements (if more elements than threads)
+			int i = idx + ( N / 2 * 2 );
+			if ( i < N ) sum += in[ i ]; 
+
+			// Perform reduction on the blocks, each thread in the 
+			// block will have the sum of that block 
+			sum = blockReduceAll( sum );
+			
+			// Write to shared memory
+			atomicAdd( &out[ threadIdx.x ], sum );
+		}
+		
 #endif

@@ -85,6 +85,24 @@ namespace curnn {
 		
 		/*
 		 * ==================================================================================================     
+		 * Function		: sumVectorized 
+		 *
+		 * Description	: Performs the sum of the elements in a vector and returns a vector of the same
+		 *                dimension with each element having the result
+		 *					
+		 * Inputs		: error		: cuRNN error type for results of operations
+		 *				: x			: The vector, araary etc.. (data) to comupte the sum of
+		 *        
+		 * Outputs		: val		: A vector where each element holds the result of the sum
+		 *
+		 * Params		: dType		: The data type of the array elements
+		 * ==================================================================================================
+		 */	 
+		template <typename dType>
+		void sumVectorized( curnnError& error, const std::vector<dType>& x, std::vector<dType>& val );
+
+		/*
+		 * ==================================================================================================     
 		 * Function		: softmax
 		 *
 		 * Description	: Performs the softmax function of a vector of data x, which is 
@@ -143,6 +161,55 @@ namespace curnn {
 			cudaFree( in ); cudaFree( out );
 
 			return val;
+		}
+
+		template <typename dType>
+		void sumVectorized( curnnError& error, const std::vector<dType>& x, std::vector<dType>& val ) {
+
+			// Declare device pointers, and (non-pointer) result val
+			dType* in = 0, *out = 0;
+
+			// If there is not enough space in val for the results, allocate space
+			if ( val.capacity() < x.size() ) {
+				val.reserve( x.size() );
+			}
+
+			// Alllocate memory on the device
+			if ( cudaMalloc( (void**)&in, x.size() * sizeof( dType ) ) != cudaSuccess ) {
+				curnn::err::allocError( error, stringify( in ) );
+			}
+			if ( cudaMalloc( (void**)&out, x.size() * sizeof( dType) ) != cudaSuccess ) {
+				curnn::err::allocError( error, stringify( out ) );
+			}
+
+			// Copy data from x to in
+			if ( cudaMemcpy( in, &x[0], x.size() * sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
+				curnn::err::copyError( error, stringify( in ) );
+			}
+			if ( cudaMemset( out, 0, x.size() * sizeof( dType ) ) != cudaSuccess ) {
+				curnn::err::copyError( error, stringify( out ) );
+			}
+
+			// Determine the size of the grids for the kernel
+			int threads = 256;
+			int blocks  = std::min( static_cast<int>( ( ( x.size() / 2 ) + threads - 1 ) / threads ), MAX_BLOCKS );
+
+			// Rather use too many threads than not handle 
+			// non power-of-2 sizes
+			if ( blocks * threads < x.size() ) blocks++;
+			std::cout << "+++++++++\n\nBLOCK\n\n++++++++++++" << blocks << std::endl;
+
+
+			// Execute kernel
+			blockReduceAtomicVectorizedAll<<<blocks, threads>>>( in, out, x.size() );
+
+			// copy result from out to val 
+			if ( cudaMemcpy( &val[0], out, x.size() * sizeof( dType ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
+				curnn::err::copyError( error, stringify( val ) );
+			}
+
+			// Free device memory
+			cudaFree( in ); cudaFree( out );
 		}
 
 		template <typename dType>
