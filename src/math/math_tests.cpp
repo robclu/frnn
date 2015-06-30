@@ -27,7 +27,7 @@
 using std::vector;
 
 // Constants for faster (but less thorough) testing
-#define FAST_TEST 0
+#define FAST_TEST 1
 
 // General tesing parameres 
 // Note : Do not make this so big that the GPU will run out of memory,
