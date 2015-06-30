@@ -44,9 +44,9 @@ using namespace curnn;
 		 * Function		: warpReduce
 		 *
 		 * Description	: Performs reduction sum (log(N) sum) within a warp (Thanks to Nvidia for making this
-		 *                so easy with __shfl_down). Only the first thread gets the result.
+		 *                so easy with __shfl_down). Only the first thread gets the shared[ 0 ]
 		 *
-		 * Outputs/(I)	: val		: Value of first element in array, and where the result is stored
+		 * Outputs/(I)	: val		: Value of first element in array, and where the shared[ 0 ]
 		 *
 		 * Params		: dType		: The data type (double, float, int)
 		 * ==================================================================================================
@@ -65,9 +65,9 @@ using namespace curnn;
 		 * Function		: warpReduceAll
 		 *
 		 * Description	: Performs reduction sum (log(N) sum) within a warp (Thanks to Nvidia for making this
-		 *                so easy with __shfl_down). All threads in warp get the results
+		 *                so easy with __shfl_down). All threads in warp get the shared[ 0 ]
 		 *
-		 * Outputs/(I)	: val		: Value of first element in array, and where the result is stored
+		 * Outputs/(I)	: val		: Value of first element in array, and where the shared[ 0 ]
 		 *
 		 * Params		: dType		: The data type (double, float, int)
 		 * ==================================================================================================
@@ -86,9 +86,9 @@ using namespace curnn;
 		 * Function		: blockReduce
 		 *
 		 * Description	: Performs reduction sum (log(N) sum) within a block using the above warpReduce
-		 *                function and the result is only available to the first thread
+		 *                function and the shared[ 0 ]
 		 *
-		 * Outputs/(I)	: val		: Value of first element in array, and where the result is stored
+		 * Outputs/(I)	: val		: Value of first element in array, and where the shared[ 0 ]
 		 *
 		 * Params		: dType		: The data type (double, float, int)
 		 * ==================================================================================================
@@ -102,12 +102,12 @@ using namespace curnn;
 
 			val = warpReduce( val );						// Do reduction on warp
 
-			// For first index in each warp, write result to shared memory
+			// For first index in each warp, write shared[ 0 ]
 			if ( lane == 0 ) shared[ wid ] = val;	
 			__syncthreads();								// Make sure all threads are finished
 
-			// Read from shared memory the results of all warps (essentially 
-			// moving the results so that the first warp can use them)
+			// Read from shared memory the shared[ 0 ]
+			// moving the shared[ 0 ]
 			val = ( threadIdx.x < blockDim.x / warpSize ) ? shared[ lane ] : 0;
 
 			// Do the reduction on the first warp
@@ -121,9 +121,9 @@ using namespace curnn;
 		 * Function		: blockReduceAll
 		 *
 		 * Description	: Performs reduction sum (log(N) sum) within a block using the above warpReduceAll
-		 *                function and the result is available to all threads
+		 *                function and the shared[ 0 ]
 		 *
-		 * Outputs/(I)	: val		: Value of first element in array, and where the result is stored
+		 * Outputs/(I)	: val		: Value of first element in array, and where the shared[ 0 ]
 		 *
 		 * Params		: dType		: The data type (double, float, int)
 		 * ==================================================================================================
@@ -135,28 +135,18 @@ using namespace curnn;
 			int lane = threadIdx.x % warpSize;				// Index in warp
 			int wid  = threadIdx.x / warpSize;				// Warp index
 
-			val = warpReduceAll( val );						// Do reduction on warp (all threads have result)
+			val = warpReduceAll( val );						// Do reduction on warp (all threads have shared[ 0 ]
 
-			// For first index in each warp, write result to shared memory
+			// For first index in each warp, write shared[ 0 ]
 			if ( lane == 0 ) shared[ wid ] = val;	
 			__syncthreads();								// Make sure all threads are finished
 
-			// Read from shared memory the results of all warps (essentially 
-			// moving the results so that the first warp can use them)
+			// Give each warp the shared[ 0 ]
 			val = ( lane < blockDim.x / warpSize ) ? shared[ lane ] : 0;
 
-			// Do the reduction on the first warp (now all 32 (if SM3.0)
-			// threads in the first warp have the result)
+			// Have each war perform the butterfly reduction
+			// so that all threads in the block have the shared[ 0 ]
 			val = warpReduceAll( val );
-
-			// Each thread in the first warp that has
-			//  the result writes it to shred memory
-			//if ( wid == 0 ) shared[ lane ] = val;
-
-			// Each lane in warps 1-N without results 
-			// add their value with the value in the 
-			// corresponding lane in warp 0
-			//if ( wid > 0 ) val = shared[ lane ];
 
 			return val;
 		}
@@ -172,7 +162,7 @@ using namespace curnn;
 		 * Inputs		: in		: A pointer to the data to compute the sum of 
 		 *              : N			: The number of elements to sum (in the array)
 		 *
-		 * Outputs		: out		: A poiinter to where the result will reside
+		 * Outputs		: out		: A poiinter to where the shared[ 0 ]
 		 *
 		 * Params		: dType		: The data type (double, float, int)
 		 * ==================================================================================================
@@ -190,14 +180,14 @@ using namespace curnn;
 				sum += val.x + val.y;
 			}
 
-			// Add 'extra' elements (if more elements than threads)
+			// Add 'extra' elements (if not multiple of 4)
 			int i = idx + ( N / 2 * 2 );
 			if ( i < N ) sum += in[ i ]; 
 
 			// Perform reduction on the blocks
 			sum = blockReduce( sum );
 			
-			// Add all results from each block
+			// Add all shared[ 0 ]
 			if ( threadIdx.x == 0 ) atomicAdd( out, sum );
 		}
 
@@ -207,44 +197,78 @@ using namespace curnn;
 		 *
 		 * Description	: Performs reduction sum (log(N) sum) on an entire array using vectorized types (2
 		 *                - this will become general, to include 4 and 8, later) and atomic adds across the 
-		 *                blocks which is better for floats, each thread then has the result of the sum.
+		 *                blocks which is better for floats, each thread then has the shared[ 0 ]
 		 *
 		 * Inputs		: in		: A pointer to the data to compute the sum of 
 		 *              : N			: The number of elements to sum (in the array)
 		 *
-		 * Outputs		: out		: A poiinter to where the result will reside
+		 * Outputs		: out		: A poiinter to where the shared[ 0 ]
 		 *
 		 * Params		: dType		: The data type (double, float, int)
 		 * ==================================================================================================
 		 */	
 		template <class dType>
 		__global__ void blockReduceAtomicVectorizedAll( dType* in, dType* out, size_t N ) {
+			typedef typename curnn::vectorizedType<dType, 4>::vectType vect4;
 			dType  sum  = dType( 0 );
-			
-			// Allocate and set memory
-			static __shared__ dType shared[ 256 ];
 
 			// Get global index
 			int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
 			// Add values to sum
-			for ( int i = idx; i < ( N / 2 ); i += blockDim.x * gridDim.x ) {
+			for ( int i = idx; i < ( N / 4 ); i += blockDim.x * gridDim.x ) {
 				// Convert to vectorized type and all to sum 
-				typedef typename curnn::vectorizedType<dType, 2>::vectType vect2;
-				vect2 val = reinterpret_cast<vect2*>( in )[ i ];
-				sum += val.x + val.y;
+				vect4 val = reinterpret_cast<vect4*>( in )[ i ];
+				sum += val.x + val.y + val.z + val.w;
 			}
-
-			// Add 'extra' elements (if more elements than threads)
-			int i = idx + ( N / 2 * 2 );
-			if ( i < N ) sum += in[ i ]; 
+		
+			// Determine elements that were not vectorized
+			int i = idx + ( N / 4 * 4 );
+			if ( i < N ) sum += in[ i ];
 
 			// Perform reduction on the blocks, each thread in the 
 			// block will have the sum of that block 
 			sum = blockReduceAll( sum );
-			
-			// Write to shared memory
-			atomicAdd( &out[ threadIdx.x ], sum );
+
+			// Add the results of all other blocks to the first 
+			// element of this block 		
+			int out_index = threadIdx.x * blockDim.x;
+		    atomicAdd( &out[ out_index ], sum );
 		}
-		
+
+/*
+		 * ==================================================================================================     
+		 * Function		: blockScatter
+		 *
+		 * Description	: 'Scatters' the first element of a block to all other elements of the block. Block
+		 *                sizes greated than the number of threads per block get the values to scatter from 
+		 *                blocks blockDim.x blocks before
+		 *
+		 * Inputs		: data		: A pointer to the data where the first element of the block must be
+		 *                            scattered
+		 *              : N			: The number of elements in the array
+		 *
+		 * Outputs		: data		: The array where each thread in the block has the same value
+		 *
+		 * Params		: dType		: The data type (double, float, int)
+		 * ==================================================================================================
+		 */	
+		template <class dType> 
+		__global__ void blockScatter( dType* data, size_t N ) {
+			static __shared__ dType shared[ 1 ];
+
+			// Get global index
+			int idx = blockIdx.x * blockDim.x + threadIdx.x;
+			
+			// Copy the first element of the block to shared memory
+			if ( threadIdx.x == 0  && blockIdx.x < blockDim.x ) {
+				shared[ 0 ] = data[ idx ];
+			} else if ( threadIdx.x == 0 && blockIdx.x >= blockDim.x ) {
+				shared[ 0 ] = data[ idx - blockDim.x * blockIdx.x ];
+			}
+			__syncthreads();
+
+			// Copy from shared memory to each thread, if in range
+			if ( idx < N ) data[ idx ] = shared[ 0 ];
+		}
 #endif

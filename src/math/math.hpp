@@ -145,8 +145,10 @@ namespace curnn {
 				curnn::err::copyError( error, stringify( out ) );
 			}
 
-			// Determine the size of the grids for the kernel
-			int threads = 256;
+			// Determine the size of the grids for the kernel, we need enough blocks
+			// to make sure that each element of the output vector gets a result
+			int threads;
+			x.size() > 256 * MAX_BLOCKS ? threads = 512 : threads = 256;
 			int blocks  = std::min( static_cast<int>( ( ( x.size() / 2 ) + threads - 1 ) / threads ), MAX_BLOCKS );
 
 			// Execute kernel
@@ -166,11 +168,13 @@ namespace curnn {
 		template <typename dType>
 		void sumVectorized( curnnError& error, const std::vector<dType>& x, std::vector<dType>& val ) {
 
+			cudaEvent_t start, stop;
+
 			// Declare device pointers, and (non-pointer) result val
 			dType* in = 0, *out = 0;
-
+			
 			// If there is not enough space in val for the results, allocate space
-			if ( val.capacity() < x.size() ) {
+			if ( val.size() < x.size() ) {
 				val.reserve( x.size() );
 			}
 
@@ -181,7 +185,7 @@ namespace curnn {
 			if ( cudaMalloc( (void**)&out, x.size() * sizeof( dType) ) != cudaSuccess ) {
 				curnn::err::allocError( error, stringify( out ) );
 			}
-
+			
 			// Copy data from x to in
 			if ( cudaMemcpy( in, &x[0], x.size() * sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
 				curnn::err::copyError( error, stringify( in ) );
@@ -189,17 +193,21 @@ namespace curnn {
 			if ( cudaMemset( out, 0, x.size() * sizeof( dType ) ) != cudaSuccess ) {
 				curnn::err::copyError( error, stringify( out ) );
 			}
+			
+			// Determine the size of the grids for the kernel, we need enough blocks
+			// to make sure that each element of the output vector gets a result
+			int threads;
+			x.size() > 256 * MAX_BLOCKS ? threads = 512 : threads = 256;
+			int blocks  = std::min( static_cast<int>( x.size() / threads ), MAX_BLOCKS );
 
-			// Determine the size of the grids for the kernel
-			int threads = 256;
-			int blocks  = std::min( static_cast<int>( ( ( x.size() / 2 ) + threads - 1 ) / threads ), MAX_BLOCKS );
+			// Check there are enough threads
+			if (  blocks * threads < x.size() ) blocks++;
 
-			// Rather use too many threads than not handle 
-			// non power-of-2 sizes
-			if ( blocks * threads < x.size() ) blocks++;
-
-			// Execute kernel
+			// Execute kernel to reduce all blocks
 			blockReduceAtomicVectorizedAll<<<blocks, threads>>>( in, out, x.size() );
+
+			// Execute kernel to give result to all threads in grid
+			blockScatter<<<blocks, threads>>>( out, x.size() );
 
 			// copy result from out to val 
 			if ( cudaMemcpy( &val[0], out, x.size() * sizeof( dType ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {

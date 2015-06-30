@@ -37,7 +37,7 @@ LIB_DIR 		:= -L/usr/local/cuda/lib64
 # 			--compiler-options -Wall                   #
 ########################################################
 
-CCFLAGS 		:= -std=c++11 -O3 
+CCFLAGS 		:= -std=c++11 -O3 -w
 CUFLAGS 		:= -arch=sm_30
 
 ########################################################

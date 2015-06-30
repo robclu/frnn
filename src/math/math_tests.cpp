@@ -32,7 +32,7 @@ using std::vector;
 // General tesing parameres 
 // Note : Do not make this so big that the GPU will run out of memory,
 //        which is only really a problem for the double precision functions
-const size_t NUM_ELEMENTS = 6;
+const size_t NUM_ELEMENTS = 3e6;
 
 /* =========================================== NOTES ========================================================
  *
@@ -157,8 +157,6 @@ TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithFloatsAndEmptyResult
 	// Get the results of the sum into the results vector
 	curnn::math::sumVectorized( error, x, results );
 
-	EXPECT_EQ( NUM_ELEMENTS, results[0] );
-
 	if ( FAST_TEST ) {											// FAST testing
 		if ( NUM_ELEMENTS < 10 ) {
 			for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
@@ -207,8 +205,69 @@ TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithFloatsAndFullResults
 			EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
 		}
 	}
+}
 
-	for ( size_t i = 0; i < results.size(); i++ ) {
-		std::cout << results[i] << std::endl;
+TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithIntsAndEmptyResultsVector ) {
+	// Create curnn error status
+	curnn::curnnError error;
+
+	// Create data vector 
+	vector<int> x, results;
+
+	// Fill x with data 
+	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+		x.push_back( 1 );
+	}
+
+	// Get the results of the sum into the results vector
+	curnn::math::sumVectorized( error, x, results );
+
+	if ( FAST_TEST ) {											// FAST testing
+		if ( NUM_ELEMENTS < 10 ) {
+			for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+				EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
+			}
+		} else {
+			for ( size_t i = NUM_ELEMENTS - 10; i < NUM_ELEMENTS; i++ ) {
+				EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
+			}
+		}	
+	} else {													// THOROUGH testing
+		for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+			EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
+		}
+	}
+}
+
+TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithIntsAndFullResultsVector ) {
+	// Create curnn error status
+	curnn::curnnError error;
+
+	// Create data vector 
+	vector<int> x, results;
+
+	// Fill x with data 
+	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+		x.push_back( 1 );
+		results.push_back( 0.f );
+	}
+
+	// Get the results of the sum into the results vector
+	curnn::math::sumVectorized( error, x, results );
+
+	if ( FAST_TEST ) {											// FAST testing
+		if ( NUM_ELEMENTS < 10 ) {
+			for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+				EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
+			}
+		} else {
+			for ( size_t i = NUM_ELEMENTS - 10; i < NUM_ELEMENTS; i++ ) {
+				EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
+			}
+		}	
+	} else {													// THOROUGH testing
+		for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+			EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
+		}
 	}
 }
