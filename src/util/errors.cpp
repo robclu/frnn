@@ -21,16 +21,17 @@
 #include "errors.h"
 
 namespace curnn {
-	namespace err {
+namespace err {
 
-		void allocError( curnn::curnnError& error, const char * varname ) {
-			std::cerr << "Error : Could not allocate memory for variable " << varname << "\n";
-			error = curnn::curnnError::CURNN_ALLOC_ERROR;
-		}				
-		
-		void copyError( curnn::curnnError& error, const char* varname ) {
-			std::cerr << "Error : Could not cpoy to/from variable " << varname << "\n";
-			error = curnn::curnnError::CURNN_COPY_ERROR;
-		}
-	}
+void allocError( curnn::curnnError& error, const char * varname ) {
+	std::cerr << "Error : Could not allocate memory for variable " << varname << "\n";
+	error = curnn::curnnError::CURNN_ALLOC_ERROR;
+}				
+
+void copyError( curnn::curnnError& error, const char* varname ) {
+	std::cerr << "Error : Could not cpoy to/from variable " << varname << "\n";
+	error = curnn::curnnError::CURNN_COPY_ERROR;
 }
+	
+}	// Namepsace err
+}	// Namespace curnn

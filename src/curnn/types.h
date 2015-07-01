@@ -29,43 +29,43 @@
 
 namespace curnn {
 
-	/* 
-	 * ======================================================================================================
-	 * Struct		: vectorizeddType	 
-	 * 
-	 * Description	: Gets a vectorzed (2) version of dType. For example, if dType is a float this 
-	 *                will then get float2, similarity for int or double.
-	 *
-	 * Params		: dType		: The type of data (float, double etc..)
-	 *				: N			: The size of the vector (2, 4, 8 ..)
-	 * ======================================================================================================
-	 */
-	template <typename dType, int N> struct vectorizedType;
+/* 
+ * ==========================================================================================================
+ * Struct		: vectorizeddType	 
+ * 
+ * Description	: Gets a vectorzed (2) version of dType. For example, if dType is a float this 
+ *                will then get float2, similarity for int or double.
+ *
+ * Params		: dType		: The type of data (float, double etc..)
+ *				: N			: The size of the vector (2, 4, 8 ..)
+ * ==========================================================================================================
+ */
+template <typename dType, int N> struct vectorizedType;
 
-	// Macro to make instances of each type for vector size 4
-	#define CURNN_VECTORIZED_INSTANCE( dType )											\
-		template <> struct vectorizedType<dType, 1> { typedef dType ## 1  vectType; };	\
-		template <> struct vectorizedType<dType, 2> { typedef dType ## 2 vectType; };	\
-		template <> struct vectorizedType<dType, 4> { typedef dType ## 4 vectType; };	\
+// Macro to make instances of each type for vector size 4
+#define CURNN_VECTORIZED_INSTANCE( dType )											\
+	template <> struct vectorizedType<dType, 1> { typedef dType ## 1  vectType; };	\
+	template <> struct vectorizedType<dType, 2> { typedef dType ## 2 vectType; };	\
+	template <> struct vectorizedType<dType, 4> { typedef dType ## 4 vectType; };	\
 
-	CURNN_VECTORIZED_INSTANCE( double )
-	CURNN_VECTORIZED_INSTANCE( float  )
-	CURNN_VECTORIZED_INSTANCE( int    )
-	CURNN_VECTORIZED_INSTANCE( uint   )
-	CURNN_VECTORIZED_INSTANCE( char	  )
+CURNN_VECTORIZED_INSTANCE( double )
+CURNN_VECTORIZED_INSTANCE( float  )
+CURNN_VECTORIZED_INSTANCE( int    )
+CURNN_VECTORIZED_INSTANCE( uint   )
+CURNN_VECTORIZED_INSTANCE( char	  )
 
-	#undef CURNN_VECTORIZED_INSTANCE
-	
-	/*
-	 * ======================================================================================================
-	 * Enum			: curnnError
-	 *
-	 * Description	: Enumerator for possible erorrs in curnn.
-	 * ======================================================================================================
-	 */
-	enum curnnError {
-		CURNN_ALLOC_ERROR = 1,
-		CURNN_COPY_ERROR
+#undef CURNN_VECTORIZED_INSTANCE
+
+/*
+ * ==========================================================================================================
+ * Enum			: curnnError
+ *
+ * Description	: Enumerator for possible erorrs in curnn.
+ * ==========================================================================================================
+ */
+enum curnnError {
+	CURNN_ALLOC_ERROR = 1,
+	CURNN_COPY_ERROR
 	};
 }
 

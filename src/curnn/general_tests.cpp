@@ -24,9 +24,12 @@
 
 #include "types.h"
 
-/* NOTE: When using the vectorized instances in device code with templated functions, 
- *       you will need to first use a typedef, so for example if the template prameter 
- *       is dType then
+/* 
+ * =========================================== NOTES ========================================================
+ *
+ * 1. When using the vectorized instances in device code with templated functions, 
+ *    you will need to first use a typedef, so for example if the template prameter 
+ *    is dType then
  *
  *       template <typename dType> 
  *       void example_function( ... ) {
@@ -36,6 +39,7 @@
  *			vec2 vectorized_dtype;
  *		}			
  *
+ * ==========================================================================================================
  */
 
 TEST( curnnTypes, CanDetermineVectorizedDoublesFromDouble ) {

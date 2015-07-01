@@ -1,7 +1,8 @@
 /*
  *  Namespace declarations for cuRNN. I honestly don't know why these 
  *  functions can be forward declared in this file but not found in their
- *  header files, but this works!
+ *  header files, but defining them in this header file and including it 
+ *  works, and is also a lot cleaner!
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
@@ -27,10 +28,12 @@
 #include "../util/errors.h"
 
 namespace curnn {
-	namespace err {
-		void allocError( curnn::curnnError&, const char* );
-		void copyError(  curnn::curnnError&, const char* );
-	}
-}
+namespace err {
+
+void allocError( curnn::curnnError&, const char* );
+void copyError(  curnn::curnnError&, const char* );
+	
+}	// Namespace err
+}	// Namespace curnn
 
 #endif 

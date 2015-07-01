@@ -30,30 +30,31 @@
 inline const char* varname( const char* name ) { return name; }
 
 namespace currn {
-	namespace err {
-		/*
-		 * ==============================================================================================
-		 * Function		: allocError
-		 *
-		 * Description	: Prints an error message of allocation failed
-		 *
-		 * Inputs		: varname	: The name of the variable that could not be allocated
-		 * ==============================================================================================
-		 */
-		void allocError( curnn::curnnError& error, const char * varname );	
+namespace err {
+/*
+ * ==============================================================================================
+ * Function		: allocError
+ *
+ * Description	: Prints an error message of allocation failed
+ *
+ * Inputs		: varname	: The name of the variable that could not be allocated
+ * ==============================================================================================
+ */
+void allocError( curnn::curnnError& error, const char * varname );	
 
-		/*
-		 * ==============================================================================================
-		 * Function		: copyError
-		 *
-		 * Description	: Prints an error message if host to device, or device to host copy failed
-		 *
-		 * Inputs		: varname	: The name of the variable that could not be copied to/from
-		 * ==============================================================================================
-		 */
-		void copyError( curnn::curnnError& error, const char* varname );
-	}
-}
+/*
+ * ==============================================================================================
+ * Function		: copyError
+ *
+ * Description	: Prints an error message if host to device, or device to host copy failed
+ *
+ * Inputs		: varname	: The name of the variable that could not be copied to/from
+ * ==============================================================================================
+ */
+void copyError( curnn::curnnError& error, const char* varname );
+
+}	// Namepsace err
+}	// Namespace curnn
 
 #endif
 
