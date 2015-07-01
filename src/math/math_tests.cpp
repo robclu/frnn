@@ -26,19 +26,21 @@
 
 using std::vector;
 
-// Constants for faster (but less thorough) testing
-#define FAST_TEST 1
 
 // General tesing parameres 
 // Note : Do not make this so big that the GPU will run out of memory,
 //        which is only really a problem for the double precision functions
 const size_t NUM_ELEMENTS = 3e6;
-const float  TOLERANCE	  = 1e-4;
+const float  TOLERANCE	  = 1e-4;     // For difference between GPU and CPU math functions
 
 /* =========================================== NOTES ========================================================
  *
- * 1. sum does not work with doubles since the kernels use the shfl operations which can only handle ints and
+ * 1. Sum does not work with doubles since the kernels use the shfl operations which can only handle ints and
  *    floats. (conversion from other params to these will be provided later on).
+ *
+ * 2. Softmax works with ints but the testing is not done as it is useless, since softmax returns a
+ *    'probablility' for each element in the vector on the range [0, 1], using ints will give the result 
+ *    of 0 for each element, which is not worth the increased time for test execution
  *
  * ==========================================================================================================
  */
@@ -61,20 +63,8 @@ TEST( curnnMath, AxpyOperationComputesCorrectlyWithFloats ) {
 	// Execute axpy with floats
 	curnn::math::axpy( error, A, x, y );
 
-	if ( FAST_TEST ) {											// FAST testing
-		if ( NUM_ELEMENTS < 10 ) {
-			for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-				EXPECT_EQ( y[i], A * i + i );
-			}
-		} else {
-			for ( size_t i = NUM_ELEMENTS - 10; i < NUM_ELEMENTS; i++ ) {
-				EXPECT_EQ( y[i], A * i + i );
-			}
-		}	
-	} else {													// THOROUGH testing
-		for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-			EXPECT_EQ( y[i], A * i + i );
-		}
+	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+		EXPECT_EQ( y[i], A * i + i );
 	}
 }
 
@@ -96,20 +86,8 @@ TEST( curnnMath, AxpyOperationComputesCorrectlyWithDoubles ) {
 	// Performs axpy with doubles
 	curnn::math::axpy( error, A, x, y );
 
-	if ( FAST_TEST ) {											// FAST testing
-		if ( NUM_ELEMENTS < 10 ) {
-			for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-				EXPECT_EQ( y[i], A * i + i );
-			}
-		} else {
-			for ( size_t i = NUM_ELEMENTS - 10; i < NUM_ELEMENTS; i++ ) {
-				EXPECT_EQ( y[i], A * i + i );
-			}
-		}	
-	} else {													// THOROUGH testing
-		for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-			EXPECT_EQ( y[i], A * i + i );
-		}
+	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+		EXPECT_EQ( y[i], A * i + i );
 	}
 }
 
@@ -158,20 +136,8 @@ TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithFloatsAndEmptyResult
 	// Get the results of the sum into the results vector
 	curnn::math::sumVectorized( error, x, results );
 
-	if ( FAST_TEST ) {											// FAST testing
-		if ( NUM_ELEMENTS < 10 ) {
-			for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-				EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
-			}
-		} else {
-			for ( size_t i = NUM_ELEMENTS - 10; i < NUM_ELEMENTS; i++ ) {
-				EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
-			}
-		}	
-	} else {													// THOROUGH testing
-		for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-			EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
-		}
+	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+		EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
 	}
 }
 
@@ -190,21 +156,9 @@ TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithFloatsAndFullResults
 
 	// Get the results of the sum into the results vector
 	curnn::math::sumVectorized( error, x, results );
-
-	if ( FAST_TEST ) {											// FAST testing
-		if ( NUM_ELEMENTS < 10 ) {
-			for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-				EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
-			}
-		} else {
-			for ( size_t i = NUM_ELEMENTS - 10; i < NUM_ELEMENTS; i++ ) {
-				EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
-			}
-		}	
-	} else {													// THOROUGH testing
-		for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-			EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
-		}
+		
+	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+		EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
 	}
 }
 
@@ -223,20 +177,8 @@ TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithIntsAndEmptyResultsV
 	// Get the results of the sum into the results vector
 	curnn::math::sumVectorized( error, x, results );
 
-	if ( FAST_TEST ) {											// FAST testing
-		if ( NUM_ELEMENTS < 10 ) {
-			for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-				EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
-			}
-		} else {
-			for ( size_t i = NUM_ELEMENTS - 10; i < NUM_ELEMENTS; i++ ) {
-				EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
-			}
-		}	
-	} else {													// THOROUGH testing
-		for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-			EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
-		}
+	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+		EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
 	}
 }
 
@@ -256,25 +198,11 @@ TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithIntsAndFullResultsVe
 	// Get the results of the sum into the results vector
 	curnn::math::sumVectorized( error, x, results );
 
-	if ( FAST_TEST ) {											// FAST testing
-		if ( NUM_ELEMENTS < 10 ) {
-			for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-				EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
-			}
-		} else {
-			for ( size_t i = NUM_ELEMENTS - 10; i < NUM_ELEMENTS; i++ ) {
-				EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
-			}
-		}	
-	} else {													// THOROUGH testing
-		for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-			EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
-		}
+	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+		EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
 	}
 }
 
-// NOTE: No point testing on ints for 
-//       softmax as it will always return 0
 TEST( curnnMath, SoftmaxComputesCorrectlyForFloats ) {
 	// Create curnn error status
 	curnn::curnnError error;
