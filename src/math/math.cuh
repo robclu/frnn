@@ -295,17 +295,26 @@ using namespace curnn;
 		 * ==================================================================================================     
 		 * Function		: softmaxKernel
 		 *
-		 * Description	: Computes the softmax function for each block. This should be called after 
-		 *                blockReduceAtomicVectorizedAll, which puts the sum of all the data elements 
-		 *                into the first blockDim.x blocks, which means each block can read from 
+		 * Description	: Computes the softmax function for a vector. It required the above 2 kernels to be
+		 *                executed first so that each thread has the sum of the vector.
 		 *
-		 * Inputs		: data		: A pointer to the data where the first element of the block must be
-		 *                            scattered
-		 *              : N			: The number of elements in the array
+		 * Inputs		: in		: The vector to compute the softmax function on
+		 *              : N			: The number of elements in the vector
+		 *              : f			: The operation to perform on each element, defult to exponentiation as
+		 *                            per the softmax function
 		 *
-		 * Outputs		: data		: The array where each thread in the block has the same value
+		 * Outputs		: out		: The vector where each element is the result of the softmax
 		 *
 		 * Params		: dType		: The data type (double, float, int)
+		 *				: F			: The functor that defines the operation on the input data
 		 * ==================================================================================================
-		 */		
+		 */
+		template <typename dType, typename F = expFunctor>
+		__global__ void softmaxKernel( dType* in, dType* out, size_t N, F f = expFunctor() ) {
+			int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+			// Each output is assumed to already have the sum of the exponent of each element
+			// So invert and multiply each element by its exponent
+			if ( idx < N ) out[ idx ] = f( in[ idx ] ) / out[ idx ];
+		}
 #endif

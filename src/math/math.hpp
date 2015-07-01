@@ -259,8 +259,11 @@ namespace curnn {
 			// get the kernel to exponentiate each element in the array
 			blockReduceAtomicVectorizedAll<<<blocks, threads>>>( in, out, x.size(), expOp );
 
-			// Execute kernel to give result to all threads in grid
+			// Give each thread the sum
 			blockScatter<<<blocks, threads>>>( out, x.size() );
+
+			// Call softmax kernel to give out the softmax of in
+			softmaxKernel<<<blocks, threads>>>( in, out, x.size() );
 
 			// copy result from out to val 
 			if ( cudaMemcpy( &val[0], out, x.size() * sizeof( dType ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
