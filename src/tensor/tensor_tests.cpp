@@ -78,4 +78,30 @@ TEST( curnnTensor, ReshapeCanUseExistingDimensionality ) {
 	EXPECT_EQ( testTensor.size(), 10 * X * 3 * Z );
 }
 
+TEST( curnnTensor, SubscriptOperatorCanGetElement ) {
+	curnn::tensor4<float> testTensor( W, X, Y, Z );
+	testTensor.data[ 1 ] = 5.f;
 
+	// Use subscript operator
+	float testVal = testTensor[0][1];
+
+	EXPECT_EQ( testVal, 5.f );
+}
+
+TEST( curnnTensor, SubscriptOperatorCanSetElement ) {
+	curnn::tensor4<float> testTensor( W, X, Y, Z );
+
+	testTensor[1][1] = 5.f;
+	float testVal = testTensor[1][1];
+
+	EXPECT_EQ( testVal, 5.f );
+}
+
+TEST( currnTensor, OutputsErrorForOutOfRangeIndexAndReturnsFirstElementValue ) {
+	curnn::tensor4<float> testTensor( W, X, Y, Z );
+
+	testTensor[0][0] = -100.f;
+	float testVal = testTensor[7][4];
+
+	EXPECT_EQ( testVal, -100.f );
+}

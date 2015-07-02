@@ -25,18 +25,63 @@
 
 namespace curnn {
 
-template <typename	dType, 
-		  uint		nodes,
-		  uint		inputs,
-		  uint		outputs,
-		  uint		depth		> 
+/*
+ * ==========================================================================================================
+ * Class		: layer 
+ *
+ * Description	: Layer class for the cuRNN that defines a generic class for a layer
+ *
+ * Params		: dType		: The type of data for the layer
+ *				: _nodes	: The number of nodes in the layer
+ *				: _depth	: The number of timesteps back or forward that have inputs 
+ * ==========================================================================================================
+ */
+template <typename	dType	, 
+		  uint		_nodes	,
+		  uint		_inputs	,
+		  uint		_depth	> 
 class layer {
-
 	public:
-		curnn::tensor4<dType> dims;
+		uint					numNodes;
+		uint					numInputs;
+		uint					depth;
+		curnn::tensor4<dType>	weights;	// 1D,2D -> Inputs - Node weights
+											// 3D	 -> Biases
+											// 4D    -> Activation results (outputs)
 	public:
+		/*
+		 * ==================================================================================================
+		 * Function		: layer 
+		 *
+		 * Description	: Defines the size of the layer parameters
+		 * ==================================================================================================
+		 */
 		explicit layer() :
-			dims( nodes, inputs, outputs, depth ) {}
+			numNodes( _nodes ), numInputs( _inputs ), depth( _depth ),
+            weights( numInputs, numNodes, numNodes, numNodes ) {}
+
+		/*
+		 * ==================================================================================================
+		 * Function		: outputs 
+		 *
+		 * Description	: Retuns a pointer to the outputs of the layer
+		 * ==================================================================================================
+		 */
+		template <typename dType>
+		inline const dType* outputs() {
+		}
+
+		/*
+		 * ==================================================================================================
+		 * Function		: forward
+		 *
+		 * Description	: Compute the forward pass on the layer
+		 *===================================================================================================
+		 /
+
+
+
+
 
 };
 

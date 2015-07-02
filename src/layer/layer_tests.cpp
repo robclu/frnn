@@ -29,12 +29,10 @@ const size_t NODES   = 4;
 const size_t DEPTH	 = 4;
 
 TEST( curnnTensor, CanCreateTensorCorrectly ) {
-	curnn::layer<float, NODES, INPUTS, OUTPUTS, DEPTH> testLayer;
+	curnn::layer<float, NODES, DEPTH> testLayer;
 
-	EXPECT_EQ( testLayer.dims.w, NODES	 );
-	EXPECT_EQ( testLayer.dims.x, INPUTS  );
-	EXPECT_EQ( testLayer.dims.y, OUTPUTS );
-	EXPECT_EQ( testLayer.dims.z, DEPTH	 );
+	EXPECT_EQ( testLayer.numNodes	, NODES  );
+	EXPECT_EQ( testLayer.depth		, DEPTH  );
 }
 
 

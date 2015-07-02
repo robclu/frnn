@@ -22,133 +22,28 @@
 #define _CURNN_TENSOR_
 
 #include <vector>
-#include <iostream>
-#include <limits>
 
 namespace curnn  {
 
 // Forward declare
 template <typename dType> class tensor4;
 
-/*
- * ==========================================================================================================
- * Class		: tensorBoundChecker 
- *
- * Description	: Defines second level [] operator to allow subscripting for tensor and provides checking of
- *                tensor bounds
- *
- * Params		: dType		: The type of data the subscript must return
- * ==========================================================================================================
- */
 template <typename dType>
-class tensorBoundChecker {
-	public:
-		int				dim;	
-		tensor4<dType>*	tensor;
+struct tensorBoundChecker {
+	tensorBoundChecker( const tensor4<dType>* _tensor, int _dim ) :
+		tensor( _tensor ), dim( _dim ) {}
 
-	public:
-		/*
-		 * =================================================================================================
-		 * Function		: tensorBoundChecker
-		 *
-		 * Description	: Constructs the boud checker, initializing the tensor to check the bounds for and
-		 *                which of its dimensions must be checked
-		 * 
-		 * Inputs		: _tensor	: The tensor to check the bounds for
-		 *				: _dim		: The dimension of the tensor to check the validity of the subscript
-		 *
-		 * ==================================================================================================
-		 */
-		tensorBoundChecker( tensor4<dType>* _tensor, int _dim ) :
-			tensor( _tensor ), dim( _dim ) {}
+	const tensor4<dType>*	tensor;
+	int						dim;	
 
-		/*
-		 * ==================================================================================================
-		 * Function		: operator[]
-		 *
-		 * Description	: Overloads the [] oeprator allowing it to be used to set value in the tensor
-		 *
-		 * Inputs		: index		: The index of the element in the dimension to set
-		 * ==================================================================================================
-		 */
-		dType& operator[]( int index ) {
-			uint offset;
-			switch ( dim ) {
-				case 0:
-					( index >= 0 && index < tensor->w )	? 
-						offset = static_cast<uint>( index )	: 
-						offset = std::numeric_limits<uint>::max();
-					break;
-				case 1:
-					( index >= 0 && index < tensor->x )	?
-						offset = tensor->w + static_cast<uint>( index )	:
-						offset = std::numeric_limits<uint>::max();
-					break;
-				case 2:
-					( index >= 0 && index < tensor->y )	?
-						offset = tensor->w + tensor->x + static_cast<uint>( index ) :
-						offset = std::numeric_limits<uint>::max();
-					break;
-				case 3:
-					( index >= 0 && index < tensor->z )	?
-						offset = tensor->w + tensor->x + tensor->y + static_cast<uint>( index )	:
-						offset = std::numeric_limits<uint>::max();
-					break;
-				default:
-					std::cerr << "Dimension " << dim << " not valid for tensor : Returning first element\n";
-					return tensor->data[ 0 ];
-
-			}
-			if ( offset == std::numeric_limits<uint>::max() ) {
-				std::cerr << "Out of Range error for index " << index << 
-					         " in tensor dimension " << dim << " : Returning first element\n";
-				return tensor->data[ 0 ];
-			}
-			return tensor->data[ offset ];
+	dType operator[]( int index ) {
+		switch ( dim ) {
+			case 0:
+				return ( index < tensor->w ) ? tensor->data[ index ] : dType( -100 );
+			default:
+				return dType( -100 );
 		}
-
-		/*
-		 * ==================================================================================================
-		 * Function		: operator[]
-		 *
-		 * Description	: Oveloads the [] operator to allow elements of the tensor to be fetched
-		 *
-		 * Inputs		: index		: The index of the element in the dimension to fetch
-		 * ==================================================================================================
-		 */
-		dType const& operator[]( int index ) const {
-			dType output;
-			switch ( dim ) {
-				case 0:
-					( index >= 0 && index < tensor->w )	? 
-						output = tensor->data[ index ]	: 
-						output = std::numeric_limits<dType>::max();
-					break;
-				case 1:
-					( index >= 0 && index < tensor->x )	?
-						output = tensor->data[ tensor->w + index ]	:
-						output = std::numeric_limits<dType>::max();
-					break;
-				case 2:
-					( index >= 0 && index < tensor->y )	?
-						output = tensor->data[ tensor->w + tensor->x + index ]	:
-						output = std::numeric_limits<dType>::max();
-					break;
-				case 3:
-					( index >= 0 && index < tensor->z )				?
-						output = tensor->data[ tensor->w + tensor->x + tensor->y + index ]	:
-						output = std::numeric_limits<dType>::max();
-					break;
-				default:
-					std::cerr << "Dimension " << dim << " not valid for tensor : Returning max value\n";
-					return std::numeric_limits<dType>::max();
-			}
-			if ( output == std::numeric_limits<dType>::max() ) {
-				std::cerr << "Out of Range error for index " << index << 
-					         " in tensor dimension " << dim << " : Returning max value\n";
-			}
-			return output;
-		}
+	}
 };
 
 /*
