@@ -27,20 +27,16 @@ namespace curnn  {
 
 /*
  * ==========================================================================================================
- * Class		: tensor
+ * Class		: tensor4
  *
  * Description	: Provides a 4D tensor to store 4 dimensionaly data, or to join data to 4 dimensions to that
  *				  less passes need to be made to the GPU
  *
  * Params		: dType		: The data type for the matrix
- *				: _w		: Num elements in 1st dimension
- *				: _x		: Num elements in 2nd dimension
- *				: _y		: Num elements in 3rd dimension
- *				: _z		: Num elements in 4th dimension
  * ==========================================================================================================
  */
-template <typename dType, uint _w = 0, uint _x = 0, uint _y = 0, uint _z = 0>
-class tensor {
+template <typename dType>
+class tensor4 {
 	public:
 		uint				w;
 		uint				x;
@@ -50,17 +46,31 @@ class tensor {
 	public:
 		/*
 		 * ==================================================================================================
-		 * Function		: tensor (constructor)
+		 * Function			: tensor4 
 		 *
-		 * Description	 : Sets the number of elements in each dimension of the tensor and allocates and sets
-		 *                 the tensor data to be zero
+		 * Description		: Default constructor which sets the dimensions of the tensor to be 0
 		 * ==================================================================================================
 		 */
-		explicit tensor() :
-			w( _w ), x( _x ), y( _y ), z( _z ), data( _w * _x * y * _z, 0 ) {}
+		explicit tensor4() :
+			w( 0 ), x ( 0 ), y ( 0 ), z ( 0 ) {}
 
 		/*
 		 * ==================================================================================================
+		 * Function			: tensor4 (constructor)
+		 *
+		 * Description		: Sets the number of elements in each dimension of the tensor and allocates and 
+		 *					  sets the tensor data to be zero
+		 *
+		 * Inputs			: _w	: Number of elements in the 1st dimension
+		 *					: _x	: Number of elements in the 2nd dimension
+		 *					: _y	: Number of elements in the 3rd dimension
+		 *					: _z	: Number of elements in the 4th dimension
+		 * ==================================================================================================
+		 */
+		explicit tensor4( uint _w, uint _x, uint _y, uint _z ) :
+			w( _w ), x( _x ), y( _y ), z( _z ), data( _w * _x * y * _z, 0 ) {}
+
+		/* ==================================================================================================
 		 * Function		: size
 		 *
 		 * Description	: Retuns the size of the tensor (total number of elements)
@@ -88,6 +98,23 @@ class tensor {
 			y = ( y_new != -1 ) ? static_cast<uint>(y_new) : y;		
 			z = ( z_new != -1 ) ? static_cast<uint>(z_new) : z;		
 			data.resize( w * x * y * z, 0 );
+		}
+
+		/*
+		 * ==================================================================================================
+		 * Function		: operator() 
+		 *
+		 * Description	: Overload () operator to allow use in consructor
+		 * Params		: dType		: The data type for the matrix
+		 *				: _w		: Num elements in 1st dimension
+		 *				: _x		: Num elements in 2nd dimension
+		 *				: _y		: Num elements in 3rd dimension
+		 *				: _z		: Num elements in 4th dimension*
+		 * ==================================================================================================
+		 */
+		__inline__ __device__ __host__ void operator() ( uint w_new, uint x_new, uint y_new, uint z_new ) {
+			w = w_new; x = x_new; y = y_new; z = z_new;
+			data( w * x * y * z,  0 );
 		}
 };
 

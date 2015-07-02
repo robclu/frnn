@@ -29,7 +29,7 @@ const size_t Y = 4;
 const size_t Z = 4;
 
 TEST( curnnTensor, CanCreateTensorCorrectly ) {
-	curnn::tensor<float, W, X, Y, Z> testTensor;
+	curnn::tensor4<float> testTensor( W, X, Y, Z );
 
 	EXPECT_EQ( testTensor.w, W );
 	EXPECT_EQ( testTensor.x, X );
@@ -39,7 +39,7 @@ TEST( curnnTensor, CanCreateTensorCorrectly ) {
 }
 
 TEST( curnnTensor, TensorValuesDefaultToZero ) {
-	curnn::tensor<float, W, X, Y, Z> testTensor;
+	curnn::tensor4<float> testTensor( W, X, Y, Z );
 
 	for ( size_t i = 0; i < testTensor.size(); i++ ) {
 		EXPECT_EQ( testTensor.data[ i ], (float)0 );
@@ -47,7 +47,7 @@ TEST( curnnTensor, TensorValuesDefaultToZero ) {
 }
 
 TEST( curnnTensor, CanReshapeTensor ) {
-	curnn::tensor<float, W, X, Y, Z> testTensor;
+	curnn::tensor4<float> testTensor( W, X, Y, Z );
 
 	testTensor.reshape( 10, 10, 7, 2 );
 
@@ -59,7 +59,7 @@ TEST( curnnTensor, CanReshapeTensor ) {
 }
 
 TEST( curnnTensor, TensorValuesAreZeroAfterReshape ) {
-	curnn::tensor<float, W, X, Y, Z> testTensor;
+	curnn::tensor4<float> testTensor( W, X, Y, Z );
 	testTensor.reshape( 10, 2, 3, 9 );
 
 	for ( size_t i = 0; i < testTensor.size(); i++ ) {
@@ -68,7 +68,7 @@ TEST( curnnTensor, TensorValuesAreZeroAfterReshape ) {
 }
 
 TEST( curnnTensor, ReshapeCanUseExistingDimensionality ) {
-	curnn::tensor<float, W, X, Y, Z> testTensor;
+	curnn::tensor4<float> testTensor( W, X, Y, Z );
 	testTensor.reshape( 10, -1, 3, -1 );
 
 	EXPECT_EQ( testTensor.w, 10 );
