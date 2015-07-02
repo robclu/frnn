@@ -42,7 +42,7 @@ namespace curnn {
  */
 template <typename dType, int N> struct vectorizedType;
 
-// Macro to make instances of each type for vector size 4
+// Macro to make instances of each type for all vector sizes
 #define CURNN_VECTORIZED_INSTANCE( dType )											\
 	template <> struct vectorizedType<dType, 1> { typedef dType ## 1  vectType; };	\
 	template <> struct vectorizedType<dType, 2> { typedef dType ## 2 vectType; };	\

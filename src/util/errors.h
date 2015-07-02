@@ -31,6 +31,7 @@ inline const char* varname( const char* name ) { return name; }
 
 namespace currn {
 namespace err {
+
 /*
  * ==============================================================================================
  * Function		: allocError

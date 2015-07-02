@@ -47,6 +47,7 @@ struct expFunctor {
 	 * Outputs		:			: The exponentiation of the input
 	 *
 	 * Params		: dType		: Type of data of the input
+	 * ======================================================================================================
 	 */
 	template <typename dType>
 	__host__ __device__ dType operator() ( const dType& value ) {
@@ -74,6 +75,7 @@ struct voidFunctor {
 	 * Outputs		:			: The input value
 	 *
 	 * Params		: dType		: Type of data of the input
+	 * ======================================================================================================
 	 */
 	template <typename dType>
 	__host__ __device__ dType operator() ( const dType& value ) {

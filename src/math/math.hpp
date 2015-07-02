@@ -125,7 +125,6 @@ void softmax( curnn::curnnError& error, const std::vector<dType>& x, std::vector
 template <typename dType>
 dType sum( curnnError& error, const std::vector<dType>& x ) {
 
-	// Declare device pointers, and (non-pointer) result val
 	dType* in = 0, *out = 0, val = 0;
 
 	// Alllocate memory on the device
@@ -145,36 +144,28 @@ dType sum( curnnError& error, const std::vector<dType>& x ) {
 		curnn::err::copyError( error, stringify( out ) );
 	}
 
-	// Determine the size of the grids for the kernel, we need enough blocks
-	// to make sure that each element of the output vector gets a result
+	// 256 threads per block is optimal, however, if this isn't enough use more
 	int threads;
 	x.size() > 256 * MAX_BLOCKS ? threads = 512 : threads = 256;
 	int blocks  = std::min( static_cast<int>( ( ( x.size() / 2 ) + threads - 1 ) / threads ), MAX_BLOCKS );
 
-	// Execute kernel
 	blockReduceAtomicVectorized<<<blocks, threads>>>( in, out, x.size() );
 
-	// copy result from out to val 
 	if ( cudaMemcpy( &val, out, sizeof( dType ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
 		curnn::err::copyError( error, stringify( out ) );
 	}
 
-	// Free device memory
 	cudaFree( in ); cudaFree( out );
-
 	return val;
 }
 
 template <typename dType>
 void sumVectorized( curnnError& error, const std::vector<dType>& x, std::vector<dType>& val ) {
 
-	// Declare device pointers, and (non-pointer) result val
 	dType* in = 0, *out = 0;
 	
-	// If there is not enough space in val for the results, allocate space
-	if ( val.size() < x.size() ) {
-		val.reserve( x.size() );
-	}
+	// Check output vector can hold results
+	if ( val.capacity() < x.size() ) val.reserve( x.size() );
 
 	// Alllocate memory on the device
 	if ( cudaMalloc( (void**)&in, x.size() * sizeof( dType ) ) != cudaSuccess ) {
@@ -197,39 +188,28 @@ void sumVectorized( curnnError& error, const std::vector<dType>& x, std::vector<
 	int threads;
 	x.size() > 256 * MAX_BLOCKS ? threads = 512 : threads = 256;
 	int blocks  = std::min( static_cast<int>( x.size() / threads ), MAX_BLOCKS );
-
-	// Check there are enough threads
 	if (  blocks * threads < x.size() ) blocks++;
 
-	// Execute kernel to reduce all blocks
 	blockReduceAtomicVectorizedAll<<<blocks, threads>>>( in, out, x.size() );
-	
-	// Execute kernel to give result to all threads in grid
-	blockScatter<<<blocks, threads>>>( out, x.size() );
+	// Copy result from first thread in each block to the others
+	blockScatter<<<blocks, threads>>>( out, x.size() );			
 
-	// copy result from out to val 
 	if ( cudaMemcpy( &val[0], out, x.size() * sizeof( dType ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
 		curnn::err::copyError( error, stringify( val ) );
 	}
 
-	// Free device memory
 	cudaFree( in ); cudaFree( out );
 }
 
 template <typename dType>
 void softmax( curnn::curnnError& error, const std::vector<dType>& x, std::vector<dType>& val ) {
 
-	// Declare device pointers, and (non-pointer) result val
 	dType* in = 0, *out = 0;
+	expFunctor expOp;			// Define operation on each element to be exponentiation
 
-	// Declare exponential functor
-	expFunctor expOp;
-
-	// If there is not enough space in val for the results, allocate space
-	if ( val.size() < x.size() ) {
-		val.reserve( x.size() );
-	}
-
+	// Check output vector can hold all reasults
+	if ( val.capacity() < x.size() ) val.reserve( x.size() );
+	
 	// Alllocate memory on the device
 	if ( cudaMalloc( (void**)&in, x.size() * sizeof( dType ) ) != cudaSuccess ) {
 		curnn::err::allocError( error, stringify( in ) );
@@ -251,26 +231,20 @@ void softmax( curnn::curnnError& error, const std::vector<dType>& x, std::vector
 	int threads;
 	x.size() > 256 * MAX_BLOCKS ? threads = 512 : threads = 256;
 	int blocks  = std::min( static_cast<int>( x.size() / threads ), MAX_BLOCKS );
-
-	// Check there are enough threads
 	if (  blocks * threads < x.size() ) blocks++;
 
 	// Execute kernel to reduce all blocks, using the exp functor to
-	// get the kernel to exponentiate each element in the array
+	// exponentiate each element before addition
 	blockReduceAtomicVectorizedAll<<<blocks, threads>>>( in, out, x.size(), expOp );
-
-	// Give each thread the sum
+	// Copy result from the first thread inea ch block to the others
 	blockScatter<<<blocks, threads>>>( out, x.size() );
+	// Do normalization to get get softmax
+	softmaxKernel<<<blocks, threads>>>( in, out, x.size() );		
 
-	// Call softmax kernel to give out the softmax of in
-	softmaxKernel<<<blocks, threads>>>( in, out, x.size() );
-
-	// copy result from out to val 
 	if ( cudaMemcpy( &val[0], out, x.size() * sizeof( dType ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
 		curnn::err::copyError( error, stringify( val ) );
 	}
 
-	// Free device memory
 	cudaFree( in ); cudaFree( out );
 }
 	

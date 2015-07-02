@@ -25,10 +25,7 @@
 
 TEST( curnnErrors, DeterminesErrorForBadAlloc ) {
 	
-	// Declare curnnError variable 
-	curnn::curnnError error;
-	
-	// Declare device pointer
+	curnn::curnnError error;	
 	float* devPointer;
 
 	// Try an malloc without casting to void pointer, to get error
@@ -41,9 +38,7 @@ TEST( curnnErrors, DeterminesErrorForBadAlloc ) {
 
 TEST( curnnErrors, DeterminesErrorForBadCopy ) {
 	
-	// Declare curnnError variable 
 	curnn::curnnError error;
-
 	std::vector<float> hostData = { 3.f, 4.f };
 	float* devData;
 

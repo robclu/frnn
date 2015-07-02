@@ -45,11 +45,9 @@ const float  TOLERANCE	  = 1e-4;     // For difference between GPU and CPU math 
  */
 
 TEST( curnnMath, AxpyOperationComputesCorrectlyWithFloats ) {
-	// Create curnn error status
 	curnn::curnnError error;
 	const float A = 2.0f;
 
-	// Create data vectors
 	vector<float> x;
 	vector<float> y;
 
@@ -59,7 +57,7 @@ TEST( curnnMath, AxpyOperationComputesCorrectlyWithFloats ) {
 		y.push_back( float( i ) );
 	}
 
-	// Execute axpy with floats
+	// axpy with floats
 	curnn::math::axpy( error, A, x, y );
 
 	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
@@ -68,11 +66,9 @@ TEST( curnnMath, AxpyOperationComputesCorrectlyWithFloats ) {
 }
 
 TEST( curnnMath, AxpyOperationComputesCorrectlyWithDoubles ) {
-	// Create curnn error status
 	curnn::curnnError error;
 	const double A = 2.0f;
-
-	// Create data vectors
+	
 	vector<double> x;
 	vector<double> y;
 
@@ -91,10 +87,7 @@ TEST( curnnMath, AxpyOperationComputesCorrectlyWithDoubles ) {
 }
 
 TEST( curnnMath, ReductionSumComputesCorrectlyWithFloats ) {
-	// Create curnn error status
 	curnn::curnnError error;
-
-	// Create data vector 
 	vector<float> x;
 
 	// Fill x with data 
@@ -106,10 +99,7 @@ TEST( curnnMath, ReductionSumComputesCorrectlyWithFloats ) {
 }
 
 TEST( curnnMath, ReductionSumComputesCorrectlyWithInts ) {
-	// Create curnn error status
 	curnn::curnnError error;
-
-	// Create data vector 
 	vector<int> x;
 
 	// Fill x with data 
@@ -121,10 +111,7 @@ TEST( curnnMath, ReductionSumComputesCorrectlyWithInts ) {
 }
 
 TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithFloatsAndEmptyResultsVector ) {
-	// Create curnn error status
 	curnn::curnnError error;
-
-	// Create data vector 
 	vector<float> x, results;
 
 	// Fill x with data 
@@ -141,10 +128,7 @@ TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithFloatsAndEmptyResult
 }
 
 TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithFloatsAndFullResultsVector ) {
-	// Create curnn error status
 	curnn::curnnError error;
-
-	// Create data vector 
 	vector<float> x, results;
 
 	// Fill x with data 
@@ -162,10 +146,7 @@ TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithFloatsAndFullResults
 }
 
 TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithIntsAndEmptyResultsVector ) {
-	// Create curnn error status
 	curnn::curnnError error;
-
-	// Create data vector 
 	vector<int> x, results;
 
 	// Fill x with data 
@@ -182,10 +163,7 @@ TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithIntsAndEmptyResultsV
 }
 
 TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithIntsAndFullResultsVector ) {
-	// Create curnn error status
 	curnn::curnnError error;
-
-	// Create data vector 
 	vector<int> x, results;
 
 	// Fill x with data 
@@ -203,10 +181,7 @@ TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithIntsAndFullResultsVe
 }
 
 TEST( curnnMath, SoftmaxComputesCorrectlyForFloats ) {
-	// Create curnn error status
 	curnn::curnnError error;
-
-	// Create data vector 
 	vector<float> x, results;
 
 	// Fill x with data 

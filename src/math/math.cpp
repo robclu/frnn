@@ -27,7 +27,6 @@ void curnn::math::axpy( curnn::curnnError& error    , const float a,
 	cublasStatus_t status;
 	float* da = 0, *dx = 0, *dy = 0;
 
-	// Initialize handle
 	status = cublasCreate( &handle );
 	cublasSetPointerMode( handle, CUBLAS_POINTER_MODE_DEVICE );
 
@@ -53,18 +52,15 @@ void curnn::math::axpy( curnn::curnnError& error    , const float a,
 		curnn::err::copyError( error, stringify( da ) );
 	}
 
-	// Perform CUBLAS saxpy
+	// Perform CUBLAS saxpy 
 	status = cublasSaxpy( handle, x.size(), da, dx, 1, dy, 1 );
 
-	// Get the result (checks for errors)
 	if ( cudaMemcpy( &y[0], dy, y.size() * sizeof( float ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
 		curnn::err::copyError( error, stringify( y ) );
 	}
 
-	// Destroy cublas handle
 	status = cublasDestroy( handle );
 
-	// Free device memory
 	cudaFree( da );
 	cudaFree( dx );
 	cudaFree( dy );
@@ -77,7 +73,6 @@ void curnn::math::axpy( curnn::curnnError& error     , const double a,
 	cublasStatus_t status;
 	double* da = 0, *dx = 0, *dy = 0;
 
-	// Initialize handle
 	status = cublasCreate( &handle );
 	cublasSetPointerMode( handle, CUBLAS_POINTER_MODE_DEVICE );
 
@@ -103,18 +98,14 @@ void curnn::math::axpy( curnn::curnnError& error     , const double a,
 		curnn::err::copyError( error, stringify( da ) );
 	}
 
-	// Perform CUBLAS saxpy
 	status = cublasDaxpy( handle, x.size(), da, dx, 1, dy, 1 );
 
-	// Get the result (checks for errors)
 	if ( cudaMemcpy( &y[0], dy, y.size() * sizeof( double ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
 		curnn::err::copyError( error, stringify( y ) );
 	}
 
-	// Destroy cublas handle
 	status = cublasDestroy( handle );
 
-	// Free device memory
 	cudaFree( da );
 	cudaFree( dx );
 	cudaFree( dy );

@@ -43,9 +43,6 @@
  */
 
 TEST( curnnTypes, CanDetermineVectorizedDoublesFromDouble ) {
-	
-	// Declare CUDA vectorized doubles
-	// NOTE: No double4 exists for cuda
 	double1 cudaDouble1;
 	double2 cudaDouble2;
 
@@ -53,13 +50,11 @@ TEST( curnnTypes, CanDetermineVectorizedDoublesFromDouble ) {
 	curnn::vectorizedType<double, 1>::vectType curnnDouble1;
 	curnn::vectorizedType<double, 2>::vectType curnnDouble2;
 	
-	// Check equivalence
 	EXPECT_EQ( typeid( cudaDouble1 ).name(), typeid( curnnDouble1 ).name() );
 	EXPECT_EQ( typeid( cudaDouble2 ).name(), typeid( curnnDouble2 ).name() );
 }
 
 TEST( curnnTypes, CanDetermineVectorizedFloatFromFloat ) {
-	// Declare CUDA vectorized doubles
 	float1 cudaFloat1;
 	float2 cudaFloat2;
 	float4 cudaFloat4;
@@ -69,14 +64,12 @@ TEST( curnnTypes, CanDetermineVectorizedFloatFromFloat ) {
 	curnn::vectorizedType<float, 2>::vectType curnnFloat2;
 	curnn::vectorizedType<float, 4>::vectType curnnFloat4;
 	
-	// Check equivalence
 	EXPECT_EQ( typeid( cudaFloat1 ).name(), typeid( curnnFloat1 ).name() );
 	EXPECT_EQ( typeid( cudaFloat2 ).name(), typeid( curnnFloat2 ).name() );
 	EXPECT_EQ( typeid( cudaFloat4 ).name(), typeid( curnnFloat4 ).name() );
 }
 
 TEST( curnnTypes, CanDetermineVectorizedIntFromInt ) {
-	// Declare CUDA vectorized ints
 	int1 cudaInt1;
 	int2 cudaInt2;
 	int4 cudaInt4;
@@ -86,14 +79,12 @@ TEST( curnnTypes, CanDetermineVectorizedIntFromInt ) {
 	curnn::vectorizedType<int, 2>::vectType curnnInt2;
 	curnn::vectorizedType<int, 4>::vectType curnnInt4;
 	
-	// Check equivalence
 	EXPECT_EQ( typeid( cudaInt1 ).name(), typeid( curnnInt1 ).name() );
 	EXPECT_EQ( typeid( cudaInt2 ).name(), typeid( curnnInt2 ).name() );
 	EXPECT_EQ( typeid( cudaInt4 ).name(), typeid( curnnInt4 ).name() );
 }
 
 TEST( curnnTypes, CanDetermineVectorizedUIntFromUInt ) {
-	// Declare CUDA vectorized unsigned ints
 	uint1 cudaUint1;
 	uint2 cudaUint2;
 	uint4 cudaUint4;
@@ -103,14 +94,12 @@ TEST( curnnTypes, CanDetermineVectorizedUIntFromUInt ) {
 	curnn::vectorizedType<uint, 2>::vectType curnnUint2;
 	curnn::vectorizedType<uint, 4>::vectType curnnUint4;
 	
-	// Check equivalence
 	EXPECT_EQ( typeid( cudaUint1 ).name(), typeid( curnnUint1 ).name() );
 	EXPECT_EQ( typeid( cudaUint2 ).name(), typeid( curnnUint2 ).name() );
 	EXPECT_EQ( typeid( cudaUint4 ).name(), typeid( curnnUint4 ).name() );
 }
 
 TEST( curnnTypes, CanDetermineVectorizedCharFromChar ) {
-	// Declare CUDA vectorized chars
 	char1 cudaChar1;
 	char2 cudaChar2;
 	char4 cudaChar4;
@@ -120,7 +109,6 @@ TEST( curnnTypes, CanDetermineVectorizedCharFromChar ) {
 	curnn::vectorizedType<char, 2>::vectType curnnChar2;
 	curnn::vectorizedType<char, 4>::vectType curnnChar4;
 	
-	// Check equivalence
 	EXPECT_EQ( typeid( cudaChar1 ).name(), typeid( curnnChar1 ).name() );
 	EXPECT_EQ( typeid( cudaChar2 ).name(), typeid( curnnChar2 ).name() );
 	EXPECT_EQ( typeid( cudaChar4 ).name(), typeid( curnnChar4 ).name() );
