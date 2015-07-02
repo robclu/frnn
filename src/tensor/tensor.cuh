@@ -83,10 +83,10 @@ class tensor {
 		 * ==================================================================================================
 		 */
 		__inline__ __device__ __host__ void reshape( int w_new, int x_new, int y_new, int z_new ) {
-			w_new != -1 ? w = static_cast<uint>(w_new) : w = w;		
-			x_new != -1 ? x = static_cast<uint>(x_new) : x = x;		
-			y_new != -1 ? y = static_cast<uint>(y_new) : y = y;		
-			z_new != -1 ? z = static_cast<uint>(z_new) : z = z;		
+			w = ( w_new != -1 ) ? static_cast<uint>(w_new) : w;		
+			x = ( x_new != -1 ) ? static_cast<uint>(x_new) : x;		
+			y = ( y_new != -1 ) ? static_cast<uint>(y_new) : y;		
+			z = ( z_new != -1 ) ? static_cast<uint>(z_new) : z;		
 			data.resize( w * x * y * z, 0 );
 		}
 };
