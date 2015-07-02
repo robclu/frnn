@@ -25,10 +25,13 @@ The long term goal is to provide support for both CUDA and OpenCL. CUDA provides
 
 The current version is v1.0.0 and supports the following functionality:
 
-__Note__: See the wiki for details on the functions and conceptual explanations. 
+__Note__: See the wiki for details on the functions and conceptual explanations (coming soon). 
 
 * Math :
-  * axpy (double and float)
+  * axpy
+  * sum (sum of a vector, result is returned) 
+  * sumVectorized (sum of a vector, each element gets result)
+  * softmax 
 
 ## Compiling and Running 
 
@@ -49,7 +52,7 @@ make
 ### Running Individual Component Tests
 
 To run the tests for an indivdual component, got the __src/component__ directory, where __component__ is
-the component you want to run the tests for, then similarly issue
+the component you want to run the tests for (for example math), then similarly issue
 ```
 make 
 ./component_tests
