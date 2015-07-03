@@ -44,7 +44,7 @@ CUFLAGS 		:= -arch=sm_30
 # 					TARGET RULES 					   #
 ########################################################
 
-all: tests cleanobs 
+all: tests  
 
 tests: tests
 

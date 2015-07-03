@@ -270,9 +270,14 @@ void softmax( curnn::curnnError& error,
 	expFunctor expOp;			// Define operation on each element to be exponentiation
 
 	// Check output vector can hold all reasults
-	if ( y.capacity() < x.size() ) y.reserve( x.size() );
+	if ( y.capacity() < wb.x ) y.reserve( wb.x );
+	// Check dimensions
+	if ( x.size() != wStride ) {
+		curnn::err::dimError( error, stringify( x ), stringify( wStride ) );
+		return;
+	}
 
-	#pragma omp parallel num_threads( 1 )
+	#pragma omp parallel num_threads( wb.z )
 	{
 		int threadId = omp_get_thread_num();	
 		// Alllocate memory on the device
@@ -287,43 +292,22 @@ void softmax( curnn::curnnError& error,
 		}
 		
 		// Copy data from x to in
-		if ( cudaMemcpy( dPointers[ 3 * threadId ], &x[0], x.size() * sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
+		if ( cudaMemcpy( dPointers[ 3 * threadId ], &x[0], x.size() * sizeof( dType ), 
+					     cudaMemcpyHostToDevice ) != cudaSuccess ) {
 			curnn::err::copyError( error, stringify( in ) );
 		}
-		if ( cudaMemcpy( dPointers[ 3 * threadId + 1 ], &wb( 0, 0, 0, 0 ), wb.x * wStride * sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
+		if ( cudaMemcpy( dPointers[ 3 * threadId + 1 ], &wb( 0, 0, threadId, 0 ), 
+					     wb.x * wStride * sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
 			curnn::err::copyError( error, stringify( weights ) );
 		}
-		if ( cudaMemset( dPointers[ 3 * threadId + 2 ], 0, wb.x * sizeof( dType ) ) != cudaSuccess ) {
-			curnn::err::copyError( error, stringify( out ) );
+		if ( cudaMemcpy( dPointers[ 3 * threadId + 2 ], &wb( 0, wStride, threadId, 0 ), 
+					     wb.x * sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
+			curnn::err::copyError( error, stringify( biases ) );
 		}
-/*
-		// Determine the size of the grids for the kernel, we need enough blocks
-		// to make sure that each element of the output vector gets a result
-		int threads;
-		x.size() > 256 * MAX_BLOCKS ? threads = 512 : threads = 256;
-		int blocks  = std::min( static_cast<int>( x.size() / threads ), MAX_BLOCKS );
-		if (  blocks * threads < x.size() ) blocks++;
-
-		// Execute kernel to reduce all blocks, using the exp functor to
-		// exponentiate each element before addition
-		blockReduceAtomicVectorizedAll<<<blocks, threads>>>( dPointers[ 3 * threadId ], 
-				dPointers[ 3 * threadId + 2 ], x.size(), expOp );
-		// Copy result from the first thread inea ch block to the others
-		blockScatter<<<blocks, threads>>>( dPointers[3 * threadId + 2 ], x.size() );
-		// Do normalization to get get softmax
-		softmaxKernel<<<blocks, threads>>>( dPointers[ 3 * threadId ], dPointers[ 3 * threadId + 2 ], x.size() );		
-*/	
-
-		// cublas gemv
-		dType alpha = 1; dType beta = 0;
-		status = cublasSgemv( handle, CUBLAS_OP_N, wb.x, wStride, &alpha, dPointers[ 3 * threadId + 1 ], wb.x, 
-				dPointers[ 3 * threadId ], 1, &beta, dPointers[ 3 * threadId + 2 ], 1 );
-
-		cudaDeviceSynchronize();
-
-		if ( status != CUBLAS_STATUS_SUCCESS ) {
-			std::cout << "Kernel Error\n";
-		}
+		// Multiply inputs and weights and add biases
+		dType alpha = 1; dType beta = 1;
+		status = cublasSgemv( handle, CUBLAS_OP_N, wb.x, wStride, &alpha, dPointers[ 3 * threadId + 1 ], 
+							  wb.x, dPointers[ 3 * threadId ], 1, &beta, dPointers[ 3 * threadId + 2 ], 1 );
 
 	}
 

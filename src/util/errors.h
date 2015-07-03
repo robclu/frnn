@@ -54,6 +54,18 @@ void allocError( curnn::curnnError& error, const char * varname );
  */
 void copyError( curnn::curnnError& error, const char* varname );
 
+/*
+ * ==============================================================================================
+ * Function		: dimError
+ *
+ * Description	: Prints an error message if there was a dimension error
+ *
+ * Inputs		: varname1	: The name of first variable causing the dimension error
+ *				: varanme2	: The name of the second variable causing the dimension error
+ * ==============================================================================================
+ */
+void dimError( curnn::curnnError& error, const char* varname1, const char* varname2 );
+
 }	// Namepsace err
 }	// Namespace curnn
 

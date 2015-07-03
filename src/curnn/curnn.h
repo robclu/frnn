@@ -32,6 +32,7 @@ namespace err {
 
 void allocError( curnn::curnnError&, const char* );
 void copyError(  curnn::curnnError&, const char* );
+void dimError(   curnn::curnnError&, const char*, const char* );
 	
 }	// Namespace err
 }	// Namespace curnn

@@ -64,8 +64,9 @@ CURNN_VECTORIZED_INSTANCE( char	  )
  * ==========================================================================================================
  */
 enum curnnError {
-	CURNN_ALLOC_ERROR = 1,
-	CURNN_COPY_ERROR
+	CURNN_ALLOC_ERROR		= 1,
+	CURNN_COPY_ERROR		= 2,
+	CURNN_DIMENSION_ERROR	= 3
 	};
 }
 

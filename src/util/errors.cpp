@@ -32,6 +32,11 @@ void copyError( curnn::curnnError& error, const char* varname ) {
 	std::cerr << "Error : Could not copy to/from variable " << varname << "\n";
 	error = curnn::curnnError::CURNN_COPY_ERROR;
 }
-	
+
+void dimError( curnn::curnnError& error, const char* varname1, const char* varname2 ) {
+	std::cerr << "Error : Dimension mismatch for variables " << varname1 << " and " << varname2 << "\n";
+	error = curnn::curnnError::CURNN_DIMENSION_ERROR;
+}
+
 }	// Namepsace err
 }	// Namespace curnn
