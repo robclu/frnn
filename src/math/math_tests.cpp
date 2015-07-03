@@ -232,7 +232,7 @@ TEST( curnnMath, SoftmaxComputesCorrectlyOnTensors ) {
 	curnn::math::softmax( error, x, tensor, I, y );
 	
 	// Check results
-	EXPECT_EQ( y[ 0 ], 15.f );
-	EXPECT_EQ( y[ 1 ], 15.f );
+	EXPECT_EQ( y[ 0 ], 10.f );
+	EXPECT_EQ( y[ 1 ], 20.f );
 }
 
