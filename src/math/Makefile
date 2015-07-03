@@ -23,7 +23,7 @@ INCLUDES 		:= -I/usr/local/cuda-7.0/include \
 #					LIBRARIES 						   #
 ########################################################
 
-CUDA_LIBS 		:= -lcuda -lcublas
+CUDA_LIBS 		:= -lcuda -lcublas -lgomp
 TEST_LIBS 		:= -lgtest -lgtest_main \
 				   -lpthread
 
@@ -37,7 +37,7 @@ LIB_DIR 		:= -L/usr/local/cuda/lib64
 # 			--compiler-options -Wall                   #
 ########################################################
 
-CCFLAGS 		:= -std=c++11 -O3 -w
+CCFLAGS 		:= -std=c++11 -g -w -Xcompiler -fopenmp
 CUFLAGS 		:= -arch=sm_30
 
 ########################################################
@@ -55,7 +55,7 @@ math.cu.o : math.cuh
 	$(NVCC) -x cu $(INLCUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -dc $<
 
 math.o : math.cpp
-	$(NVCC) -x cu $(INLCUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -dc $<
+	$(NVCC) -x cu $(INLCUDES) $(CUFLAGS) $(CCFLAGS) -o $@ -dc $<
 
 math_tests.o: math_tests.cpp 
 	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -c $<

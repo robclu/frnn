@@ -42,33 +42,50 @@ template <typename	dType	,
 		  uint		_depth	> 
 class layer {
 	public:
-		uint					numNodes;
-		uint					numInputs;
-		uint					depth;
-		curnn::tensor4<dType>	weights;	// 1D,2D -> Inputs - Node weights
-											// 3D	 -> Biases
-											// 4D    -> Activation results (outputs)
+		uint				numNodes;
+		uint				numInputs;
+		uint				depth;
+		tensor4<dType>		weights;	// See constructor comment for what the tensor holds
+		std::vector<dType>  outputs;
 	public:
 		/*
 		 * ==================================================================================================
 		 * Function		: layer 
 		 *
-		 * Description	: Defines the size of the layer parameters
+		 * Description	: Defines the size of the layer parameters. The wights are stores as pages where each
+		 *                page is the weights between the inputs or a previous iteration of a hidden layer. 
+		 *                Each page has the following format :
+		 *
+		 *                | Woo Wo1 ... WoN | N = nodes
+		 *                | W1o W11 ... W1N |
+		 *                |  .   .  .    .  |
+		 *                |  .   .    .  .  | 
+		 *                | WM0 WM1     WMN | M = max( inputs, nodes )
+		 *                | boP b1P ... bNP | b = bias, P = page = inputs, hidden_-1, hidden_-2 etc
+		 *                | aoP a1P ... aNP | a = activation, from Wx + b from its page
+		 *
 		 * ==================================================================================================
 		 */
 		explicit layer() :
 			numNodes( _nodes ), numInputs( _inputs ), depth( _depth ),
-            weights( numInputs, numNodes, numNodes, numNodes ) {}
+            weights( std::max( _inputs, _nodes ) + 2		// +2 from biases and activaitons
+					, _nodes										
+					, _depth								// Number of previous hidden inputs
+				    , 0  ),									// Nor using 4th dimension
+			outputs( _nodes, 0 ) 
+			{}
 
 		/*
 		 * ==================================================================================================
 		 * Function		: outputs 
 		 *
 		 * Description	: Retuns a pointer to the outputs of the layer
+		 *
+		 * Outputs		: A constant pointer to the outputs of the layer
 		 * ==================================================================================================
 		 */
-		template <typename dType>
-		inline const dType* outputs() {
+		inline const dType* getOutputs() const {
+			return &outputs[ 0 ]; 
 		}
 
 		/*
@@ -77,13 +94,16 @@ class layer {
 		 *
 		 * Description	: Compute the forward pass on the layer
 		 *===================================================================================================
-		 /
-
-
-
-
-
+		 */
+		void forward();
 };
+
+/* ==================================== Template Implementation =========================================== */
+
+template <typename dType, uint n, uint i, uint d>
+void layer<dType,n, i, d>::forward( ) {
+
+}
 
 }	// Namespace curnn
 

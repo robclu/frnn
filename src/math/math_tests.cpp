@@ -29,7 +29,7 @@ using std::vector;
 // General tesing parameres 
 // Note : Do not make this so big that the GPU will run out of memory,
 //        which is only really a problem for the double precision functions
-const size_t NUM_ELEMENTS = 3e6;
+const size_t NUM_ELEMENTS = 3e5;
 const float  TOLERANCE	  = 1e-4;     // For difference between GPU and CPU math functions
 
 /* =========================================== NOTES ========================================================
@@ -198,3 +198,41 @@ TEST( curnnMath, SoftmaxComputesCorrectlyForFloats ) {
 		EXPECT_NEAR( softmax_i, results[ i ], TOLERANCE );
 	}
 }
+
+TEST( curnnMath, SoftmaxComputesCorrectlyOnTensors ) {
+	curnn::curnnError error;
+	
+	// Create tensor that holds 2 pages, and each page has 
+	// and M x N weight matrix, 1 x N bias vector, and 1 x N 
+	// results vector so the tensor has dimension:
+	// ( M + 1 + 1 ) X N X 2 X 0
+	uint W = 3;				// Num rows in weight matrix
+	uint M = W + 2;			// 2 inputs, a bias, and activation
+	uint N = 3;				// 3 nodes (for example)
+	uint D = 2;				// depth of 2
+	curnn::tensor4<float> tensor( N, M, D, 1 );
+
+	// Fill tensor with data 
+	for ( int i = 0; i < tensor.z; i++ ) {
+		for ( int j = 0; j < tensor.y; j++ ) {
+			for ( int k = 0; k < tensor.x; k++ ) {
+				tensor( k, j, i, 0 ) = 1.f;
+				std::cout << tensor( k, j, i, 0 ) << " ";
+			}
+			std::cout << std::endl;
+		}
+		std::cout << std::endl << std::endl;
+	}
+
+	// Simple inputs for testing ( needs to be same dimension as N
+	std::vector<float> x = { 2.f, 2.f, 2.f };
+	std::vector<float> y;						// Outputs
+
+	// Execute softmax function on tensor using x and storing the results in y
+	curnn::math::softmax( error, x, tensor, W, y );
+	
+	// Check results
+	EXPECT_EQ( y[ 0 ], 6.f );
+	EXPECT_EQ( y[ 1 ], 6.f );
+}
+

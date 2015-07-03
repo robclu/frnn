@@ -27,130 +27,6 @@
 
 namespace curnn  {
 
-// Forward declare
-template <typename dType> class tensor4;
-
-/*
- * ==========================================================================================================
- * Class		: tensorBoundChecker 
- *
- * Description	: Defines second level [] operator to allow subscripting for tensor and provides checking of
- *                tensor bounds
- *
- * Params		: dType		: The type of data the subscript must return
- * ==========================================================================================================
- */
-template <typename dType>
-class tensorBoundChecker {
-	public:
-		int				dim;	
-		tensor4<dType>*	tensor;
-
-	public:
-		/*
-		 * =================================================================================================
-		 * Function		: tensorBoundChecker
-		 *
-		 * Description	: Constructs the boud checker, initializing the tensor to check the bounds for and
-		 *                which of its dimensions must be checked
-		 * 
-		 * Inputs		: _tensor	: The tensor to check the bounds for
-		 *				: _dim		: The dimension of the tensor to check the validity of the subscript
-		 *
-		 * ==================================================================================================
-		 */
-		tensorBoundChecker( tensor4<dType>* _tensor, int _dim ) :
-			tensor( _tensor ), dim( _dim ) {}
-
-		/*
-		 * ==================================================================================================
-		 * Function		: operator[]
-		 *
-		 * Description	: Overloads the [] oeprator allowing it to be used to set value in the tensor
-		 *
-		 * Inputs		: index		: The index of the element in the dimension to set
-		 * ==================================================================================================
-		 */
-		dType& operator[]( int index ) {
-			uint offset;
-			switch ( dim ) {
-				case 0:
-					( index >= 0 && index < tensor->w )	? 
-						offset = static_cast<uint>( index )	: 
-						offset = std::numeric_limits<uint>::max();
-					break;
-				case 1:
-					( index >= 0 && index < tensor->x )	?
-						offset = tensor->w + static_cast<uint>( index )	:
-						offset = std::numeric_limits<uint>::max();
-					break;
-				case 2:
-					( index >= 0 && index < tensor->y )	?
-						offset = tensor->w + tensor->x + static_cast<uint>( index ) :
-						offset = std::numeric_limits<uint>::max();
-					break;
-				case 3:
-					( index >= 0 && index < tensor->z )	?
-						offset = tensor->w + tensor->x + tensor->y + static_cast<uint>( index )	:
-						offset = std::numeric_limits<uint>::max();
-					break;
-				default:
-					std::cerr << "Dimension " << dim << " not valid for tensor : Returning first element\n";
-					return tensor->data[ 0 ];
-
-			}
-			if ( offset == std::numeric_limits<uint>::max() ) {
-				std::cerr << "Out of Range error for index " << index << 
-					         " in tensor dimension " << dim << " : Returning first element\n";
-				return tensor->data[ 0 ];
-			}
-			return tensor->data[ offset ];
-		}
-
-		/*
-		 * ==================================================================================================
-		 * Function		: operator[]
-		 *
-		 * Description	: Oveloads the [] operator to allow elements of the tensor to be fetched
-		 *
-		 * Inputs		: index		: The index of the element in the dimension to fetch
-		 * ==================================================================================================
-		 */
-		dType const& operator[]( int index ) const {
-			dType output;
-			switch ( dim ) {
-				case 0:
-					( index >= 0 && index < tensor->w )	? 
-						output = tensor->data[ index ]	: 
-						output = std::numeric_limits<dType>::max();
-					break;
-				case 1:
-					( index >= 0 && index < tensor->x )	?
-						output = tensor->data[ tensor->w + index ]	:
-						output = std::numeric_limits<dType>::max();
-					break;
-				case 2:
-					( index >= 0 && index < tensor->y )	?
-						output = tensor->data[ tensor->w + tensor->x + index ]	:
-						output = std::numeric_limits<dType>::max();
-					break;
-				case 3:
-					( index >= 0 && index < tensor->z )				?
-						output = tensor->data[ tensor->w + tensor->x + tensor->y + index ]	:
-						output = std::numeric_limits<dType>::max();
-					break;
-				default:
-					std::cerr << "Dimension " << dim << " not valid for tensor : Returning max value\n";
-					return std::numeric_limits<dType>::max();
-			}
-			if ( output == std::numeric_limits<dType>::max() ) {
-				std::cerr << "Out of Range error for index " << index << 
-					         " in tensor dimension " << dim << " : Returning max value\n";
-			}
-			return output;
-		}
-};
-
 /*
  * ==========================================================================================================
  * Class		: tensor4
@@ -178,7 +54,7 @@ class tensor4 {
 		 * ==================================================================================================
 		 */
 		explicit tensor4() :
-			w( 0 ), x ( 0 ), y ( 0 ), z ( 0 ) {}
+			x ( 0 ), y ( 0 ), z ( 0 ), w( 0 ) {}
 
 		/*
 		 * ==================================================================================================
@@ -187,14 +63,14 @@ class tensor4 {
 		 * Description		: Sets the number of elements in each dimension of the tensor and allocates and 
 		 *					  sets the tensor data to be zero
 		 *
-		 * Inputs			: _w	: Number of elements in the 1st dimension
-		 *					: _x	: Number of elements in the 2nd dimension
-		 *					: _y	: Number of elements in the 3rd dimension
-		 *					: _z	: Number of elements in the 4th dimension
+		 * Inputs			: _x	: Number of elements in the 1st dimension
+		 *					: _y	: Number of elements in the 2nd dimension
+		 *					: _z	: Number of elements in the 3rd dimension
+		 *					: _w	: Number of elements in the 4th dimension
 		 * ==================================================================================================
 		 */
-		explicit tensor4( uint _w, uint _x, uint _y, uint _z ) :
-			w( _w ), x( _x ), y( _y ), z( _z ), data( _w * _x * y * _z, 0 ) {}
+		tensor4( uint _x, uint _y, uint _z, uint _w ) :
+			x( _x ), y( _y ), z( _z ), w( _w ), data( _x * _y * _z * _w, 0 ) {}
 
 		/* ==================================================================================================
 		 * Function		: size
@@ -202,7 +78,7 @@ class tensor4 {
 		 * Description	: Retuns the size of the tensor (total number of elements)
 		 * ==================================================================================================
 		 */
-		__inline__ __device__ __host__ size_t size() {
+		__inline__ __device__ __host__ size_t size() const {
 			return data.size();
 		}
 
@@ -212,17 +88,17 @@ class tensor4 {
 		 *
 		 * Description	: Reshapes the tensor along each dimension, -1 keeps the dimensionality 
 		 *
-		 * Inputs		: w_new		: New number of elements for 1st dimensino
-		 *				: x_new		: New number of elements for 2nd dimension
-		 *				: y_new		: New number of elements for 3rd dimension
-		 *				: z_new		: New number of elements for 4th dimension
+		 * Inputs		: x_new		: New number of elements for 1st dimension
+		 *				: y_new		: New number of elements for 2nd dimension
+		 *				: z_new		: New number of elements for 3rd dimension
+		 *				: w_new		: New number of elements for 4th dimension
 		 * ==================================================================================================
 		 */
-		__inline__ __device__ __host__ void reshape( int w_new, int x_new, int y_new, int z_new ) {
-			w = ( w_new != -1 ) ? static_cast<uint>(w_new) : w;		
+		__inline__ __device__ __host__ void reshape( int x_new, int y_new, int z_new, int w_new ) {
 			x = ( x_new != -1 ) ? static_cast<uint>(x_new) : x;		
 			y = ( y_new != -1 ) ? static_cast<uint>(y_new) : y;		
 			z = ( z_new != -1 ) ? static_cast<uint>(z_new) : z;		
+			w = ( w_new != -1 ) ? static_cast<uint>(w_new) : w;		
 			data.resize( w * x * y * z, 0 );
 		}
 
@@ -230,34 +106,88 @@ class tensor4 {
 		 * ==================================================================================================
 		 * Function		: operator() 
 		 *
-		 * Description	: Overload () operator to allow use in consructor
+		 * Description	: Overload () operator to get a specific element
 		 * Params		: dType		: The data type for the matrix
-		 *				: _w		: Num elements in 1st dimension
-		 *				: _x		: Num elements in 2nd dimension
-		 *				: _y		: Num elements in 3rd dimension
-		 *				: _z		: Num elements in 4th dimension*
+		 *				: x_new		: Element position in 1st (x) dimension
+		 *				: y_new		: Element position in 2nd (y) dimension
+		 *				: z_new		: Element position in 3rd (z) dimension
+		 *				: w_new		: Element position in 4th (w) dimension
 		 * ==================================================================================================
 		 */
-		__inline__ __device__ __host__ void operator() ( uint w_new, uint x_new, uint y_new, uint z_new ) {
-			w = w_new; x = x_new; y = y_new; z = z_new;
-			data( w * x * y * z,  0 );
+		dType& operator() ( uint x_elem, uint y_elem, uint z_elem, uint w_elem ) {
+			int error = 0;
+			if ( x_elem < 0 || x_elem >= x ) error = -1;
+			if ( y_elem < 0 || y_elem >= y ) error = -2;
+			if ( z_elem < 0 || z_elem >= y ) error = -3;
+			if ( w_elem < 0 || w_elem >= y ) error = -4;
+
+			switch ( error ) {
+				case -1:
+					std::cerr << "Out of Range Error : Element " << x_elem << 
+						         " out of range of dimension 1 for rensor : Returning first element\n";
+					return data[ 0 ];
+				case -2:
+					std::cerr << "Out of Range Error : Element " << y_elem << 
+						         " out of range of dimension 2 for rensor : Returning first element\n";
+					return data[ 0 ];
+				case -3:
+					std::cerr << "Out of Range Error : Element " << z_elem << 
+						         " out of range of dimension 3 for rensor : Returning first element\n";
+					return data[ 0 ];
+				case -4:
+					std::cerr << "Out of Range Error : Element " << w_elem << 
+						         " out of range of dimension 4 for rensor : Returning first element\n";
+					return data[ 0 ];
+			}
+			int offset = x * y * z * w_elem	+			// 4th dimension offset
+				         x * y * z_elem		+			// 3rd dimension offset
+						 x * y_elem			+			// 2nd dimension offset
+						 x_elem;						// 1st dimension offset
+			return 	data[ offset ];
 		}
 
 		/*
 		 * ==================================================================================================
-		 * Function		: operator[]
+		 * Function		: operator() 
 		 *
-		 * Description	: Overloads the subscript operator to allow access by [][] because the vector class
-		 *                also has an [] operator.
-		 *
-		 * Inputs		: index		: The index of dimension that the data must be fetched from
-		 *
-		 * Outputs		: A reference to the element that represents the first element in the dimension that
-		 *                is specified in the input 
+		 * Description	: Overload () operator to set a specific element
+		 * Params		: dType		: The data type for the matrix
+		 *				: x_new		: Element position in 1st (x) dimension
+		 *				: y_new		: Element position in 2nd (y) dimension
+		 *				: z_new		: Element position in 3rd (z) dimension
+		 *				: w_new		: Element position in 4th (w) dimension
 		 * ==================================================================================================
-		 */ 
-		tensorBoundChecker<dType> operator[]( int dim ) {
-			return tensorBoundChecker<dType>( this, dim );
+		 */
+		dType const& operator()( uint x_elem, uint y_elem, uint z_elem, uint w_elem ) const {
+			int error = 0;
+			if ( x_elem < 0 || x_elem >= x ) error = -1;
+			if ( y_elem < 0 || y_elem >= y ) error = -2;
+			if ( z_elem < 0 || z_elem >= y ) error = -3;
+			if ( w_elem < 0 || w_elem >= y ) error = -4;
+
+			switch ( error ) {
+				case -1:
+					std::cerr << "Out of Range Error : Element " << x_elem << 
+						         " out of range of dimension 1 for rensor : Returning first element\n";
+					return data[ 0 ];
+				case -2:
+					std::cerr << "Out of Range Error : Element " << y_elem << 
+						         " out of range of dimension 2 for rensor : Returning first element\n";
+					return data[ 0 ];
+				case -3:
+					std::cerr << "Out of Range Error : Element " << z_elem << 
+						         " out of range of dimension 3 for rensor : Returning first element\n";
+					return data[ 0 ];
+				case -4:
+					std::cerr << "Out of Range Error : Element " << w_elem << 
+						         " out of range of dimension 4 for rensor : Returning first element\n";
+					return data[ 0 ];
+			}
+			int offset = x * y * z * w_elem	+			// 4th dimension offset
+				         x * y * z_elem		+			// 3rd dimension offset
+						 x * y_elem			+			// 2nd dimension offset
+						 x_elem;						// 1st dimension offset
+			return data[ offset ];
 		}
 };
 

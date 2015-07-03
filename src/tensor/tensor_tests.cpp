@@ -29,7 +29,7 @@ const size_t Y = 4;
 const size_t Z = 4;
 
 TEST( curnnTensor, CanCreateTensorCorrectly ) {
-	curnn::tensor4<float> testTensor( W, X, Y, Z );
+	curnn::tensor4<float> testTensor( X, Y, Z, W );
 
 	EXPECT_EQ( testTensor.w, W );
 	EXPECT_EQ( testTensor.x, X );
@@ -39,7 +39,7 @@ TEST( curnnTensor, CanCreateTensorCorrectly ) {
 }
 
 TEST( curnnTensor, TensorValuesDefaultToZero ) {
-	curnn::tensor4<float> testTensor( W, X, Y, Z );
+	curnn::tensor4<float> testTensor( X, Y, Z, W );
 
 	for ( size_t i = 0; i < testTensor.size(); i++ ) {
 		EXPECT_EQ( testTensor.data[ i ], (float)0 );
@@ -47,19 +47,19 @@ TEST( curnnTensor, TensorValuesDefaultToZero ) {
 }
 
 TEST( curnnTensor, CanReshapeTensor ) {
-	curnn::tensor4<float> testTensor( W, X, Y, Z );
+	curnn::tensor4<float> testTensor( X, Y, Z, W );
 
 	testTensor.reshape( 10, 10, 7, 2 );
 
-	EXPECT_EQ( testTensor.w, 10 );
+	EXPECT_EQ( testTensor.w, 2 );
 	EXPECT_EQ( testTensor.x, 10 );
-	EXPECT_EQ( testTensor.y, 7 );
-	EXPECT_EQ( testTensor.z, 2 );
+	EXPECT_EQ( testTensor.y, 10 );
+	EXPECT_EQ( testTensor.z, 7 );
 	EXPECT_EQ( testTensor.size(), 10 * 10 * 7 * 2 );
 }
 
 TEST( curnnTensor, TensorValuesAreZeroAfterReshape ) {
-	curnn::tensor4<float> testTensor( W, X, Y, Z );
+	curnn::tensor4<float> testTensor( X, Y, Z, W );
 	testTensor.reshape( 10, 2, 3, 9 );
 
 	for ( size_t i = 0; i < testTensor.size(); i++ ) {
@@ -68,40 +68,65 @@ TEST( curnnTensor, TensorValuesAreZeroAfterReshape ) {
 }
 
 TEST( curnnTensor, ReshapeCanUseExistingDimensionality ) {
-	curnn::tensor4<float> testTensor( W, X, Y, Z );
+	curnn::tensor4<float> testTensor( X, Y, Z, W );
 	testTensor.reshape( 10, -1, 3, -1 );
 
-	EXPECT_EQ( testTensor.w, 10 );
-	EXPECT_EQ( testTensor.x, X );
-	EXPECT_EQ( testTensor.y, 3 );
-	EXPECT_EQ( testTensor.z, Z );
-	EXPECT_EQ( testTensor.size(), 10 * X * 3 * Z );
+	EXPECT_EQ( testTensor.x, 10 );
+	EXPECT_EQ( testTensor.y, Y );
+	EXPECT_EQ( testTensor.z, 3 );
+	EXPECT_EQ( testTensor.w, W );
+	EXPECT_EQ( testTensor.size(), 10 * Y * 3 * W );
 }
 
-TEST( curnnTensor, SubscriptOperatorCanGetElement ) {
-	curnn::tensor4<float> testTensor( W, X, Y, Z );
+TEST( curnnTensor, CanGetElementWithAccessOperator ) {
+	curnn::tensor4<float> testTensor( X, Y, Z, W );
 	testTensor.data[ 1 ] = 5.f;
 
-	// Use subscript operator
-	float testVal = testTensor[0][1];
+	// Use operator
+	float testVal = testTensor( 1, 0, 0, 0 );
 
 	EXPECT_EQ( testVal, 5.f );
 }
 
-TEST( curnnTensor, SubscriptOperatorCanSetElement ) {
-	curnn::tensor4<float> testTensor( W, X, Y, Z );
+TEST( curnnTensor, CanSetElementWithAccessOperator ) {
+	curnn::tensor4<float> testTensor( X, Y, Z, W );
+	testTensor.data[ 1 ] = 5.f;
 
-	testTensor[1][1] = 5.f;
-	float testVal = testTensor[1][1];
+	// Use operator
+	testTensor( 1, 0, 0, 0 ) = 10.f;
+	float testVal = testTensor( 1, 0, 0, 0 );
 
-	EXPECT_EQ( testVal, 5.f );
+	EXPECT_EQ( testVal, 10.f );
+}
+TEST( curnnTensor, OutputsErrorForOutOfRangeIndexAndReturnsFirstElementValue ) {
+	curnn::tensor4<float> testTensor( X, Y, Z, W );
+
+	float testVal = testTensor( 100, 12, 34, 2 );
+
+	EXPECT_EQ( testVal, testTensor.data[ 0 ] );
 }
 
-TEST( currnTensor, OutputsErrorForOutOfRangeIndexAndReturnsFirstElementValue ) {
-	curnn::tensor4<float> testTensor( W, X, Y, Z );
+TEST( curnnTensor, CanGetPointerToElement ) {
+	curnn::tensor4<float> testTensor( X, Y, Z, W );
 
-	testTensor[0][0] = -100.f;
-	float testVal = testTensor[7][4];
+	testTensor( 0, 0, 1, 0 ) = 10.f;	
+	float* testVal = &testTensor( 0, 0, 1, 0 );
 
-	EXPECT_EQ( testVal, -100.f );
+	EXPECT_EQ( *testVal, 10.f );
+}
+
+TEST( curnnTensor, CanCreateArrayFromTensor ) {
+	curnn::tensor4<float> testTensor( X, Y, Z, W );
+
+	// Set elements
+	for ( size_t i = 0; i < testTensor.x; i++ ) {
+		testTensor( i, 0, 0, 0 ) = float ( i );
+	}
+
+	float* testPointer;
+	testPointer = &testTensor( 0, 0, 0, 0 );
+
+	for ( int i = 0; i < X; i++ ) {
+		EXPECT_EQ( float( i ), testPointer[ i ] );
+	}
 }

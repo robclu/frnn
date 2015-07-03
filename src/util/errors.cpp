@@ -29,7 +29,7 @@ void allocError( curnn::curnnError& error, const char * varname ) {
 }				
 
 void copyError( curnn::curnnError& error, const char* varname ) {
-	std::cerr << "Error : Could not cpoy to/from variable " << varname << "\n";
+	std::cerr << "Error : Could not copy to/from variable " << varname << "\n";
 	error = curnn::curnnError::CURNN_COPY_ERROR;
 }
 	
