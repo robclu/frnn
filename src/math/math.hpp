@@ -266,7 +266,7 @@ void softmax( curnn::curnnError& error,
 	cublasHandle_t handle;
 	cublasStatus_t status;
 	status = cublasCreate( &handle );
-//	cublasSetPointerMode( handle, CUBLAS_POINTER_MODE_DEVICE );
+	cublasSetPointerMode( handle, CUBLAS_POINTER_MODE_HOST );
 
 	// Device pointers 
 	std::vector<dType*> dPointers( 3 * wb.z, 0 );
@@ -316,9 +316,6 @@ void softmax( curnn::curnnError& error,
 		
 		// Assign results to results pointer array
 		results_h[ threadId ] = dPointers[ 3 * threadId + 2 ];
-		
-		// Wait for all threads to finish
-		#pragma omp barrier	
 	}
 
 	// Allocate space and copy the pointers to the resuls to host memory
@@ -341,9 +338,6 @@ void softmax( curnn::curnnError& error,
 
 	// Sum all the results of W*x + b from each page (or layer in network)
 	xpny<<<blocks, threads, sharedMemAmount>>>( results_d, wb.x, wb.z );
-
-	// Correct till here
-	cudaDeviceSynchronize(); 
 
 	// Create pointer to the softmax result
 	dType* out;

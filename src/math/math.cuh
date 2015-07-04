@@ -58,7 +58,7 @@ __inline__ __global__ void xpny( dType** vectors, size_t N, size_t M ) {
 	__syncthreads();
 
 	if ( idy == 0 ) {
-		vectors[ 0 ][ idx ] = 0;
+		vectors[ 0 ][ idx ] = 0;						// Bad - need to improve this
 		for ( int i = 0; i < ( M / 2 ); i++ ) {
 			vectors[0][idx] += s[ idx * yStride + i ];
 		}

@@ -1,1 +1,1 @@
-make clean && clear && make -j5
+make clean && clear && make -j5 && ./math_tests

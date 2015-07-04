@@ -206,17 +206,17 @@ TEST( curnnMath, SoftmaxComputesCorrectlyOnTensors ) {
 	// and M x N weight matrix, 1 x N bias vector, and 1 x N 
 	// results vector so the tensor has dimension:
 	// ( M + 1 + 1 ) X N X 2 X 0
-	uint N = 2;				// Num nodes in layer
-	uint I = 4;				// Num inputs 
-	uint M = I + 2;			// I inputs, a bias, and activation
-	uint D = 2;				// depth of 2
+	uint N = 70;				// Num nodes in layer
+	uint I = 10;				// Num inputs 
+	uint M = I + 2;				// I inputs, a bias, and activation
+	uint D = 2;					// depth of 2
 	curnn::tensor4<float> tensor( N, M, D, 1 );
 
 	// Fill tensor with data 
 	for ( int i = 0; i < tensor.z; i++ ) {
 		for ( int j = 0; j < tensor.y; j++ ) {
 			for ( int k = 0; k < tensor.x; k++ ) {
-				tensor( k, j, i, 0 ) = ( float( k ) + 1.f ) / 10.f;
+				tensor( k, j, i, 0 ) = 0.7f;
 				std::cout << tensor( k, j, i, 0 ) << " ";
 			}
 			std::cout << std::endl;
@@ -224,15 +224,25 @@ TEST( curnnMath, SoftmaxComputesCorrectlyOnTensors ) {
 		std::cout << std::endl << std::endl;
 	}
 
-	// Simple inputs for testing ( needs to be same dimension as N
-	std::vector<float> x = { 0.2f, 0.2f, 0.2f, 0.3f };
+	// Simple inputs for testing ( needs to be same dimension as N )
+	std::vector<float> x;
 	std::vector<float> y;						// Outputs
+
+	for ( int i = 0; i < I; i++ ) x.push_back( 0.5f );
 
 	// Execute softmax function on tensor using x and storing the results in y
 	curnn::math::softmax( error, x, tensor, I, y );
 	
+	// Define expected results
+	float result_wxpb = 0.5f * 0.7f * N * D;
+	float result_smax = exp( result_wxpb ) / ( N * exp( result_wxpb ) );
+	float sum = 0.0f;
+
 	// Check results
-	EXPECT_EQ( y[ 0 ], 0.02f );
-	EXPECT_EQ( y[ 1 ], 0.02f );
+	for ( int i = 0; i < N; i++ ) {
+		EXPECT_NEAR( y[ i ], result_smax, TOLERANCE );
+		sum += y[ i ];
+	}
+	EXPECT_NEAR( sum, 1.f, TOLERANCE );
 }
 
