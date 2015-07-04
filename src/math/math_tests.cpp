@@ -29,7 +29,7 @@ using std::vector;
 // General tesing parameres 
 // Note : Do not make this so big that the GPU will run out of memory,
 //        which is only really a problem for the double precision functions
-const size_t NUM_ELEMENTS = 3e5;
+const size_t NUM_ELEMENTS = 3e4;
 const float  TOLERANCE	  = 1e-4;     // For difference between GPU and CPU math functions
 
 /* =========================================== NOTES ========================================================
@@ -216,7 +216,7 @@ TEST( curnnMath, SoftmaxComputesCorrectlyOnTensors ) {
 	for ( int i = 0; i < tensor.z; i++ ) {
 		for ( int j = 0; j < tensor.y; j++ ) {
 			for ( int k = 0; k < tensor.x; k++ ) {
-				tensor( k, j, i, 0 ) = k + 1;
+				tensor( k, j, i, 0 ) = ( float( k ) + 1.f ) / 10.f;
 				std::cout << tensor( k, j, i, 0 ) << " ";
 			}
 			std::cout << std::endl;
@@ -225,14 +225,14 @@ TEST( curnnMath, SoftmaxComputesCorrectlyOnTensors ) {
 	}
 
 	// Simple inputs for testing ( needs to be same dimension as N
-	std::vector<float> x = { 2.f, 2.f, 2.f, 3.f };
+	std::vector<float> x = { 0.2f, 0.2f, 0.2f, 0.3f };
 	std::vector<float> y;						// Outputs
 
 	// Execute softmax function on tensor using x and storing the results in y
 	curnn::math::softmax( error, x, tensor, I, y );
 	
 	// Check results
-	EXPECT_EQ( y[ 0 ], 20.f );
-	EXPECT_EQ( y[ 1 ], 40.f );
+	EXPECT_EQ( y[ 0 ], 0.02f );
+	EXPECT_EQ( y[ 1 ], 0.02f );
 }
 
