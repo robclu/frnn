@@ -260,14 +260,15 @@ void softmax( curnn::curnnError& error,
 			  curnn::tensor4<dType>& wb  , size_t wStride,
 			  std::vector<dType>& y )		{
 
+	// Cublas initialization
 	cublasHandle_t handle;
 	cublasStatus_t status;
 	status = cublasCreate( &handle );
 	cublasSetPointerMode( handle, CUBLAS_POINTER_MODE_HOST );
 
+	// Device pointers 
 	std::vector<dType*> dPointers( 3 * wb.z, 0 );
-	dType* in = 0, *weights = 0, *out = 0;
-	expFunctor expOp;			// Define operation on each element to be exponentiation
+	dType* results_h[ wb.z ]; dType** results_d;
 
 	// Check output vector can hold all reasults
 	if ( y.capacity() < wb.x ) y.reserve( wb.x );
@@ -277,6 +278,7 @@ void softmax( curnn::curnnError& error,
 		return;
 	}
 
+	// Each page is done by a separate kernel
 	#pragma omp parallel num_threads( wb.z )
 	{
 		int threadId = omp_get_thread_num();	
@@ -290,8 +292,8 @@ void softmax( curnn::curnnError& error,
 		if ( cudaMalloc( (void**)&dPointers[ 3 * threadId + 2 ], wb.x * sizeof( dType) ) != cudaSuccess ) {
 			curnn::err::allocError( error, stringify( out ) );
 		}
-		
-		// Copy data from x to in
+
+		// Copy data from host to device
 		if ( cudaMemcpy( dPointers[ 3 * threadId ], &x[0], x.size() * sizeof( dType ), 
 					     cudaMemcpyHostToDevice ) != cudaSuccess ) {
 			curnn::err::copyError( error, stringify( in ) );
@@ -304,12 +306,33 @@ void softmax( curnn::curnnError& error,
 					     wb.x * sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
 			curnn::err::copyError( error, stringify( biases ) );
 		}
-		// Multiply inputs and weights and add biases
+		// Multiply inputs and weights (column-wise) and add biases
 		dType alpha = 1; dType beta = 1;
 		status = cublasSgemv( handle, CUBLAS_OP_N, wb.x, wStride, &alpha, dPointers[ 3 * threadId + 1 ], 
 							  wb.x, dPointers[ 3 * threadId ], 1, &beta, dPointers[ 3 * threadId + 2 ], 1 );
-
+		
+		// Assign results to results pointer array
+		results_h[ threadId ] = dPointers[ 3 * threadId + 2 ];
+		
+		// Wait for all threads to finish
+		#pragma omp barrier	
 	}
+
+	// Allocate space and copy the pointers to the resuls to host memory
+	if ( cudaMalloc( (void**)&results_d, wb.z * sizeof( dType* ) ) != cudaSuccess ) {
+		curnn::err::allocError( error, stringify( results_h ) );
+	}
+	if ( cudaMemcpy( results_d, results_h, wb.z * sizeof( dType* ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
+		curnn::err::copyError( error, stringify( results_d ) );
+	}
+
+	// Sum the results from each page 
+	dim3 blocks( 1, 1 );
+	dim3 threads( wb.x, wb.z );
+
+	std::cout << "X : " << wb.x << " Z : " << wb.z << std::endl;
+
+	xpny<<<blocks, threads, wb.z * ( wb.x / 2 ) * sizeof( dType )>>>( results_d, wb.x, wb.z );
 
 	if ( cudaMemcpy( &y[0], dPointers[2], wb.x * sizeof( dType ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
 		curnn::err::copyError( error, stringify( y ) );
@@ -318,6 +341,7 @@ void softmax( curnn::curnnError& error,
 	cublasDestroy( handle );
 
 	for ( int i = 0; i < dPointers.size(); i++ ) cudaFree( dPointers[i] );
+	cudaFree( results_d );
 }
 
 }	// Namespace math

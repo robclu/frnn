@@ -40,6 +40,32 @@
  
 using namespace curnn;
 
+template <typename dType>
+__inline__ __global__ void xpny( dType** vectors, size_t N, size_t M ) {
+	int idx = blockIdx.x * blockDim.x + threadIdx.x;
+	int idy = blockIdx.y * blockDim.y + threadIdx.y;
+	int yStride = M / 2;
+
+	extern __shared__ dType s[];
+
+	if ( idy < yStride ) {
+		s[ ( idx * yStride ) + idy ] 
+			= vectors[ idy ][ idx ] + vectors[ idy + ( M / 2 ) ][ idx ];
+	}
+
+	// Add lasit elements if M = odd
+	if ( ( M & 1 != 0 ) && idy == 0 ) s[ idx * yStride ] += vectors[ M - 1 ][ idx ];
+	__syncthreads();
+
+	if ( idy == 0 ) {
+		vectors[ 0 ][ idx ] = 0;
+		for ( int i = 0; i < ( M / 2 ); i++ ) {
+			vectors[0][idx] += s[ idx * yStride + i ];
+		}
+	}
+}
+
+
 /*
  * ==========================================================================================================
  * Function		: warpReduce
