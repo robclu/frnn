@@ -32,6 +32,8 @@
 #include "../curnn/curnn.h"
 #include "math.cuh"
 
+#define THREADS_PER_BLOCK 256
+
 namespace curnn {
 namespace math  {
 	
@@ -326,14 +328,37 @@ void softmax( curnn::curnnError& error,
 		curnn::err::copyError( error, stringify( results_d ) );
 	}
 
-	// Sum the results from each page 
-	dim3 blocks( 1, 1 );
-	dim3 threads( wb.x, wb.z );
+	// Determine sizes of blocks and threads for next kernel
+	size_t threadsX = wb.x >= THREADS_PER_BLOCK ? THREADS_PER_BLOCK : wb.x;
+	size_t threadsY = wb.z >= THREADS_PER_BLOCK ? THREADS_PER_BLOCK : wb.z;
+	size_t blocksX  = wb.x  > THREADS_PER_BLOCK ? wb.x / THREADS_PER_BLOCK + 1 : 1;
+	size_t blocksY  = wb.z  > THREADS_PER_BLOCK ? wb.z / THREADS_PER_BLOCK + 1 : 1;
+	size_t sharedMemAmount = wb.z * ( wb.x / 2 ) * sizeof( dType );
 
-	std::cout << "X : " << wb.x << " Z : " << wb.z << std::endl;
+	dim3 blocks( blocksX, blocksY );
+	dim3 threads( threadsX, threadsY );
 
-	xpny<<<blocks, threads, wb.z * ( wb.x / 2 ) * sizeof( dType )>>>( results_d, wb.x, wb.z );
+	// Sum all the results of W*x + b from each page (or layer in network)
+	xpny<<<blocks, threads, sharedMemAmount>>>( results_d, wb.x, wb.z );
 
+	// Create pointer to the softmax result
+	dType* outputs;
+	// ALLOCATE MEM!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//
+	// Perform softmax on the resultant vector
+	( wb.x > THREADS_PER_BLOCK * MAX_BLOCKS ) ? 
+		threadsX = 2 * THREADS_PER_BLOCK : threads = THREADS_PER_BLOCK;
+	
+	blocksX = std::min( static_cast<int>( wb.x / threads ), MAX_BLOCKS );
+	if ( blocksX * threadsX < wb.x ) blocksX++;
+
+	// Perform softmax on the resultant vector 
+	blockReduceAtomicVectorizedAll<<<blocksX, threadsX>>>( dPointer[ 2 ], out, wb.x );
+	// Copy result from the first thread inea ch block to the others
+	blockScatter<<<blocks, threads>>>( out, x.size() );
+	// Do normalization to get get softmax
+	softmaxKernel<<<blocks, threads>>>( in, out, x.size() );		
+	
 	if ( cudaMemcpy( &y[0], dPointers[2], wb.x * sizeof( dType ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
 		curnn::err::copyError( error, stringify( y ) );
 	}
