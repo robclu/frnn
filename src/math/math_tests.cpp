@@ -206,8 +206,8 @@ TEST( curnnMath, SoftmaxComputesCorrectlyOnTensors ) {
 	// and M x N weight matrix, 1 x N bias vector, and 1 x N 
 	// results vector so the tensor has dimension:
 	// ( M + 1 + 1 ) X N X 2 X 0
-	uint N = 70;				// Num nodes in layer
-	uint I = 10;				// Num inputs 
+	uint N = 7;				// Num nodes in layer
+	uint I = 2;				// Num inputs 
 	uint M = I + 2;				// I inputs, a bias, and activation
 	uint D = 2;					// depth of 2
 	curnn::tensor4<float> tensor( N, M, D, 1 );
@@ -240,9 +240,12 @@ TEST( curnnMath, SoftmaxComputesCorrectlyOnTensors ) {
 
 	// Check results
 	for ( int i = 0; i < N; i++ ) {
-		EXPECT_NEAR( y[ i ], result_smax, TOLERANCE );
-		sum += y[ i ];
+		EXPECT_NEAR( tensor( i, I + 1, 0, 0 ), result_smax, TOLERANCE );
 	}
-	EXPECT_NEAR( sum, 1.f, TOLERANCE );
+
+	for ( int i = 0; i < N; i++ ) {
+		std::cout << tensor( i, I + 1, 0, 0 ) << " ";
+	}
+	std::cout << std::endl;
 }
 

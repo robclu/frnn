@@ -1,5 +1,5 @@
 /*
- *  Test file for cuRNN matrix class.
+ *  Test file for cuRNN matrx class.
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
@@ -31,18 +31,24 @@ const size_t Z = 4;
 TEST( curnnTensor, CanCreateTensorCorrectly ) {
 	curnn::tensor4<float> testTensor( X, Y, Z, W );
 
-	EXPECT_EQ( testTensor.w, W );
-	EXPECT_EQ( testTensor.x, X );
-	EXPECT_EQ( testTensor.y, Y );
-	EXPECT_EQ( testTensor.z, Z );
+	EXPECT_EQ( testTensor.w(), W );
+	EXPECT_EQ( testTensor.x(), X );
+	EXPECT_EQ( testTensor.y(), Y );
+	EXPECT_EQ( testTensor.z(), Z );
 	EXPECT_EQ( testTensor.size(), W * X * Y * Z );
 }
 
 TEST( curnnTensor, TensorValuesDefaultToZero ) {
 	curnn::tensor4<float> testTensor( X, Y, Z, W );
 
-	for ( size_t i = 0; i < testTensor.size(); i++ ) {
-		EXPECT_EQ( testTensor.data[ i ], (float)0 );
+	for ( size_t l = 0; l < testTensor.w(); l++ ) {
+		for ( size_t k = 0; k < testTensor.z(); k++ ) {
+			for ( size_t j = 0; j < testTensor.y(); j++ ) {
+				for ( size_t i = 0; i < testTensor.x(); i++ ) {
+					EXPECT_EQ( testTensor( i, j, k, l ), (float)0 );
+				}
+			}
+		}
 	}
 }
 
@@ -51,10 +57,10 @@ TEST( curnnTensor, CanReshapeTensor ) {
 
 	testTensor.reshape( 10, 10, 7, 2 );
 
-	EXPECT_EQ( testTensor.w, 2 );
-	EXPECT_EQ( testTensor.x, 10 );
-	EXPECT_EQ( testTensor.y, 10 );
-	EXPECT_EQ( testTensor.z, 7 );
+	EXPECT_EQ( testTensor.w(), 2 );
+	EXPECT_EQ( testTensor.x(), 10 );
+	EXPECT_EQ( testTensor.y(), 10 );
+	EXPECT_EQ( testTensor.z(), 7 );
 	EXPECT_EQ( testTensor.size(), 10 * 10 * 7 * 2 );
 }
 
@@ -62,25 +68,31 @@ TEST( curnnTensor, TensorValuesAreZeroAfterReshape ) {
 	curnn::tensor4<float> testTensor( X, Y, Z, W );
 	testTensor.reshape( 10, 2, 3, 9 );
 
-	for ( size_t i = 0; i < testTensor.size(); i++ ) {
-		EXPECT_EQ( testTensor.data[ i ], (float)0 );
+	for ( size_t l = 0; l < testTensor.w(); l++ ) {
+		for ( size_t k = 0; k < testTensor.z(); k++ ) {
+			for ( size_t j = 0; j < testTensor.y(); j++ ) {
+				for ( size_t i = 0; i < testTensor.x(); i++ ) {
+					EXPECT_EQ( testTensor( i, j, k, l ), (float)0 );
+				}
+			}
+		}
 	}
 }
 
-TEST( curnnTensor, ReshapeCanUseExistingDimensionality ) {
+TEST( curnnTensor, ReshapeCanUsexistingDimensionality ) {
 	curnn::tensor4<float> testTensor( X, Y, Z, W );
 	testTensor.reshape( 10, -1, 3, -1 );
 
-	EXPECT_EQ( testTensor.x, 10 );
-	EXPECT_EQ( testTensor.y, Y );
-	EXPECT_EQ( testTensor.z, 3 );
-	EXPECT_EQ( testTensor.w, W );
+	EXPECT_EQ( testTensor.x(), 10 );
+	EXPECT_EQ( testTensor.y(), Y );
+	EXPECT_EQ( testTensor.z(), 3 );
+	EXPECT_EQ( testTensor.w(), W );
 	EXPECT_EQ( testTensor.size(), 10 * Y * 3 * W );
 }
 
-TEST( curnnTensor, CanGetElementWithAccessOperator ) {
+TEST( curnnTensor, CanGetAndSetElementWithAccessOperator ) {
 	curnn::tensor4<float> testTensor( X, Y, Z, W );
-	testTensor.data[ 1 ] = 5.f;
+	testTensor( 1, 0, 0, 0 ) = 5.f;
 
 	// Use operator
 	float testVal = testTensor( 1, 0, 0, 0 );
@@ -88,22 +100,12 @@ TEST( curnnTensor, CanGetElementWithAccessOperator ) {
 	EXPECT_EQ( testVal, 5.f );
 }
 
-TEST( curnnTensor, CanSetElementWithAccessOperator ) {
-	curnn::tensor4<float> testTensor( X, Y, Z, W );
-	testTensor.data[ 1 ] = 5.f;
-
-	// Use operator
-	testTensor( 1, 0, 0, 0 ) = 10.f;
-	float testVal = testTensor( 1, 0, 0, 0 );
-
-	EXPECT_EQ( testVal, 10.f );
-}
-TEST( curnnTensor, OutputsErrorForOutOfRangeIndexAndReturnsFirstElementValue ) {
+TEST( curnnTensor, OutputsErrorForOutOfRangeIndxAndReturnsFirstElementValue ) {
 	curnn::tensor4<float> testTensor( X, Y, Z, W );
 
 	float testVal = testTensor( 100, 12, 34, 2 );
 
-	EXPECT_EQ( testVal, testTensor.data[ 0 ] );
+	EXPECT_EQ( testVal, testTensor( 0, 0, 0, 0 ) );
 }
 
 TEST( curnnTensor, CanGetPointerToElement ) {
@@ -119,7 +121,7 @@ TEST( curnnTensor, CanCreateArrayFromTensor ) {
 	curnn::tensor4<float> testTensor( X, Y, Z, W );
 
 	// Set elements
-	for ( size_t i = 0; i < testTensor.x; i++ ) {
+	for ( size_t i = 0; i < testTensor.x(); i++ ) {
 		testTensor( i, 0, 0, 0 ) = float ( i );
 	}
 

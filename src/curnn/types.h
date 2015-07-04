@@ -25,8 +25,8 @@
 #include <type_traits>
 
 // Change if necessary
-#define MAX_BLOCKS 65536
-
+#define MAX_BLOCKS			65536
+#define THREADS_PER_BLOCK	256
 namespace curnn {
 
 /* 

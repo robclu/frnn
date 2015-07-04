@@ -32,8 +32,6 @@
 #include "../curnn/curnn.h"
 #include "math.cuh"
 
-#define THREADS_PER_BLOCK 256
-
 namespace curnn {
 namespace math  {
 	
@@ -295,7 +293,6 @@ void softmax( curnn::curnnError& error,
 		if ( cudaMalloc( (void**)&dPointers[ 3 * threadId + 2 ], wb.x * sizeof( dType) ) != cudaSuccess ) {
 			curnn::err::allocError( error, stringify( out ) );
 		}
-
 		// Copy data from host to device
 		if ( cudaMemcpy( dPointers[ 3 * threadId ], &x[0], x.size() * sizeof( dType ), 
 					     cudaMemcpyHostToDevice ) != cudaSuccess ) {
@@ -322,6 +319,7 @@ void softmax( curnn::curnnError& error,
 	if ( cudaMalloc( (void**)&results_d, wb.z * sizeof( dType* ) ) != cudaSuccess ) {
 		curnn::err::allocError( error, stringify( results_h ) );
 	}
+	std::vector<dType> temp( wb.z, 0 );
 	if ( cudaMemcpy( results_d, results_h, wb.z * sizeof( dType* ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
 		curnn::err::copyError( error, stringify( results_d ) );
 	}
@@ -340,11 +338,11 @@ void softmax( curnn::curnnError& error,
 	xpny<<<blocks, threads, sharedMemAmount>>>( results_d, wb.x, wb.z );
 
 	// Create pointer to the softmax result
-	dType* out;
-	if ( cudaMalloc( (void**)&out, wb.x * sizeof( dType ) ) != cudaSuccess ) {
+	dType* activations;
+	if ( cudaMalloc( (void**)&activations, wb.x * sizeof( dType ) ) != cudaSuccess ) {
 		curnn::err::allocError( error, stringify( out ) );
 	}
-	if ( cudaMemset( out, 0, wb.x * sizeof( dType ) ) != cudaSuccess ) {
+	if ( cudaMemset( activations, 0, wb.x * sizeof( dType ) ) != cudaSuccess ) {
 		curnn::err::copyError( error, stringify( out ) );
 	}
 
@@ -357,20 +355,20 @@ void softmax( curnn::curnnError& error,
 	if ( blocksX * threadsX < wb.x ) blocksX++;
 
 	// Perform softmax on the resultant vector 
-	blockReduceAtomicVectorizedAll<<<blocksX, threadsX>>>( dPointers[ 2 ], out, wb.x, expOp );
+	blockReduceAtomicVectorizedAll<<<blocksX, threadsX>>>( dPointers[ 2 ], activations, wb.x, expOp );
 	// Copy result from the first thread in each block to the others
-	blockScatter<<<blocksX, threadsX>>>( out, wb.x );
+	blockScatter<<<blocksX, threadsX>>>( activations, wb.x );
 	// Do normalization to get get softmax
-	softmaxKernel<<<blocksX, threadsX>>>( dPointers[ 2 ], out, wb.x );		
+	softmaxKernel<<<blocksX, threadsX>>>( dPointers[ 2 ], activations, wb.x );		
 
-	if ( cudaMemcpy( &y[0], out, wb.x * sizeof( dType ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
-		curnn::err::copyError( error, stringify( y ) );
+	if ( cudaMemcpy( &wb( 0, wStride + 1, 0, 0 ), activations, wb.x * sizeof( dType ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
+		curnn::err::copyError( error, stringify( activations ) );
 	}
 
 	cublasDestroy( handle );
 
 	for ( int i = 0; i < dPointers.size(); i++ ) cudaFree( dPointers[i] );
-	cudaFree( results_d ); cudaFree( out );
+	cudaFree( results_d ); cudaFree( activations );
 }
 
 }	// Namespace math

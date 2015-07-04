@@ -9,11 +9,11 @@
  *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT AN_size.y WARRANTY; without even the implied warranty of
- *  MERCHANTABILIT_size.y or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
- *  _size.you should have received a copy of the GNU General Public License along
+ *  You should have received a copy of the GNU General Public License along
  *  with this program; if not, write to the Free Software Foundation,
  *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
@@ -36,16 +36,16 @@ namespace curnn {
  *				: _depth	: The number of timesteps back or forward that have inputs 
  * ==========================================================================================================
  */
-template <typename	dType	, 
-		  uint		_nodes	,
-		  uint		_inputs	,
-		  uint		_depth	> 
-class layer {
+template <typename	dType		, 
+		  uint		_nodes		,
+		  uint		_inputs		,
+		  uint		_depth		,
+		  template <typename, uint...> class typePolicy >	 
+class layer : public typePolicy<dType, _nodes, _inputs, _depth> {
 	public:
 		uint				numNodes;
 		uint				numInputs;
 		uint				depth;
-		tensor4<dType>		weights;	// See constructor comment for what the tensor holds
 		std::vector<dType>  outputs;
 	public:
 		/*
@@ -67,13 +67,7 @@ class layer {
 		 * ==================================================================================================
 		 */
 		explicit layer() :
-			numNodes( _nodes ), numInputs( _inputs ), depth( _depth ),
-            weights( std::max( _inputs, _nodes ) + 2		// +2 from biases and activaitons
-					, _nodes										
-					, _depth								// Number of previous hidden inputs
-				    , 0  ),									// Nor using 4th dimension
-			outputs( _nodes, 0 ) 
-			{}
+			numNodes( _nodes ), numInputs( _inputs ), depth( _depth ), outputs( _nodes, 0 ) {}
 
 		/*
 		 * ==================================================================================================
@@ -87,23 +81,7 @@ class layer {
 		inline const dType* getOutputs() const {
 			return &outputs[ 0 ]; 
 		}
-
-		/*
-		 * ==================================================================================================
-		 * Function		: forward
-		 *
-		 * Description	: Compute the forward pass on the layer
-		 *===================================================================================================
-		 */
-		void forward();
 };
-
-/* ==================================== Template Implementation =========================================== */
-
-template <typename dType, uint n, uint i, uint d>
-void layer<dType,n, i, d>::forward( ) {
-
-}
 
 }	// Namespace curnn
 

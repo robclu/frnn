@@ -22,7 +22,7 @@ INCLUDES 		:= -I/usr/local/cuda-7.0/include -I.
 #					LIBRARIES 						   #
 ########################################################
 
-CUDA_LIBS 		:= -lcuda -lcublas
+CUDA_LIBS 		:= -lcuda -lcublas -lgomp
 TEST_LIBS 		:= -lgtest -lgtest_main \
 				   -lpthread
 
@@ -36,7 +36,7 @@ LIB_DIR 		:= -L/usr/local/cuda/lib64
 # 			--compiler-options -Wall                   #
 ########################################################
 
-CCFLAGS 		:= -std=c++11 -O3 -w
+CCFLAGS 		:= -std=c++11 -O3 -w -Xcompiler -fopenmp
 CUFLAGS 		:= -arch=sm_30
 
 ########################################################
@@ -47,13 +47,16 @@ all: tests cleanobs
 
 tests: tests
 
+errors.o: ../util/errors.cpp 
+	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -c $<
+
 layer_tests.o: layer_tests.cpp 
 	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -c $<
 
 main.o : main.cpp
 	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -c $<
 
-tests: layer_tests.o main.o
+tests: errors.o layer_tests.o main.o
 	$(NVCC) $(LDFLAGS) -o $(EXE) $+ $(LIB_DIR) \
 		$(CUDA_LIBS) $(TEST_LIBS)	
 		

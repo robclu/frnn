@@ -22,18 +22,33 @@
 #include <iostream>
 
 #include "layer.hpp"
+#include "softmaxPolicy.hpp"
 
 const size_t INPUTS  = 3;
 const size_t OUTPUTS = 4;
 const size_t NODES   = 4;
 const size_t DEPTH	 = 4;
 
-TEST( curnnTensor, CanCreateTensorCorrectly ) {
-	curnn::layer<float, NODES, INPUTS, DEPTH> testLayer;
+typedef curnn::layer<float, NODES, INPUTS, DEPTH, curnn::policies::softmaxPolicy> curnnLayerSmaxf;
 
-	EXPECT_EQ( testLayer.numNodes	, NODES  );
-	EXPECT_EQ( testLayer.numInputs	, INPUTS );
-	EXPECT_EQ( testLayer.depth		, DEPTH  );
+TEST( curnnTensor, CanCreateSoftmaxLayerCorrectly ) {
+	curnnLayerSmaxf softmaxLayer;
+
+	EXPECT_EQ( softmaxLayer.numNodes	, NODES  );
+	EXPECT_EQ( softmaxLayer.numInputs	, INPUTS );
+	EXPECT_EQ( softmaxLayer.depth		, DEPTH  );
 }
 
+TEST( curnnTensor, CanForwardPassOnSoftmaxLayer ) {
+	curnnLayerSmaxf softmaxLayer;
 
+	std::vector<float> ins, outs;
+
+	for ( int i = 0; i < INPUTS; i++ ) {
+		ins.push_back( 0.5f );
+	}
+
+	softmaxLayer.forward( ins, outs );
+	
+	EXPECT_EQ( outs[ 0 ], 0.2f );
+}
