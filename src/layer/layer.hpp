@@ -22,6 +22,7 @@
 #define _CURNN_LAYER_
 
 #include "../tensor/tensor.cuh"
+#include "../math/math.hpp"
 
 namespace curnn {
 
@@ -39,10 +40,10 @@ namespace curnn {
  * ==========================================================================================================
  */
 template <typename  dType                               , 
-         uint       _nodes                              ,
-         uint       _inputs                             ,
-         uint       _depth                              ,
-         template <typename, uint...> class typePolicy >     
+          uint       _nodes                             ,
+          uint       _inputs                            ,
+          uint       _depth                             ,
+          template <typename, uint...> class typePolicy >     
 class layer : public typePolicy<dType, _nodes, _inputs, _depth> {
     public:
         uint                numNodes;
@@ -71,6 +72,40 @@ class layer : public typePolicy<dType, _nodes, _inputs, _depth> {
         explicit layer() :
             numNodes( _nodes ), numInputs( _inputs ), depth( _depth ), outputs( _nodes, 0 ) {}
 
+        /*
+         * ==================================================================================================
+         * Function     : initializeWeights 
+         * 
+         * Description  : Initialzes the weights between a certain range (by default the weights are
+         *                initialized to 0 during construction.
+         *
+         * Inputs       : min   : The minimum value for the weights
+         *              : max   : The maximum value for the weights
+         * ==================================================================================================
+         */
+        inline void initializeWeights( dType min, dType max ) {
+            for ( uint d = 0; d < depth; d++ ) {
+                for( uint i = 0; i < numInputs; i++ ) {
+                    for ( uint n = 0; n < numNodes; n++ ) {
+                       this->wba( n, i, d, 0 ) = curnn::math::rand( min, max );
+                    }
+                }
+            }
+        }
+        
+        /*
+         * ==================================================================================================
+         * Function     : getWeights
+         * 
+         * Description  : Returns a constant pointer to the weights (read-only)
+         * 
+         * Outputs      : A constant pointer to the weights, biases, and activations of the layer
+         * ==================================================================================================
+         */
+        inline const tensor4<dType>& getWBA() const { 
+            return this->wba;
+        }
+        
         /*
          * ==================================================================================================
          * Function     : outputs 

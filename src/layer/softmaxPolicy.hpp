@@ -42,9 +42,10 @@ namespace policies {
  * Params       : dType     : The type of data for the network
  *              : nodes     : The number of nodes for the layer
  *              : inputs    : The number of inputs to the layer
+ *              : depth     : The number of different inputs in the layer (almost always 1 for softmax)
  * ==========================================================================================================
  */
-template <typename dType, uint nodes, uint inputs, uint...>
+template <typename dType, uint nodes, uint inputs, uint depth>
 class softmaxPolicy {
 
     public:
@@ -58,7 +59,7 @@ class softmaxPolicy {
          * ==================================================================================================
          */
         explicit softmaxPolicy() :
-            wba( nodes, inputs + 2, 1, 1 ), numInputs( inputs ) {}
+            wba( nodes, inputs + 2, depth, 1 ), numInputs( inputs ) {}
 
         /*
          * ==================================================================================================
@@ -74,15 +75,15 @@ class softmaxPolicy {
          * ==================================================================================================
          */
         void forward( std::vector<dType>& ins, std::vector<dType>& outs );
-    private:
+    protected:
         tensor4<dType>  wba;            // Tensor for weights, biases, and activations
         uint            numInputs;      // Number of inputs for the layer
 };
 
 /* ==========================================  Implementations ============================================ */
 
-template <typename dType, uint nds, uint ipts, uint... rest>
-void softmaxPolicy<dType, nds, ipts, rest...>::forward( std::vector<dType>& ins, std::vector<dType>& outs ) {
+template <typename dType, uint nds, uint ipts, uint dth>
+void softmaxPolicy<dType, nds, ipts, dth>::forward( std::vector<dType>& ins, std::vector<dType>& outs ) {
 
     // Thread sizes
     size_t threadsX, threadsY, blocksX, blocksY;
@@ -103,7 +104,7 @@ void softmaxPolicy<dType, nds, ipts, rest...>::forward( std::vector<dType>& ins,
     expFunctor          expOp;                          // Exp operation for softmax
 
     // Outputs vector must have same dimension as number of nodes
-    if ( outs.capacity() < wba.x() ) outs.reserve( wba.x() );
+    if ( outs.size() < wba.x() ) outs.resize( wba.x(), 0 );
     // Inputs vector must have same dimension as weight metrix num inputs
     if ( ins.size() != numInputs ) {
         curnn::err::dimError( error, stringify( ins ), stringify( numInputs ) );
@@ -199,6 +200,8 @@ void softmaxPolicy<dType, nds, ipts, rest...>::forward( std::vector<dType>& ins,
 
     cublasDestroy( handle );
 
+    cudaDeviceSynchronize();
+    
     for ( int i = 0; i < dPointers.size(); i++ ) cudaFree( dPointers[i] );
     cudaFree( results_d ); cudaFree( acts );
 }

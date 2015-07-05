@@ -24,13 +24,14 @@
 #include "layer.hpp"
 #include "softmaxPolicy.hpp"
 
-const size_t INPUTS  = 3;
-const size_t NODES   = 4;
-const size_t DEPTH   = 4;
+const size_t    INPUTS      = 3;
+const size_t    NODES       = 4;
+const size_t    DEPTH       = 4;
+const float     TOLERANCE   = 1e-12;
 
 typedef curnn::layer<float, NODES, INPUTS, DEPTH, curnn::policies::softmaxPolicy> curnnLayerSmaxf;
 
-TEST( curnnTensor, CanCreateSoftmaxLayerCorrectly ) {
+TEST( curnnLayer, CanCreateSoftmaxLayerCorrectly ) {
     curnnLayerSmaxf softmaxLayer;
 
     EXPECT_EQ( softmaxLayer.numNodes    , NODES  );
@@ -38,7 +39,34 @@ TEST( curnnTensor, CanCreateSoftmaxLayerCorrectly ) {
     EXPECT_EQ( softmaxLayer.depth       , DEPTH  );
 }
 
-TEST( curnnTensor, CanForwardPassOnSoftmaxLayer ) {
+TEST( curnnLayer, InitializesWeightsBiasesAndActivationsToZero ) {
+    curnnLayerSmaxf softmaxLayer;
+   
+   const curnn::tensor4<float> layerWghtsBiasActs = softmaxLayer.getWBA();
+    
+   // Just checking first depth level
+   for ( uint i = 0; i < INPUTS + 2; i++ ) {
+       for ( uint n = 0; n < NODES; n++ ) {
+            EXPECT_NEAR( layerWghtsBiasActs( n, i, 0, 0 ), 0.0f, TOLERANCE );
+       }
+   }
+}
+
+TEST( curnnLayer, CanInitializeiAndReadWeights ) {
+    curnnLayerSmaxf softmaxLayer;
+    softmaxLayer.initializeWeights( 0.0f, 1.0f );
+   
+   const curnn::tensor4<float> layerWghtsBiasActs = softmaxLayer.getWBA();
+    
+   // Just checking first depth level
+   for ( uint i = 0; i < INPUTS; i++ ) {
+       for ( uint n = 0; n < NODES; n++ ) {
+            EXPECT_NE( layerWghtsBiasActs( n, i, 0, 0 ), 0.0f );
+       }
+   }
+}
+
+TEST( curnnLayer, CanForwardPassOnSoftmaxLayer ) {
     curnnLayerSmaxf softmaxLayer;
 
     std::vector<float> ins, outs;
@@ -48,6 +76,11 @@ TEST( curnnTensor, CanForwardPassOnSoftmaxLayer ) {
     }
 
     softmaxLayer.forward( ins, outs );
+
+    // Sum of outputs must be 1 for correct distribution
+    float sum = 0.0f;
+    for ( uint i = 0; i < outs.size(); i++ ) sum += outs[ i ]; 
     
-    EXPECT_EQ( outs[ 0 ], 0.2f );
+    // Account for floating point variablity
+    EXPECT_NEAR( sum, 1.0f, TOLERANCE );
 }
