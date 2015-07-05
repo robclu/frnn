@@ -31,7 +31,7 @@
 #include "../math/math.cuh"
 
 namespace curnn {
-namespace policies {
+namespace ltype {
 
 /*
  * ==========================================================================================================
@@ -75,9 +75,26 @@ class softmaxPolicy {
          * ==================================================================================================
          */
         void forward( std::vector<dType>& ins, std::vector<dType>& outs );
+        
+        /*
+         * ==================================================================================================
+         * Function     : getErrors
+         * 
+         * Description  : Gets the errors of the layer given a tensor, in this case the tensor will hold the
+         *                layer outputs and the targets.
+         *                
+         * Inputs       : outs      : The outputs of the layer
+         *              : targets   : The targets for each output
+         * 
+         * Outputs      : The results are stored in the errors vector of the class
+         * ==================================================================================================
+         */
+        void getErrors( std::vector<dType> outs, std::vector<dType> targets );
+        
     protected:
-        tensor4<dType>  wba;            // Tensor for weights, biases, and activations
-        uint            numInputs;      // Number of inputs for the layer
+        tensor4<dType>      wba;            // Tensor for weights, biases, and activations
+        std::vector<dType>  errors;         // Errors for the layer
+        uint                numInputs;      // Number of inputs for the layer
 };
 
 /* ==========================================  Implementations ============================================ */
@@ -206,7 +223,17 @@ void softmaxPolicy<dType, nds, ipts, dth>::forward( std::vector<dType>& ins, std
     cudaFree( results_d ); cudaFree( acts );
 }
 
+template <typename dType, uint nds, uint ipts, uint dth>
+void softmaxPolicy<dType, nds, ipts, dth>::getErrors( std::vector<dType>& outs, std::vector<dType>& targets ) {
+    curnnError& error;
+    if ( outs.size() != targets.size() ) {
+        curnn::err::dimError( error, stringify( outs ), stringify( targets ) );
+        return;
+    }
+    // Data will never be big enough to use GPU, so use CPU
+    for ( uint i = 0; i < outs.size(); i++ ) error[ i ] = outs[ i ] - targets[ i ];
+}
 
-}   // Namepsace policies
+}   // Namepsace lloss
 }   // Namepsace curnn
 #endif 
