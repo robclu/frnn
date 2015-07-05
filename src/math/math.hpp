@@ -32,7 +32,8 @@
 #include "../util/errors.h"
 #include "../curnn/curnn.h"
 #include "blas/curnnBlas.h"
-#include "math.cuh"
+#include "math_kernels_gpu.cuh"
+#include "math_kernels_cpu.hpp"
 
 namespace curnn {
 namespace math  {

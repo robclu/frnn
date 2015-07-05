@@ -28,7 +28,7 @@
 #include "../../tensor/tensor.cuh"
 #include "../../util/errors.h"
 #include "../../curnn/curnn.h"
-#include "../../math/math.cuh"
+#include "../../math/math_kernels_gpu.cuh"
 #include "../../math/blas/curnnBlas.h"
 
 namespace curnn {
@@ -60,7 +60,7 @@ class softmaxPolicy {
          * ==================================================================================================
          */
         explicit softmaxPolicy() :
-            wba( nodes, inputs + 2, depth, 1 ), numInputs( inputs ) {}
+            wba( nodes, inputs + 2, depth, 1 ), numInputs( inputs ), errors( nodes, 0 ) {}
 
         /*
          * ==================================================================================================
@@ -79,10 +79,10 @@ class softmaxPolicy {
         
         /*
          * ==================================================================================================
-         * Function     : getErrors
+         * Function     : determinesErrors
          * 
-         * Description  : Gets the errors of the layer given a tensor, in this case the tensor will hold the
-         *                layer outputs and the targets.
+         * Description  : Determines the errors of the layer using the layer outputs and targets and using a
+         *                negative log liklihood loss function
          *                
          * Inputs       : outs      : The outputs of the layer
          *              : targets   : The targets for each output
@@ -90,7 +90,7 @@ class softmaxPolicy {
          * Outputs      : The results are stored in the errors vector of the class
          * ==================================================================================================
          */
-        void getErrors( std::vector<dType>& outs, std::vector<dType>& targets );
+        void determineErrors( std::vector<dType>& outs, std::vector<dType>& targets );
         
     protected:
         tensor4<dType>      wba;            // Tensor for weights, biases, and activations
@@ -224,15 +224,16 @@ void softmaxPolicy<dType, nds, ipts, dth>::forward( std::vector<dType>& ins, std
 }
 
 template <typename dType, uint nds, uint ipts, uint dth>
-void softmaxPolicy<dType, nds, ipts, dth>::getErrors( std::vector<dType>& outs, std::vector<dType>& targets ) {
+void softmaxPolicy<dType, nds, ipts, dth>::determineErrors( std::vector<dType>& outs, std::vector<dType>& targets ) {
     curnnError error;
     if ( outs.size() != targets.size() ) {
         curnn::err::dimError( error, stringify( outs ), stringify( targets ) );
         return;
     }
-    __m128* ots = (__m128*)(&outs[0]);
-    // Data will never be big enough to use GPU, so use CPU
-    for ( uint i = 0; i < outs.size(); i++ ) errors[ i ] = outs[ i ] - targets[ i ];
+    
+    for ( uint i = 0; i < errors.size(); i ++ ) {
+        errors[ i ] = outs[ i ] - targets[ i ];
+    }
 }
 
 }   // Namepsace lloss

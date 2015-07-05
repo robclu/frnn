@@ -37,7 +37,7 @@ LIB_DIR			:= -L/usr/local/cuda/lib64
 #			--compiler-options -Wall                   #
 ########################################################
 
-CCFLAGS			:= -std=c++11 -g -w -Xcompiler -fopenmp
+CCFLAGS			:= -std=c++11 -O3 -w -Xcompiler -fopenmp
 CUFLAGS			:= -arch=sm_30
 
 ########################################################
@@ -51,19 +51,13 @@ tests: tests
 main.o : main.cpp
 	$(NVCC) -x cu $(INLCUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -c $<
 
-math.cu.o : math.cuh
-	$(NVCC) -x cu $(INLCUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -dc $<
-
-#math.o : math.cpp
-#	$(NVCC) -x cu $(INLCUDES) $(CUFLAGS) $(CCFLAGS) -o $@ -dc $<
-
 math_tests.o: math_tests.cpp 
 	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -c $<
 
 errors.o: ../util/errors.cpp 
 	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -c $<
 
-tests: errors.o math.cu.o math_tests.o main.o
+tests: errors.o math_tests.o main.o
 	$(NVCC) $(LDFLAGS) -o $(EXE) $+ $(LIB_DIR) \
 		$(CUDA_LIBS) $(TEST_LIBS)	
 		

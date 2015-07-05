@@ -21,15 +21,14 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
-#include "math.hpp"
-#include "math.cuh"
+#include "math.hpp"     // Includes kernels 
 
 using std::vector;
 
 // General tesing parameres 
 // Note : Do not make this so big that the GPU will run out of memory,
 //        which is only really a problem for the double precision functions
-const size_t NUM_ELEMENTS = 3e4;
+const size_t NUM_ELEMENTS = 3e6;
 const float  TOLERANCE    = 1e-4;     // For difference between GPU and CPU math functions
 
 /* =========================================== NOTES ========================================================
@@ -44,14 +43,14 @@ const float  TOLERANCE    = 1e-4;     // For difference between GPU and CPU math
  * ==========================================================================================================
  */
 
-TEST( curnnMath, CanGenerateRandomNumbersUniformDistribution ) {
+TEST( curnnMathGpu, CanGenerateRandomNumbersUniformDistribution ) {
     float lo = 0.0f; float hi = 0.1f;
     
     EXPECT_GE( curnn::math::rand( lo, hi ), lo );
     EXPECT_LT( curnn::math::rand( lo, hi ), hi );
 }
 
-TEST( curnnMath, AxpyOperationComputesCorrectlyWithFloats ) {
+TEST( curnnMathGpu, AxpyOperationComputesCorrectlyWithFloats ) {
     curnn::curnnError error;
     const float A = 2.0f;
 
@@ -72,7 +71,7 @@ TEST( curnnMath, AxpyOperationComputesCorrectlyWithFloats ) {
     }
 }
 
-TEST( curnnMath, AxpyOperationComputesCorrectlyWithDoubles ) {
+TEST( curnnMathGpu, AxpyOperationComputesCorrectlyWithDoubles ) {
     curnn::curnnError error;
     const double A = 2.0f;
     
@@ -93,7 +92,7 @@ TEST( curnnMath, AxpyOperationComputesCorrectlyWithDoubles ) {
     }
 }
 
-TEST( curnnMath, ReductionSumComputesCorrectlyWithFloats ) {
+TEST( curnnMathGpu, ReductionSumComputesCorrectlyWithFloats ) {
     curnn::curnnError error;
     vector<float> x;
 
@@ -105,7 +104,7 @@ TEST( curnnMath, ReductionSumComputesCorrectlyWithFloats ) {
     EXPECT_EQ( NUM_ELEMENTS, curnn::math::sum( error, x ) );
 }
 
-TEST( curnnMath, ReductionSumComputesCorrectlyWithInts ) {
+TEST( curnnMathGpu, ReductionSumComputesCorrectlyWithInts ) {
     curnn::curnnError error;
     vector<int> x;
 
@@ -117,7 +116,7 @@ TEST( curnnMath, ReductionSumComputesCorrectlyWithInts ) {
     EXPECT_EQ( NUM_ELEMENTS, curnn::math::sum( error, x ) );
 }
 
-TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithFloatsAndEmptyResultsVector ) {
+TEST( curnnMathGpu, ReductionSumVectorizedComputesCorrectlyWithFloatsAndEmptyResultsVector ) {
     curnn::curnnError error;
     vector<float> x, results;
 
@@ -134,7 +133,7 @@ TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithFloatsAndEmptyResult
     }
 }
 
-TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithFloatsAndFullResultsVector ) {
+TEST( curnnMathGpu, ReductionSumVectorizedComputesCorrectlyWithFloatsAndFullResultsVector ) {
     curnn::curnnError error;
     vector<float> x, results;
 
@@ -152,7 +151,7 @@ TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithFloatsAndFullResults
     }
 }
 
-TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithIntsAndEmptyResultsVector ) {
+TEST( curnnMathGpu, ReductionSumVectorizedComputesCorrectlyWithIntsAndEmptyResultsVector ) {
     curnn::curnnError error;
     vector<int> x, results;
 
@@ -169,7 +168,7 @@ TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithIntsAndEmptyResultsV
     }
 }
 
-TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithIntsAndFullResultsVector ) {
+TEST( curnnMathGpu, ReductionSumVectorizedComputesCorrectlyWithIntsAndFullResultsVector ) {
     curnn::curnnError error;
     vector<int> x, results;
 
@@ -187,7 +186,7 @@ TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithIntsAndFullResultsVe
     }
 }
 
-TEST( curnnMath, SoftmaxComputesCorrectlyForFloats ) {
+TEST( curnnMathGpu, SoftmaxComputesCorrectlyForFloats ) {
     curnn::curnnError error;
     vector<float> x, results;
 
@@ -206,54 +205,41 @@ TEST( curnnMath, SoftmaxComputesCorrectlyForFloats ) {
     }
 }
 
-/*
-TEST( curnnMath, SoftmaxComputesCorrectlyOnTensors ) {
-    curnn::curnnError error;
-    
-    // Create tensor that holds 2 pages, and each page has 
-    // and M x N weight matrix, 1 x N bias vector, and 1 x N 
-    // results vector so the tensor has dimension:
-    // ( M + 1 + 1 ) X N X 2 X 0
-    uint N = 7;             // Num nodes in layer
-    uint I = 2;             // Num inputs 
-    uint M = I + 2;             // I inputs, a bias, and activation
-    uint D = 2;                 // depth of 2
-    curnn::tensor4<float> tensor( N, M, D, 1 );
-
-    // Fill tensor with data 
-    for ( int i = 0; i < tensor.z; i++ ) {
-        for ( int j = 0; j < tensor.y; j++ ) {
-            for ( int k = 0; k < tensor.x; k++ ) {
-                tensor( k, j, i, 0 ) = 0.7f;
-                std::cout << tensor( k, j, i, 0 ) << " ";
-            }
-            std::cout << std::endl;
-        }
-        std::cout << std::endl << std::endl;
-    }
-
-    // Simple inputs for testing ( needs to be same dimension as N )
+TEST( curnnMathCpu, CanPerformXminusYWithVectorizedCpuKernelWithFloats ) {
     std::vector<float> x;
-    std::vector<float> y;                       // Outputs
-
-    for ( int i = 0; i < I; i++ ) x.push_back( 0.5f );
-
-    // Execute softmax function on tensor using x and storing the results in y
-    curnn::math::softmax( error, x, tensor, I, y );
+    std::vector<float> y;
+    std::vector<float> out;
     
-    // Define expected results
-    float result_wxpb = 0.5f * 0.7f * N * D;
-    float result_smax = exp( result_wxpb ) / ( N * exp( result_wxpb ) );
-    float sum = 0.0f;
-
-    // Check results
-    for ( int i = 0; i < N; i++ ) {
-        EXPECT_NEAR( tensor( i, I + 1, 0, 0 ), result_smax, TOLERANCE );
+    for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+        x.push_back( float( i ) );
+        y.push_back( float( i + 1 ) );
+        out.push_back( 0.0f );
     }
-
-    for ( int i = 0; i < N; i++ ) {
-        std::cout << tensor( i, I + 1, 0, 0 ) << " ";
+    
+    // Perform CPU X - Y
+    xmyCpu( x, y, out );
+    
+    for ( size_t i = 0; i < out.size(); i++ ) {
+        EXPECT_EQ( out[ i ], -1.f );
     }
-    std::cout << std::endl;
 }
-*/
+
+TEST( curnnMathCpu, CanPerformXminusYWithVectorizedCpuKernelWithDoubles ) {
+    std::vector<double> x;
+    std::vector<double> y;
+    std::vector<double> out;
+    
+    for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+        x.push_back( double( i ) );
+        y.push_back( double( i + 1 ) );
+        out.push_back( 0.0 );
+    }
+    
+    // Perform CPU X - Y
+    xmyCpu( x, y, out );
+    
+    for ( size_t i = 0; i < out.size(); i++ ) {
+        EXPECT_EQ( out[ i ], -1.0 );
+    }
+}
+

@@ -74,7 +74,36 @@ template <> struct vectorizedTypeCpu<int>    { typedef __m128i vectType; };
 template <> struct vectorizedTypeCpu<char>   { typedef __m128i vectType; };
 template <> struct vectorizedTypeCpu<float>  { typedef __m128  vectType; };
 template <> struct vectorizedTypeCpu<double> { typedef __m128d vectType; };
+template <> struct vectorizedTypeCpu<float*>  { typedef __m128*  vectType; };
 
+// For vectorized instructions
+template <typename dType> struct vectInstructions;
+
+template <> struct vectInstructions<float> {
+    size_t sz() { return 4; }
+    
+    typedef __m128 (*load)( const float* );
+    static constexpr load mm_load_u = &_mm_loadu_ps;
+    
+    typedef __m128 (*sub)( __m128, __m128 );
+    static constexpr sub mm_sub_p = &_mm_sub_ps;
+    
+    typedef void (*store)( float*, __m128 );
+    static constexpr store mm_store_p = &_mm_store_ps;
+};
+
+template <> struct vectInstructions<double> {
+    size_t sz() { return 2; }
+    
+    typedef __m128d (*load)( const double* );
+    static constexpr load mm_load_u = &_mm_loadu_pd;
+    
+    typedef __m128d (*sub)( __m128d, __m128d );
+    static constexpr sub mm_sub_p = &_mm_sub_pd;
+    
+    typedef void (*store)( double*, __m128d );
+    static constexpr store mm_store_p = &_mm_store_pd;
+};
 /*
  * ==========================================================================================================
  * Enum			: curnnError

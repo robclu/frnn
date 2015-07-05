@@ -118,6 +118,19 @@ class layer : public typePolicy<dType, _nodes, _inputs, _depth> {
         inline const dType* getOutputs() const {
             return &outputs[ 0 ]; 
         }
+        
+        /*
+         * ==================================================================================================
+         * Function     : getErrors
+         *
+         * Description  : Retuns a pointer to the errors of the layer
+         *
+         * Outputs      : A constant pointer to the errors of the layer
+         * ==================================================================================================
+         */
+        inline const dType* getErrors() const {
+            return &(this->errors[ 0 ]); 
+        }
 };
 
 }   // Namespace curnn

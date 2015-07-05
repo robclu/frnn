@@ -52,7 +52,7 @@ TEST( curnnLayer, InitializesWeightsBiasesAndActivationsToZero ) {
    }
 }
 
-TEST( curnnLayer, CanInitializeiAndReadWeights ) {
+TEST( curnnLayer, CanInitializeAndReadWeights ) {
     curnnLayerSmaxf softmaxLayer;
     softmaxLayer.initializeWeights( 0.0f, 1.0f );
    
@@ -83,4 +83,23 @@ TEST( curnnLayer, CanForwardPassOnSoftmaxLayer ) {
     
     // Account for floating point variablity
     EXPECT_NEAR( sum, 1.0f, TOLERANCE );
+}
+
+TEST( curnnLayer, SoftmaxLayerCanDetermineErrorsCorrectly ) {
+    curnnLayerSmaxf softmaxLayer;
+
+    const size_t NUM_ELEMENTS = 16;
+    std::vector<float> targets, outs;
+
+    for ( int i = 0; i < NUM_ELEMENTS; i++ ) {
+        outs.push_back( float( i ) );
+        targets.push_back( float( i - 1 ) );
+    }
+
+    softmaxLayer.determineErrors( outs, targets );
+    const float* errs = softmaxLayer.getErrors();
+    
+    for ( uint i = 0; i < outs.size(); i++ ) {
+        EXPECT_EQ( outs[ i ] - targets[ i ], errs[ i ] );
+    }
 }
