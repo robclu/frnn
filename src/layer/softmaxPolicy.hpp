@@ -33,13 +33,46 @@
 namespace curnn {
 namespace policies {
 
+/*
+ * ==========================================================================================================
+ * Class		: softmaxPolicy 
+ *
+ * Desription	: Policy class for a softmax layer, which defines the forward and backward propogations
+ *
+ * Params		: dType		: The type of data for the network
+ *				: nodes		: The number of nodes for the layer
+ *				: inputs	: The number of inputs to the layer
+ * ==========================================================================================================
+ */
 template <typename dType, uint nodes, uint inputs, uint...>
 class softmaxPolicy {
 
 	public:
+		/*
+		 * ==================================================================================================
+		 * Function		: sofmaxPolicy
+		 *
+		 * Description	: Constructor for the softmaxPolicy. Sets the tensor (wba) which holds the weights,
+		 *                biases, and activations (using the forst 2 dimensions of the tensor), and the number
+		 *                of inputs for the layer.
+		 * ==================================================================================================
+		 */
 		explicit softmaxPolicy() :
 			wba( nodes, inputs + 2, 1, 1 ), numInputs( inputs ) {}
 
+		/*
+		 * ==================================================================================================
+		 * Function		: forward
+		 *
+		 * Description	: Forward propogates the inputs through the layer, to determine the activations
+		 *                (outputs for the softmax layer) and returns the outputs.
+		 *
+		 * Inputs		: ins	: The inputs to the layer, for example the outputs of the hidden layer before
+		 *                        this layer.
+		 *
+		 * Outputs		: outs	: The outputs of the layer after performing softmax( W*x + b ) on the inputs.
+		 * ==================================================================================================
+		 */
 		void forward( std::vector<dType>& ins, std::vector<dType>& outs );
 	private:
 		tensor4<dType>	wba;			// Tensor for weights, biases, and activations
