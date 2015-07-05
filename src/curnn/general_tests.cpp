@@ -113,3 +113,31 @@ TEST( curnnTypes, CanDetermineVectorizedCharFromChar ) {
 	EXPECT_EQ( typeid( cudaChar2 ).name(), typeid( curnnChar2 ).name() );
 	EXPECT_EQ( typeid( cudaChar4 ).name(), typeid( curnnChar4 ).name() );
 }
+
+TEST( curnnTypes, CanDetermineVectorizedCpuFloatFromFloat ) {
+    curnn::vectorizedTypeCpu<float>::vectType curnnVectorizedCpu;
+    __m128 sseVectorizedCpu;
+    
+    EXPECT_EQ( typeid( curnnVectorizedCpu ).name(), typeid( sseVectorizedCpu ).name() );
+}
+
+TEST( curnnTypes, CanDetermineVectorizedCpuDoubleFromDouble ) {
+    curnn::vectorizedTypeCpu<double>::vectType curnnVectorizedCpu;
+    __m128d sseVectorizedCpu;
+    
+    EXPECT_EQ( typeid( curnnVectorizedCpu ).name(), typeid( sseVectorizedCpu ).name() );
+}
+
+TEST( curnnTypes, CanDetermineVectorizedCpuIntFromInt ) {
+    curnn::vectorizedTypeCpu<int>::vectType curnnVectorizedCpu;
+    __m128i sseVectorizedCpu;
+    
+    EXPECT_EQ( typeid( curnnVectorizedCpu ).name(), typeid( sseVectorizedCpu ).name() );
+}
+
+TEST( curnnTypes, CanDetermineVectorizedCpuCharFromChar ) {
+    curnn::vectorizedTypeCpu<char>::vectType curnnVectorizedCpu;
+    __m128i sseVectorizedCpu;
+    
+    EXPECT_EQ( typeid( curnnVectorizedCpu ).name(), typeid( sseVectorizedCpu ).name() );
+}

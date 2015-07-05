@@ -24,16 +24,19 @@
 #include <cuda.h>
 #include <type_traits>
 
+#include <emmintrin.h>          // SSE vectorized types
+
 // Change if necessary
 #define MAX_BLOCKS			65536
 #define THREADS_PER_BLOCK	256
+
 namespace curnn {
 
 /* 
  * ==========================================================================================================
- * Struct		: vectorizeddType	 
+ * Struct		: vectorizedType	 
  * 
- * Description	: Gets a vectorzed (2) version of dType. For example, if dType is a float this 
+ * Description	: Gets a vectorzed version of dType. For example, if dType is a float this 
  *                will then get float2, similarity for int or double.
  *
  * Params		: dType		: The type of data (float, double etc..)
@@ -42,7 +45,7 @@ namespace curnn {
  */
 template <typename dType, int N> struct vectorizedType;
 
-// Macro to make instances of each type for all vector sizes
+// Macro to make instances of each type for all vector sizes for CUDA vectorized types
 #define CURNN_VECTORIZED_INSTANCE( dType )											\
 	template <> struct vectorizedType<dType, 1> { typedef dType ## 1  vectType; };	\
 	template <> struct vectorizedType<dType, 2> { typedef dType ## 2 vectType; };	\
@@ -55,6 +58,22 @@ CURNN_VECTORIZED_INSTANCE( uint   )
 CURNN_VECTORIZED_INSTANCE( char	  )
 
 #undef CURNN_VECTORIZED_INSTANCE
+
+/*
+ * ==========================================================================================================
+ * Struct       : vectorizedTypeCpu
+ * 
+ * Description  : Gets a vectorized (v4) version of a type for sse instructions.
+ * 
+ * Params       : dType     : The type of data (float, double, int )
+ * ==========================================================================================================
+ */
+template <typename dType> struct vectorizedTypeCpu;
+
+template <> struct vectorizedTypeCpu<int>    { typedef __m128i vectType; };
+template <> struct vectorizedTypeCpu<char>   { typedef __m128i vectType; };
+template <> struct vectorizedTypeCpu<float>  { typedef __m128  vectType; };
+template <> struct vectorizedTypeCpu<double> { typedef __m128d vectType; };
 
 /*
  * ==========================================================================================================
