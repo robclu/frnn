@@ -27,37 +27,37 @@ namespace curnn {
 
 /*
  * ==========================================================================================================
- * Class		: layer 
+ * Class        : layer 
  *
- * Description	: Layer class for the cuRNN that defines a generic class for a layer
+ * Description  : Layer class for the cuRNN that defines a generic class for a layer
  *
- * Params		: dType			: The type of data for the layer
- *              : _nodes		: The number of nodes in the layer
+ * Params       : dType	        : The type of data for the layer
+ *              : _nodes        : The number of nodes in the layer
  *              : _inputs       : The number of inputs to the layer
- *              : _depth		: The number of timesteps back or forward that have inputs to this layer
- *              : typePolicy    : The type of layer
+ *              : _depth        : The number of timesteps back or forward that have inputs to this layer
+ *              : typePol       : The type of layer
  * ==========================================================================================================
  */
-template <typename	dType		, 
-		  uint		_nodes		,
-          uint		_inputs		,
-          uint		_depth		,
-          template <typename, uint...> class typePolicy >	 
+template <typename	dType                               , 
+         uint		_nodes		                        ,
+         uint		_inputs		                        ,
+         uint		_depth		                        ,
+         template <typename, uint...> class typePolicy >	 
 class layer : public typePolicy<dType, _nodes, _inputs, _depth> {
 	public:
-		uint				numNodes;
-		uint				numInputs;
-		uint				depth;
+		uint                numNodes;
+		uint                numInputs;
+		uint                depth;
 		std::vector<dType>  outputs;
 	public:
 		/*
 		 * ==================================================================================================
-		 * Function		: layer 
+		 * Function     : layer 
 		 *
-		 * Description	: Defines the size of the layer parameters. The wights are stores as pages where each
+		 * Description  : Defines the size of the layer parameters. The wights are stores as pages where each
 		 *                page is the weights between the inputs or a previous iteration of a hidden layer. 
 		 *                Each page has the following format :
-		 *
+		 *                
 		 *                | Woo Wo1 ... WoN | N = nodes
 		 *                | W1o W11 ... W1N |
 		 *                |  .   .  .    .  |
@@ -73,11 +73,11 @@ class layer : public typePolicy<dType, _nodes, _inputs, _depth> {
 
 		/*
 		 * ==================================================================================================
-		 * Function		: outputs 
+		 * Function	    : outputs 
 		 *
-		 * Description	: Retuns a pointer to the outputs of the layer
+		 * Description  : Retuns a pointer to the outputs of the layer
 		 *
-		 * Outputs		: A constant pointer to the outputs of the layer
+		 * Outputs      : A constant pointer to the outputs of the layer
 		 * ==================================================================================================
 		 */
 		inline const dType* getOutputs() const {
