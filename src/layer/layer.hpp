@@ -31,10 +31,10 @@ namespace curnn {
  *
  * Description	: Layer class for the cuRNN that defines a generic class for a layer
  *
- * Params		: dType		    : The type of data for the layer
- *				: _nodes	    : The number of nodes in the layer
+ * Params		: dType			: The type of data for the layer
+ *				: _nodes		: The number of nodes in the layer
  *				: _inputs       : The number of inputs to the layer
- *				: _depth	    : The number of timesteps back or forward that have inputs to this layer
+ *				: _depth		: The number of timesteps back or forward that have inputs to this layer
  *				: typePolicy    : The type of layer
  * ==========================================================================================================
  */
