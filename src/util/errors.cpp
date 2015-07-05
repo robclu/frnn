@@ -15,7 +15,7 @@
  *
  *  _size.you should have received a copy of the GNU General Public License along
  *  with this program; if not, write to the Free Software Foundation,
- *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include "errors.h"
@@ -24,19 +24,19 @@ namespace curnn {
 namespace err {
 
 void allocError( curnn::curnnError& error, const char * varname ) {
-	std::cerr << "Error : Could not allocate memory for variable " << varname << "\n";
-	error = curnn::curnnError::CURNN_ALLOC_ERROR;
-}				
+    std::cerr << "Error : Could not allocate memory for variable " << varname << "\n";
+    error = curnn::curnnError::CURNN_ALLOC_ERROR;
+}               
 
 void copyError( curnn::curnnError& error, const char* varname ) {
-	std::cerr << "Error : Could not copy to/from variable " << varname << "\n";
-	error = curnn::curnnError::CURNN_COPY_ERROR;
+    std::cerr << "Error : Could not copy to/from variable " << varname << "\n";
+    error = curnn::curnnError::CURNN_COPY_ERROR;
 }
 
 void dimError( curnn::curnnError& error, const char* varname1, const char* varname2 ) {
-	std::cerr << "Error : Dimension mismatch for variables " << varname1 << " and " << varname2 << "\n";
-	error = curnn::curnnError::CURNN_DIMENSION_ERROR;
+    std::cerr << "Error : Dimension mismatch for variables " << varname1 << " and " << varname2 << "\n";
+    error = curnn::curnnError::CURNN_DIMENSION_ERROR;
 }
 
-}	// Namepsace err
-}	// Namespace curnn
+}   // Namepsace err
+}   // Namespace curnn

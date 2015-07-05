@@ -1,47 +1,47 @@
 ########################################################
-#					EXECUTABLE NAME 				   #
+#					EXECUTABLE NAME					   #
 ########################################################
 
-EXE 			:= math_tests
+EXE				:= math_tests
 
 ########################################################
 #					COMPILERS						   #
 ########################################################
 
 HOST_COMPILER	:= g++
-NVCC 			:= nvcc -ccbin $(HOST_COMPILER)
-CXX 			:= $(HOST_COMPILER)
+NVCC			:= nvcc -ccbin $(HOST_COMPILER)
+CXX				:= $(HOST_COMPILER)
 
 ########################################################
-#				INCLUDE DIRECTORIES 				   #
+#				INCLUDE DIRECTORIES					   #
 ########################################################
 
-INCLUDES 		:= -I/usr/local/cuda-7.0/include \
+INCLUDES		:= -I/usr/local/cuda-7.0/include \
 				   -I../Util
 
 ########################################################
-#					LIBRARIES 						   #
+#					LIBRARIES						   #
 ########################################################
 
-CUDA_LIBS 		:= -lcuda -lcublas -lgomp
-TEST_LIBS 		:= -lgtest -lgtest_main \
+CUDA_LIBS		:= -lcuda -lcublas -lgomp
+TEST_LIBS		:= -lgtest -lgtest_main \
 				   -lpthread
 
-LIB_DIR 		:= -L/usr/local/cuda/lib64
+LIB_DIR			:= -L/usr/local/cuda/lib64
 
 ########################################################
-#					COMPILER FLAGS 					   #
+#					COMPILER FLAGS					   #
 #                                                      #
 # To enable compiler warnings, remove -w and replace   #
 # with :                                               #
-# 			--compiler-options -Wall                   #
+#			--compiler-options -Wall                   #
 ########################################################
 
-CCFLAGS 		:= -std=c++11 -g -w -Xcompiler -fopenmp
-CUFLAGS 		:= -arch=sm_30
+CCFLAGS			:= -std=c++11 -g -w -Xcompiler -fopenmp
+CUFLAGS			:= -arch=sm_30
 
 ########################################################
-# 					TARGET RULES 					   #
+#					TARGET RULES					   #
 ########################################################
 
 all: tests  

@@ -15,7 +15,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program; if not, write to the Free Software Foundation,
- *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef _CURNN_ERRORS_
@@ -34,40 +34,40 @@ namespace err {
 
 /*
  * ==============================================================================================
- * Function		: allocError
+ * Function     : allocError
  *
- * Description	: Prints an error message of allocation failed
+ * Description  : Prints an error message of allocation failed
  *
- * Inputs		: varname	: The name of the variable that could not be allocated
+ * Inputs       : varname   : The name of the variable that could not be allocated
  * ==============================================================================================
  */
-void allocError( curnn::curnnError& error, const char * varname );	
+void allocError( curnn::curnnError& error, const char * varname );  
 
 /*
  * ==============================================================================================
- * Function		: copyError
+ * Function     : copyError
  *
- * Description	: Prints an error message if host to device, or device to host copy failed
+ * Description  : Prints an error message if host to device, or device to host copy failed
  *
- * Inputs		: varname	: The name of the variable that could not be copied to/from
+ * Inputs       : varname   : The name of the variable that could not be copied to/from
  * ==============================================================================================
  */
 void copyError( curnn::curnnError& error, const char* varname );
 
 /*
  * ==============================================================================================
- * Function		: dimError
+ * Function     : dimError
  *
- * Description	: Prints an error message if there was a dimension error
+ * Description  : Prints an error message if there was a dimension error
  *
- * Inputs		: varname1	: The name of first variable causing the dimension error
- *				: varanme2	: The name of the second variable causing the dimension error
+ * Inputs       : varname1  : The name of first variable causing the dimension error
+ *              : varanme2  : The name of the second variable causing the dimension error
  * ==============================================================================================
  */
 void dimError( curnn::curnnError& error, const char* varname1, const char* varname2 );
 
-}	// Namepsace err
-}	// Namespace curnn
+}   // Namepsace err
+}   // Namespace curnn
 
 #endif
 

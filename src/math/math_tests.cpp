@@ -15,7 +15,7 @@
  *
  *  _size.you should have received a copy of the GNU General Public License along
  *  with this program; if not, write to the Free Software Foundation,
- *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <gtest/gtest.h>
@@ -30,7 +30,7 @@ using std::vector;
 // Note : Do not make this so big that the GPU will run out of memory,
 //        which is only really a problem for the double precision functions
 const size_t NUM_ELEMENTS = 3e4;
-const float  TOLERANCE	  = 1e-4;     // For difference between GPU and CPU math functions
+const float  TOLERANCE    = 1e-4;     // For difference between GPU and CPU math functions
 
 /* =========================================== NOTES ========================================================
  *
@@ -44,208 +44,216 @@ const float  TOLERANCE	  = 1e-4;     // For difference between GPU and CPU math 
  * ==========================================================================================================
  */
 
+TEST( curnnMath, CanGenerateRandomNumbersUniformDistribution ) {
+    float lo = 0.0f; float hi = 0.1f;
+    
+    EXPECT_GE( curnn::math::rand( lo, hi ), lo );
+    EXPECT_LT( curnn::math::rand( lo, hi ), hi );
+}
+
 TEST( curnnMath, AxpyOperationComputesCorrectlyWithFloats ) {
-	curnn::curnnError error;
-	const float A = 2.0f;
+    curnn::curnnError error;
+    const float A = 2.0f;
 
-	vector<float> x;
-	vector<float> y;
+    vector<float> x;
+    vector<float> y;
 
-	// Fill vectors with data
-	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-		x.push_back( float( i ) ); 
-		y.push_back( float( i ) );
-	}
+    // Fill vectors with data
+    for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+        x.push_back( float( i ) ); 
+        y.push_back( float( i ) );
+    }
 
-	// axpy with floats
-	curnn::math::axpy( error, A, x, y );
+    // axpy with floats
+    curnn::math::axpy( error, A, x, y );
 
-	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-		EXPECT_EQ( y[i], A * i + i );
-	}
+    for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+        EXPECT_EQ( y[i], A * i + i );
+    }
 }
 
 TEST( curnnMath, AxpyOperationComputesCorrectlyWithDoubles ) {
-	curnn::curnnError error;
-	const double A = 2.0f;
-	
-	vector<double> x;
-	vector<double> y;
+    curnn::curnnError error;
+    const double A = 2.0f;
+    
+    vector<double> x;
+    vector<double> y;
 
-	// Fill vectors with data
-	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-		x.push_back( double( i ) ); 
-		y.push_back( double( i ) );
-	}
+    // Fill vectors with data
+    for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+        x.push_back( double( i ) ); 
+        y.push_back( double( i ) );
+    }
 
-	// Performs axpy with doubles
-	curnn::math::axpy( error, A, x, y );
+    // Performs axpy with doubles
+    curnn::math::axpy( error, A, x, y );
 
-	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-		EXPECT_EQ( y[i], A * i + i );
-	}
+    for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+        EXPECT_EQ( y[i], A * i + i );
+    }
 }
 
 TEST( curnnMath, ReductionSumComputesCorrectlyWithFloats ) {
-	curnn::curnnError error;
-	vector<float> x;
+    curnn::curnnError error;
+    vector<float> x;
 
-	// Fill x with data 
-	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-		x.push_back( 1.f );
-	}
+    // Fill x with data 
+    for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+        x.push_back( 1.f );
+    }
 
-	EXPECT_EQ( NUM_ELEMENTS, curnn::math::sum( error, x ) );
+    EXPECT_EQ( NUM_ELEMENTS, curnn::math::sum( error, x ) );
 }
 
 TEST( curnnMath, ReductionSumComputesCorrectlyWithInts ) {
-	curnn::curnnError error;
-	vector<int> x;
+    curnn::curnnError error;
+    vector<int> x;
 
-	// Fill x with data 
-	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-		x.push_back( int( 1 ) );
-	}
+    // Fill x with data 
+    for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+        x.push_back( int( 1 ) );
+    }
 
-	EXPECT_EQ( NUM_ELEMENTS, curnn::math::sum( error, x ) );
+    EXPECT_EQ( NUM_ELEMENTS, curnn::math::sum( error, x ) );
 }
 
 TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithFloatsAndEmptyResultsVector ) {
-	curnn::curnnError error;
-	vector<float> x, results;
+    curnn::curnnError error;
+    vector<float> x, results;
 
-	// Fill x with data 
-	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-		x.push_back( 1.f );
-	}
+    // Fill x with data 
+    for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+        x.push_back( 1.f );
+    }
 
-	// Get the results of the sum into the results vector
-	curnn::math::sumVectorized( error, x, results );
+    // Get the results of the sum into the results vector
+    curnn::math::sumVectorized( error, x, results );
 
-	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-		EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
-	}
+    for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+        EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
+    }
 }
 
 TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithFloatsAndFullResultsVector ) {
-	curnn::curnnError error;
-	vector<float> x, results;
+    curnn::curnnError error;
+    vector<float> x, results;
 
-	// Fill x with data 
-	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-		x.push_back( 1.f );
-		results.push_back( 0.f );
-	}
+    // Fill x with data 
+    for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+        x.push_back( 1.f );
+        results.push_back( 0.f );
+    }
 
-	// Get the results of the sum into the results vector
-	curnn::math::sumVectorized( error, x, results );
-		
-	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-		EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
-	}
+    // Get the results of the sum into the results vector
+    curnn::math::sumVectorized( error, x, results );
+        
+    for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+        EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
+    }
 }
 
 TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithIntsAndEmptyResultsVector ) {
-	curnn::curnnError error;
-	vector<int> x, results;
+    curnn::curnnError error;
+    vector<int> x, results;
 
-	// Fill x with data 
-	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-		x.push_back( 1 );
-	}
+    // Fill x with data 
+    for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+        x.push_back( 1 );
+    }
 
-	// Get the results of the sum into the results vector
-	curnn::math::sumVectorized( error, x, results );
+    // Get the results of the sum into the results vector
+    curnn::math::sumVectorized( error, x, results );
 
-	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-		EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
-	}
+    for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+        EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
+    }
 }
 
 TEST( curnnMath, ReductionSumVectorizedComputesCorrectlyWithIntsAndFullResultsVector ) {
-	curnn::curnnError error;
-	vector<int> x, results;
+    curnn::curnnError error;
+    vector<int> x, results;
 
-	// Fill x with data 
-	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-		x.push_back( 1 );
-		results.push_back( 0.f );
-	}
+    // Fill x with data 
+    for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+        x.push_back( 1 );
+        results.push_back( 0.f );
+    }
 
-	// Get the results of the sum into the results vector
-	curnn::math::sumVectorized( error, x, results );
+    // Get the results of the sum into the results vector
+    curnn::math::sumVectorized( error, x, results );
 
-	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-		EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
-	}
+    for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+        EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
+    }
 }
 
 TEST( curnnMath, SoftmaxComputesCorrectlyForFloats ) {
-	curnn::curnnError error;
-	vector<float> x, results;
+    curnn::curnnError error;
+    vector<float> x, results;
 
-	// Fill x with data 
-	for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
-		x.push_back( 1.f );
-	}
+    // Fill x with data 
+    for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+        x.push_back( 1.f );
+    }
 
-	// Get the results of the sum into the results vector
-	curnn::math::softmax( error, x, results );
+    // Get the results of the sum into the results vector
+    curnn::math::softmax( error, x, results );
 
-	for ( size_t i = 1; i < NUM_ELEMENTS; i++ ) {
-		float softmax_i = exp( 1.f ) / ( exp( 1.f ) * (float)NUM_ELEMENTS );
-		// Account for difference in GPU exp and CPU exp
-		EXPECT_NEAR( softmax_i, results[ i ], TOLERANCE );
-	}
+    for ( size_t i = 1; i < NUM_ELEMENTS; i++ ) {
+        float softmax_i = exp( 1.f ) / ( exp( 1.f ) * (float)NUM_ELEMENTS );
+        // Account for difference in GPU exp and CPU exp
+        EXPECT_NEAR( softmax_i, results[ i ], TOLERANCE );
+    }
 }
 
+/*
 TEST( curnnMath, SoftmaxComputesCorrectlyOnTensors ) {
-	curnn::curnnError error;
-	
-	// Create tensor that holds 2 pages, and each page has 
-	// and M x N weight matrix, 1 x N bias vector, and 1 x N 
-	// results vector so the tensor has dimension:
-	// ( M + 1 + 1 ) X N X 2 X 0
-	uint N = 7;				// Num nodes in layer
-	uint I = 2;				// Num inputs 
-	uint M = I + 2;				// I inputs, a bias, and activation
-	uint D = 2;					// depth of 2
-	curnn::tensor4<float> tensor( N, M, D, 1 );
+    curnn::curnnError error;
+    
+    // Create tensor that holds 2 pages, and each page has 
+    // and M x N weight matrix, 1 x N bias vector, and 1 x N 
+    // results vector so the tensor has dimension:
+    // ( M + 1 + 1 ) X N X 2 X 0
+    uint N = 7;             // Num nodes in layer
+    uint I = 2;             // Num inputs 
+    uint M = I + 2;             // I inputs, a bias, and activation
+    uint D = 2;                 // depth of 2
+    curnn::tensor4<float> tensor( N, M, D, 1 );
 
-	// Fill tensor with data 
-	for ( int i = 0; i < tensor.z; i++ ) {
-		for ( int j = 0; j < tensor.y; j++ ) {
-			for ( int k = 0; k < tensor.x; k++ ) {
-				tensor( k, j, i, 0 ) = 0.7f;
-				std::cout << tensor( k, j, i, 0 ) << " ";
-			}
-			std::cout << std::endl;
-		}
-		std::cout << std::endl << std::endl;
-	}
+    // Fill tensor with data 
+    for ( int i = 0; i < tensor.z; i++ ) {
+        for ( int j = 0; j < tensor.y; j++ ) {
+            for ( int k = 0; k < tensor.x; k++ ) {
+                tensor( k, j, i, 0 ) = 0.7f;
+                std::cout << tensor( k, j, i, 0 ) << " ";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl << std::endl;
+    }
 
-	// Simple inputs for testing ( needs to be same dimension as N )
-	std::vector<float> x;
-	std::vector<float> y;						// Outputs
+    // Simple inputs for testing ( needs to be same dimension as N )
+    std::vector<float> x;
+    std::vector<float> y;                       // Outputs
 
-	for ( int i = 0; i < I; i++ ) x.push_back( 0.5f );
+    for ( int i = 0; i < I; i++ ) x.push_back( 0.5f );
 
-	// Execute softmax function on tensor using x and storing the results in y
-	curnn::math::softmax( error, x, tensor, I, y );
-	
-	// Define expected results
-	float result_wxpb = 0.5f * 0.7f * N * D;
-	float result_smax = exp( result_wxpb ) / ( N * exp( result_wxpb ) );
-	float sum = 0.0f;
+    // Execute softmax function on tensor using x and storing the results in y
+    curnn::math::softmax( error, x, tensor, I, y );
+    
+    // Define expected results
+    float result_wxpb = 0.5f * 0.7f * N * D;
+    float result_smax = exp( result_wxpb ) / ( N * exp( result_wxpb ) );
+    float sum = 0.0f;
 
-	// Check results
-	for ( int i = 0; i < N; i++ ) {
-		EXPECT_NEAR( tensor( i, I + 1, 0, 0 ), result_smax, TOLERANCE );
-	}
+    // Check results
+    for ( int i = 0; i < N; i++ ) {
+        EXPECT_NEAR( tensor( i, I + 1, 0, 0 ), result_smax, TOLERANCE );
+    }
 
-	for ( int i = 0; i < N; i++ ) {
-		std::cout << tensor( i, I + 1, 0, 0 ) << " ";
-	}
-	std::cout << std::endl;
+    for ( int i = 0; i < N; i++ ) {
+        std::cout << tensor( i, I + 1, 0, 0 ) << " ";
+    }
+    std::cout << std::endl;
 }
-
+*/

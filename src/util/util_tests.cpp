@@ -15,7 +15,7 @@
  *
  *  _size.you should have received a copy of the GNU General Public License along
  *  with this program; if not, write to the Free Software Foundation,
- *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <gtest/gtest.h>
@@ -24,34 +24,34 @@
 #include "../curnn/curnn.h"
 
 TEST( curnnErrors, DeterminesErrorForBadAlloc ) {
-	
-	curnn::curnnError error;	
-	float* devPointer;
+    
+    curnn::curnnError error;    
+    float* devPointer;
 
-	// Try an malloc without casting to void pointer, to get error
-	if ( cudaMalloc( (void**)devPointer, sizeof( float ) ) != cudaSuccess ) {
-		curnn::err::allocError( error, stringify( devPointer ) );
-	}
+    // Try an malloc without casting to void pointer, to get error
+    if ( cudaMalloc( (void**)devPointer, sizeof( float ) ) != cudaSuccess ) {
+        curnn::err::allocError( error, stringify( devPointer ) );
+    }
 
-	EXPECT_EQ( error, curnn::curnnError::CURNN_ALLOC_ERROR );
+    EXPECT_EQ( error, curnn::curnnError::CURNN_ALLOC_ERROR );
 }
 
 TEST( curnnErrors, DeterminesErrorForBadCopy ) {
-	
-	curnn::curnnError error;
-	std::vector<float> hostData = { 3.f, 4.f };
-	float* devData;
+    
+    curnn::curnnError error;
+    std::vector<float> hostData = { 3.f, 4.f };
+    float* devData;
 
-	// Allocate memory on device (for 1 float)
-	if ( cudaMalloc( (void**)&devData, sizeof( float ) ) != cudaSuccess ) {
-		curnn::err::allocError( error, stringify( devPointer ) );
-	}
+    // Allocate memory on device (for 1 float)
+    if ( cudaMalloc( (void**)&devData, sizeof( float ) ) != cudaSuccess ) {
+        curnn::err::allocError( error, stringify( devPointer ) );
+    }
 
-	// Try and copy too much data
-	if ( cudaMemcpy( devData, &hostData[0], hostData.size() * sizeof( float ), cudaMemcpyHostToDevice ) !=
-		   cudaSuccess ) {
-		curnn::err::copyError( error, stringify( devData ) );
-	}
+    // Try and copy too much data
+    if ( cudaMemcpy( devData, &hostData[0], hostData.size() * sizeof( float ), cudaMemcpyHostToDevice ) !=
+           cudaSuccess ) {
+        curnn::err::copyError( error, stringify( devData ) );
+    }
 
-	EXPECT_EQ( error, curnn::curnnError::CURNN_COPY_ERROR );
+    EXPECT_EQ( error, curnn::curnnError::CURNN_COPY_ERROR );
 }
