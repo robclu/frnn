@@ -15,7 +15,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program; if not, write to the Free Software Foundation,
- *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef _CURNN_LAYER_
@@ -35,14 +35,14 @@ namespace curnn {
  *              : _nodes        : The number of nodes in the layer
  *              : _inputs       : The number of inputs to the layer
  *              : _depth        : The number of timesteps back or forward that have inputs to this layer
- *              : typePol       : The type of layer
+ *              : typePolicy    : The type of layer
  * ==========================================================================================================
  */
 template <typename	dType                               , 
-         uint		_nodes		                        ,
-         uint		_inputs		                        ,
-         uint		_depth		                        ,
-         template <typename, uint...> class typePolicy >	 
+		 uint		_nodes		                        ,
+		 uint		_inputs		                        ,
+		 uint		_depth		                        ,
+		 template <typename, uint...> class typePolicy >	 
 class layer : public typePolicy<dType, _nodes, _inputs, _depth> {
 	public:
 		uint                numNodes;
