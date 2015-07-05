@@ -22,7 +22,7 @@ INCLUDES 		:= -I/usr/local/cuda-7.0/include -I.
 #					LIBRARIES 						   #
 ########################################################
 
-CUDA_LIBS 		:= -lcuda -lcublas
+CUDA_LIBS 		:= -lcuda -lcublas -lgomp
 TEST_LIBS 		:= -lgtest -lgtest_main \
 				   -lpthread
 
@@ -36,14 +36,14 @@ LIB_DIR 		:= -L/usr/local/cuda/lib64
 # 			--compiler-options -Wall                   #
 ########################################################
 
-CCFLAGS 		:= -std=c++11 -O3 -w
+CCFLAGS 		:= -std=c++11 -O3 -w -Xcompiler -fopenmp
 CUFLAGS 		:= -arch=sm_30
 
 ########################################################
 # 					TARGET RULES 					   #
 ########################################################
 
-all: tests cleanobs 
+all: tests
 
 tests: tests
 
@@ -62,15 +62,12 @@ general_tests.o : curnn/general_tests.cpp
 
 ###################### MATH ############################
 
-math.o : math/math.cpp
-	$(NVCC) -x cu $(INLCUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -dc $<
-
 math_tests.o: math/math_tests.cpp 
 	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -c $<
 
-##################### MATRIX ###########################
+##################### LAYER ###########################
 
-matrix_tests.o: matrix/matrix_tests.cpp 
+layer_tests.o: layer/layer_tests.cpp 
 	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -c $<
 
 ##################### TENSOR ###########################
@@ -84,8 +81,8 @@ main.o : main.cpp
 	$(NVCC) $(INCLUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -c $<
 
 tests: errors.o util_tests.o general_tests.o		\
-	   math.o math_tests.o matrix_tests.o 			\
-	   tensor_tests.o main.o
+	   math_tests.o layer_tests.o tensor_tests.o    \
+	   main.o
 	$(NVCC) $(LDFLAGS) -o $(EXE) $+ $(LIB_DIR) \
 		$(CUDA_LIBS) $(TEST_LIBS)	
 		

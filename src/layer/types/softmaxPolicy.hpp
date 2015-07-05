@@ -25,10 +25,11 @@
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
 
-#include "../tensor/tensor.cuh"
-#include "../util/errors.h"
-#include "../curnn/curnn.h"
-#include "../math/math.cuh"
+#include "../../tensor/tensor.cuh"
+#include "../../util/errors.h"
+#include "../../curnn/curnn.h"
+#include "../../math/math.cuh"
+#include "../../math/blas/curnnBlas.h"
 
 namespace curnn {
 namespace ltype {
@@ -159,8 +160,9 @@ void softmaxPolicy<dType, nds, ipts, dth>::forward( std::vector<dType>& ins, std
 
         // Multiply inputs and weights (column-wise) and add biases { W^(T)*x + b }
         dType alpha = 1; dType beta = 1;
-        status = cublasSgemv( handle, CUBLAS_OP_N, wba.x(), numInputs, &alpha, dPointers[ wOffset ], 
-                              wba.x(), dPointers[ inOffset ], 1, &beta, dPointers[ bOffset ], 1 );
+        status = curnn::blas::functions<dType>::gemv( 
+                handle , CUBLAS_OP_N          , wba.x(), numInputs, &alpha              , dPointers[ wOffset ]  , 
+                wba.x(), dPointers[ inOffset ], 1      , &beta    , dPointers[ bOffset ], 1                     );
         
         // Assign results to results pointer array
         results_h[ threadId ] = dPointers[ bOffset ];
@@ -216,9 +218,7 @@ void softmaxPolicy<dType, nds, ipts, dth>::forward( std::vector<dType>& ins, std
     }
 
     cublasDestroy( handle );
-
-    cudaDeviceSynchronize();
-    
+ 
     for ( int i = 0; i < dPointers.size(); i++ ) cudaFree( dPointers[i] );
     cudaFree( results_d ); cudaFree( acts );
 }

@@ -31,6 +31,7 @@
 #include "../tensor/tensor.cuh"
 #include "../util/errors.h"
 #include "../curnn/curnn.h"
+#include "blas/curnnBlas.h"
 #include "math.cuh"
 
 namespace curnn {
@@ -57,39 +58,24 @@ inline dType rand( dType lo, dType hi ) {
     std::uniform_real_distribution<>    dist( lo, hi );
     return static_cast<dType>( dist( gen ) );
 }
-    
-/*
- * ==========================================================================================================
- * Function     : axpy
- *
- * Description  : Performs simgle precision a*X + Y
- *
- * Inputs       : error     : cuRNN error type for result of operations
- *              : a         : Constant for multiplication 
- *              : x         : Vector to multiply with a
- * 
- * Outputs/(I)  : y         : Vector used in a*X + Y, and where the result of a*X + Y is stored
- * ==========================================================================================================
- */
-void axpy( curnnError& error          , const float a         , 
-           const std::vector<float>& x, std::vector<float>& y );    
 
 /*
  * ==========================================================================================================
  * Function     : axpy
  *
- * Description  : Performs double precision a*X + Y
+ * Description  : Performs simgle precision a*X + Y, using CUBLAS
  *
  * Inputs       : error     : cuRNN error type for result of operations
  *              : a         : Constant for multiplication 
  *              : x         : Vector to multiply with a
  * 
- * Outputs/(I)  : y         : Vector used in a*X + Y, and where the result of a*X + Y is stored
+ * Outputs      : y         : Vector used in a*X + Y, and where the result of a*X + Y is stored
+ * 
+ * Params       : dType     : The type of data used for the computation
  * ==========================================================================================================
  */
-void axpy( curnnError& error           , const double a         , 
-           const std::vector<double>& x, std::vector<double>& y );  
-
+template <typename dType>
+void axpy( curnnError& errror, const dType a, const std::vector<dType>& x, std::vector<dType>& y );    
 
 /*
  * ==========================================================================================================
@@ -136,7 +122,7 @@ void sumVectorized( curnnError& error, const std::vector<dType>& x, std::vector<
  *
  * Inputs       : status    : Cublas status for determining correct completion of operation
  *        
- * Outputs/(I)  : x         : Vector to compute the softmax of, and to store the result in
+ * Outputs      : x         : Vector to compute the softmax of, and to store the result in
  *
  * Params       : dType     : The type of data (float or int) double not supported due to lack of
  *                            support for doubles in some Nvidia kernel functions
@@ -146,6 +132,53 @@ template <typename dType>
 void softmax( curnnError& error, const std::vector<dType>& x, std::vector<dType>& val );
 
 /* ============================= Implementations for templated functions ================================== */
+
+template <typename dType>
+void axpy( curnnError& error, const dType a, const std::vector<dType>& x, std::vector<dType>& y ) {
+
+    cublasHandle_t handle;
+    cublasStatus_t status;
+    dType* da = 0, *dx = 0, *dy = 0;
+
+    status = cublasCreate( &handle );
+    cublasSetPointerMode( handle, CUBLAS_POINTER_MODE_DEVICE );
+
+    // Allocate and fill device vectors with host vector data 
+    if ( cudaMalloc( (void**)&da, sizeof( dType ) ) != cudaSuccess ) {
+        curnn::err::allocError( error, stringify( da ) );
+    }
+    if ( cudaMalloc( (void**)&dx, x.size() * sizeof( dType ) ) != cudaSuccess ) {
+        curnn::err::allocError( error, stringify( dx ) );   
+    }
+    if ( cudaMalloc( (void**)&dy, y.size() * sizeof( dType ) ) != cudaSuccess ) {
+        curnn::err::allocError( error, stringify( dy ) );   
+    }
+
+    // Fill device vectors with data
+    if ( cudaMemcpy( da, &a, sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
+        curnn::err::copyError( error, stringify( da ) );
+    }
+    if ( cudaMemcpy( dx, &x[0], x.size() * sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
+        curnn::err::copyError( error, stringify( da ) );
+    }
+    if ( cudaMemcpy( dy, &y[0], y.size() * sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
+        curnn::err::copyError( error, stringify( da ) );
+    }
+
+    // Perform CUBLAS axpy using wrapper blas library
+    status = curnn::blas::functions<dType>::axpy( handle, x.size(), da, dx, 1, dy, 1 );
+
+    if ( cudaMemcpy( &y[0], dy, y.size() * sizeof( dType ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
+        curnn::err::copyError( error, stringify( y ) );
+    }
+
+    status = cublasDestroy( handle );
+
+    cudaFree( da );
+    cudaFree( dx );
+    cudaFree( dy );
+
+} 
 
 template <typename dType>
 dType sum( curnnError& error, const std::vector<dType>& x ) {
