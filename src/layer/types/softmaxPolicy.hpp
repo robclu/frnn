@@ -89,7 +89,7 @@ class softmaxPolicy {
          * Outputs      : The results are stored in the errors vector of the class
          * ==================================================================================================
          */
-        void getErrors( std::vector<dType> outs, std::vector<dType> targets );
+        void getErrors( std::vector<dType>& outs, std::vector<dType>& targets );
         
     protected:
         tensor4<dType>      wba;            // Tensor for weights, biases, and activations
@@ -225,13 +225,14 @@ void softmaxPolicy<dType, nds, ipts, dth>::forward( std::vector<dType>& ins, std
 
 template <typename dType, uint nds, uint ipts, uint dth>
 void softmaxPolicy<dType, nds, ipts, dth>::getErrors( std::vector<dType>& outs, std::vector<dType>& targets ) {
-    curnnError& error;
+    curnnError error;
     if ( outs.size() != targets.size() ) {
         curnn::err::dimError( error, stringify( outs ), stringify( targets ) );
         return;
     }
+    __m128* ots = (__m128*)(&outs[0]);
     // Data will never be big enough to use GPU, so use CPU
-    for ( uint i = 0; i < outs.size(); i++ ) error[ i ] = outs[ i ] - targets[ i ];
+    for ( uint i = 0; i < outs.size(); i++ ) errors[ i ] = outs[ i ] - targets[ i ];
 }
 
 }   // Namepsace lloss
