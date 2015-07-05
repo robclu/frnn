@@ -50,7 +50,7 @@ namespace math  {
  * Params       : dType     : The type of data of the output element
  * ==========================================================================================================
  */
-template <typename dType, class distribution = std::uniform_real_distribution<>>
+template <typename dType>
 inline dType rand( dType lo, dType hi ) {
     std::random_device                  rd;                             // Random device
     std::mt19937                        gen( rd() );                    // Generator
@@ -71,7 +71,7 @@ inline dType rand( dType lo, dType hi ) {
  * Outputs/(I)  : y         : Vector used in a*X + Y, and where the result of a*X + Y is stored
  * ==========================================================================================================
  */
-void axpy( curnnError& error   , const float a, 
+void axpy( curnnError& error          , const float a         , 
            const std::vector<float>& x, std::vector<float>& y );    
 
 /*
@@ -87,7 +87,7 @@ void axpy( curnnError& error   , const float a,
  * Outputs/(I)  : y         : Vector used in a*X + Y, and where the result of a*X + Y is stored
  * ==========================================================================================================
  */
-void axpy( curnnError& error    , const double a, 
+void axpy( curnnError& error           , const double a         , 
            const std::vector<double>& x, std::vector<double>& y );  
 
 

@@ -20,7 +20,7 @@
 
 #include "math.hpp"
 
-void curnn::math::axpy( curnn::curnnError& error    , const float a, 
+void curnn::math::axpy( curnn::curnnError& error    , const float a         , 
                          const std::vector<float>& x, std::vector<float>& y ) {
 
     cublasHandle_t handle;
@@ -66,7 +66,7 @@ void curnn::math::axpy( curnn::curnnError& error    , const float a,
     cudaFree( dy );
 }
 
-void curnn::math::axpy( curnn::curnnError& error     , const double a, 
+void curnn::math::axpy( curnn::curnnError& error     , const double a         , 
                          const std::vector<double>& x, std::vector<double>& y ) {
 
     cublasHandle_t handle;
