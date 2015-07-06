@@ -33,6 +33,18 @@ namespace curnn {
 
 /*
  * ==========================================================================================================
+ * Enum         : deviceTypes
+ * 
+ * Decsiption   : Enumerator for the devices available for use
+ * ==========================================================================================================
+ */
+enum deviceType : bool {
+    CPU,
+    GPU
+};
+
+/*
+ * ==========================================================================================================
  * Enum         : curnnError
  *
  * Description  : Enumerator for possible erorrs in curnn.
@@ -42,7 +54,7 @@ enum curnnError {
     CURNN_ALLOC_ERROR       = 1,
     CURNN_COPY_ERROR        = 2,
     CURNN_DIMENSION_ERROR   = 3
-    };
+ };
 
 }   // Namepace curnn
 

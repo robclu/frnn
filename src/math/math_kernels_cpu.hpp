@@ -27,24 +27,24 @@
 
 template <typename dType>
 void xmyCpu( std::vector<dType>& v1, std::vector<dType>& v2, std::vector<dType>& res ) {
-    // Get size and pointers
-    vectInstructions<dType> vecIns;
+    typedef typename curnn::vectInstructions<dType>            vect_ins;
+    typedef typename curnn::vectorizedTypeCpu<dType>::vectType vect4;
+    
+    // Get size and pointers 
     const size_t N    = v1.size();
-    size_t step       = vecIns.sz();
+    size_t step       = vect_ins::typeSize();
     dType* v1p        = N > 0 ? &v1[ 0 ] : NULL;
     dType* v2p        = N > 0 ? &v2[ 0 ] : NULL;
     dType* resp       = &res[ 0 ];
     
-    
-    typedef typename vectorizedTypeCpu<dType>::vectType vect4;
     vect4 v14; vect4 v24; vect4 res4;
     
     // For every 4 elements
     for ( size_t i = 0; i < N; i += step ) {
-        v14  = vectInstructions<dType>::mm_load_u( v1p );          // Load to vectorized version
-        v24  = vectInstructions<dType>::mm_load_u( v2p );          // Load to vectorized version
-        res4 = vectInstructions<dType>::mm_sub_p( v14, v24 );      // Subtract
-        vectInstructions<dType>::mm_store_p( resp, res4 );          // Move result to output
+        v14  = vect_ins::mm_load_u( v1p );          // Load to vectorized version
+        v24  = vect_ins::mm_load_u( v2p );          // Load to vectorized version
+        res4 = vect_ins::mm_sub_p( v14, v24 );      // Subtract
+        vect_ins::mm_store_p( resp, res4 );          // Move result to output
         
         // Increment
         v1p += step; v2p += step; resp += step;

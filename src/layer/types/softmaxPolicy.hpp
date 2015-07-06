@@ -30,6 +30,7 @@
 #include "../../curnn/curnn.h"
 #include "../../math/math_kernels_gpu.cuh"
 #include "../../math/blas/curnnBlas.h"
+#include "../../math/math_general.h"
 
 namespace curnn {
 namespace ltype {
@@ -251,7 +252,7 @@ void softmaxPolicy<dType, nds, ipts, dth>::backward( std::vector<dType>& outs, s
     
     // Call CPU X minus Y kernel because these vectors will never be big 
     // enough to warrant the data transfer between the CPU and the GPU
-    curnn::blas::functions<dType>::xmy( outs, targets, errors );
+    curnn::mathTest<dType, curnn::deviceType::CPU>::xmy( outs, targets, errors );
 }
 
 template <typename dType, uint nds, uint ipts, uint dth>

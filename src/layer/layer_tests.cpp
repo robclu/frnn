@@ -85,18 +85,18 @@ TEST( curnnLayer, CanForwardPassOnSoftmaxLayer ) {
     EXPECT_NEAR( sum, 1.0f, TOLERANCE );
 }
 
-TEST( curnnLayer, SoftmaxLayerCanDetermineErrorsCorrectly ) {
+TEST( curnnLayer, SoftmaxLayerCanBackpropCorrectly ) {
     curnnLayerSmaxf softmaxLayer;
 
-    const size_t NUM_ELEMENTS = 16;
+    const size_t NODES = 16;
     std::vector<float> targets, outs;
 
-    for ( int i = 0; i < NUM_ELEMENTS; i++ ) {
+    for ( int i = 0; i < NODES; i++ ) {
         outs.push_back( float( i ) );
         targets.push_back( float( i - 1 ) );
     }
 
-    softmaxLayer.determineErrors( outs, targets );
+    softmaxLayer.backward( outs, targets );
     const float* errs = softmaxLayer.getErrors();
     
     for ( uint i = 0; i < outs.size(); i++ ) {

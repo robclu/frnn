@@ -62,9 +62,14 @@ template <> struct vectorizedTypeCpu<float*>  { typedef __m128*  vectType; };
 
 template <typename dType> struct vectInstructions;
 
+// Size functions for float and double
+constexpr size_t sizeFloatVect()  { return 4; }
+constexpr size_t sizeDoubleVect() { return 2; }
+
 // Float specification
 template <> struct vectInstructions<float> {
-    size_t sz() { return 4; }
+    
+    static constexpr auto typeSize = &sizeFloatVect;
     
     typedef __m128 (*load)( const float* );
     static constexpr load mm_load_u = &_mm_loadu_ps;
@@ -78,8 +83,9 @@ template <> struct vectInstructions<float> {
 
 // Double specification
 template <> struct vectInstructions<double> {
-    size_t sz() { return 2; }
-    
+   
+    static constexpr auto typeSize = &sizeDoubleVect;
+
     typedef __m128d (*load)( const double* );
     static constexpr load mm_load_u = &_mm_loadu_pd;
     

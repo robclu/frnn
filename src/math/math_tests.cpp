@@ -21,7 +21,8 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
-#include "math.hpp"     // Includes kernels 
+#include "math.hpp"             // Includes kernels 
+#include "math_general.h"
 
 using std::vector;
 
