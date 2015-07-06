@@ -91,6 +91,22 @@ class softmaxPolicy {
          * ==================================================================================================
          */
         void determineErrors( std::vector<dType>& outs, std::vector<dType>& targets );
+
+        /*
+         * ==================================================================================================
+         * Function     : backward 
+         * 
+         * Description  : Backward propogates the errors through the layer, for the softmax layer (as it is an
+         *                output layer) this just determines the difference between the targets and the
+         *                outputs.
+         * 
+         * Inputs       : outs      : The outputs of the layer
+         *              : targets   : The targets for each of the outputs of the layer
+         *              
+         * Outputs      : The results are stored in the errors vector
+         * ==================================================================================================
+         */
+        void backward( std::vector<dType>& outs, std::vector<dType>&targets );
         
     protected:
         tensor4<dType>      wba;            // Tensor for weights, biases, and activations
@@ -221,6 +237,21 @@ void softmaxPolicy<dType, nds, ipts, dth>::forward( std::vector<dType>& ins, std
  
     for ( int i = 0; i < dPointers.size(); i++ ) cudaFree( dPointers[i] );
     cudaFree( results_d ); cudaFree( acts );
+}
+
+template <typename dType, uint nds, uint ipts, uint dth>
+void softmaxPolicy<dType, nds, ipts, dth>::backward( std::vector<dType>& outs, std::vector<dType>& targets ) {
+    curnnError error; 
+    // Check dimensions
+    if ( outs.size() != targets.size() ) {
+        curnn::err::dimError( error, stringify( outs ), stringify( targets ) );
+    } else if ( outs.size() != errors.size() ) { 
+        curnn::err::dimError( error, stringify( outs ), stringify( errors ) );
+    }
+    
+    // Call CPU X minus Y kernel because these vectors will never be big 
+    // enough to warrant the data transfer between the CPU and the GPU
+    curnn::blas::functions<dType>::xmy( outs, targets, errors );
 }
 
 template <typename dType, uint nds, uint ipts, uint dth>
