@@ -27,15 +27,70 @@
 #include <cmath>
 
 namespace curnn {
+namespace functors {
+    
+/*
+ * ==========================================================================================================
+ * Struct       : sigmoid
+ * 
+ * Description  : Functor which provides the sigmoid operation
+ * ==========================================================================================================
+ */
+struct sigmoid {
+    /*
+     * ======================================================================================================
+     * Function     : operator()
+     * 
+     * Decription   : Overlaods the () operator to provide the sigmoid operation 
+     * 
+     * Inputs       : x     : The value on which the sigmoid function should operate
+     * 
+     * Outputs      : The results of applying the sigmoid operation to the input
+     * 
+     * dType        : The type of data to use
+     * ======================================================================================================
+     */
+    template <typename dType>
+    __host__ __device__ dType operator() ( const dType& x ) const {
+        return ( dType( 1 ) / ( dType( 1 ) + std::exp( dType( -1 ) * x ) ) );
+    }
+};
 
 /*
  * ==========================================================================================================
- * Struct		: expFunctor
+ * Struct       : sigmoidDerivative
+ * 
+ * Description  : Functor which provides the derivative of the sigmoid sigmoid operation
+ * ==========================================================================================================
+ */
+struct sigmoidDerivative {
+    /*
+     * ======================================================================================================
+     * Function     : operator()
+     * 
+     * Decription   : Overlaods the () operator to provide the derivative of the sigmoid operation 
+     * 
+     * Inputs       : x     : The value at whhich the derivative should be evaluated
+     * 
+     * Outputs      : The results of the derivative evaluted at the input value
+     * 
+     * dType        : The type of data to use
+     * ======================================================================================================
+     */
+    template <typename dType>
+    __host__ __device__ dType operator() ( const dType& x ) const {
+        return ( sigmoid( x ) * ( dType( 1 ) - sigmoid( x ) ) );
+    }
+};
+
+/*
+ * ==========================================================================================================
+ * Struct		: exp
  *
  * Description	: Functor which provides the exp operation
  * ==========================================================================================================
  */
-struct expFunctor {
+struct exp {
 	/*
 	 * ======================================================================================================
 	 * Function		: operator()
@@ -51,7 +106,7 @@ struct expFunctor {
 	 */
 	template <typename dType>
 	__host__ __device__ dType operator() ( const dType& value ) {
-		return exp( value );
+		return std::exp( value );
 	}
 };
 
@@ -83,6 +138,7 @@ struct voidFunctor {
 	}
 };
 
+}   // Namespace functors
 }	// Namespace curnn
 
 #endif

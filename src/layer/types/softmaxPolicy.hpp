@@ -121,7 +121,7 @@ void softmaxPolicy<dType, nds, ipts, dth>::forward( std::vector<dType>& ins, std
     std::vector<dType*> dPointers( 3 * wba.z(), 0 );
     dType*              results_h[ wba.z() ];           // Pointers to results of W*x + b on host
     dType**             results_d;                      // Pointers to results of W*x + b on device
-    expFunctor          expOp;                          // Exp operation for softmax
+    functors::exp       expOp;                          // Exp operation for softmax
 
     // Outputs vector must have same dimension as number of nodes
     if ( outs.size() < wba.x() ) outs.resize( wba.x(), 0 );

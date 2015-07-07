@@ -264,7 +264,7 @@ template <typename dType>
 void softmax( curnn::curnnError& error, const std::vector<dType>& x, std::vector<dType>& val ) {
 
     dType* in = 0, *out = 0;
-    expFunctor expOp;           // Define operation on each element to be exponentiation
+    functors::exp expOp;           // Define operation on each element to be exponentiation
 
     // Check output vector can hold all reasults
     if ( val.capacity() < x.size() ) val.reserve( x.size() );

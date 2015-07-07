@@ -246,8 +246,8 @@ __global__ void blockReduceAtomicVectorized( dType* in, dType* out, size_t N ) {
  *              : F         : A functor that acts on each element before summation, default to void
  * ==========================================================================================================
  */ 
-template <typename dType, typename F = voidFunctor>
-__global__ void blockReduceAtomicVectorizedAll( dType* in, dType* out, size_t N, F f = voidFunctor() ) {
+template <typename dType, typename F = functors::voidFunctor>
+__global__ void blockReduceAtomicVectorizedAll( dType* in, dType* out, size_t N, F f = functors::voidFunctor() ) {
     typedef typename curnn::vectorizedType<dType, 4>::vectType vect4;
     dType   sum  = dType( 0 );
     int     idx  = blockIdx.x * blockDim.x + threadIdx.x;
@@ -324,8 +324,8 @@ __global__ void blockScatter( dType* data, size_t N ) {
  *              : F         : The functor that defines the operation on the input data
  * ==========================================================================================================
  */
-template <typename dType, typename F = expFunctor>
-__global__ void softmaxKernel( dType* in, dType* out, size_t N, F f = expFunctor() ) {
+template <typename dType, typename F = functors::exp>
+__global__ void softmaxKernel( dType* in, dType* out, size_t N, F f = functors::exp() ) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
     // Each output is assumed to already have the sum of the exponent of each element

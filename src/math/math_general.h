@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "../curnn/types.h"
+#include "math.hpp"
 #include "math_kernels_cpu.hpp"
 
 namespace curnn {
@@ -55,6 +56,10 @@ template <typename dType> struct mathTest<dType, curnn::deviceType::CPU> {
 
 // Specify for GPU
 template <typename dType> struct mathTest<dType, curnn::deviceType::GPU> {
+    
+    // a*X plus Y function 
+    typedef void (*ax_plus_y)( curnnError&, std::vector<dType>&, std::vector<dType>& );
+    static constexpr ax_plus_y axpyTest = &math::axpy;
 };
 
 }
