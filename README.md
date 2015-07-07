@@ -10,12 +10,11 @@ The long term goal is to provide support for both CUDA and OpenCL. CUDA provides
 
 ### Software
 
-* C++ : 11 (Testing with gtest)
-* CUDA   : Cuda 7.0 API
-* OpenCL : Not yet supported
-* Linux  : Tested and working
-* Windows : Not yet tested
-* OSX : Not yet tested
+The currently used/supported software is:
+
+* C++11 (Testing with gtest)
+* CUDA 7.0
+* Linux 
 
 ### Hardware
 
@@ -27,11 +26,17 @@ The current version is v1.0.0 and supports the following functionality:
 
 __Note__: See the wiki for details on the functions and conceptual explanations (coming soon). 
 
+* Data :
+  * tensor4 (4D tensor)
+* Layers :
+  * softmax (negative log liklihood loss)
 * Math :
-  * axpy
-  * sum (sum of a vector, result is returned) 
-  * sumVectorized (sum of a vector, each element gets result)
-  * softmax 
+  * axpy (a x X + Y) [GPU]
+  * sum (sum of a vector, result is returned) [GPU]
+  * sumVectorized (sum of a vector, each element gets result) [GPU]
+  * softmax [GPU]
+  * xmy (X - Y) [CPU]
+
 
 ## Compiling and Running 
 
