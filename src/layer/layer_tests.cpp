@@ -24,10 +24,10 @@
 #include "layer.hpp"
 #include "types/softmaxPolicy.hpp"
 
-const size_t    INPUTS      = 3;
-const size_t    NODES       = 4;
+const size_t    INPUTS      = 3000;
+const size_t    NODES       = 40;
 const size_t    DEPTH       = 4;
-const float     TOLERANCE   = 1e-12;
+const float     TOLERANCE   = 1e-5;
 
 typedef curnn::layer<float, NODES, INPUTS, DEPTH, curnn::ltype::softmaxPolicy> curnnLayerSmaxf;
 
@@ -88,7 +88,6 @@ TEST( curnnLayer, CanForwardPassOnSoftmaxLayer ) {
 TEST( curnnLayer, SoftmaxLayerCanBackpropCorrectly ) {
     curnnLayerSmaxf softmaxLayer;
 
-    const size_t NODES = 16;
     std::vector<float> targets, outs;
 
     for ( int i = 0; i < NODES; i++ ) {

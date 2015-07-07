@@ -77,21 +77,6 @@ class softmaxPolicy {
          * ==================================================================================================
          */
         void forward( std::vector<dType>& ins, std::vector<dType>& outs );
-        
-        /*
-         * ==================================================================================================
-         * Function     : determinesErrors
-         * 
-         * Description  : Determines the errors of the layer using the layer outputs and targets and using a
-         *                negative log liklihood loss function
-         *                
-         * Inputs       : outs      : The outputs of the layer
-         *              : targets   : The targets for each output
-         * 
-         * Outputs      : The results are stored in the errors vector of the class
-         * ==================================================================================================
-         */
-        void determineErrors( std::vector<dType>& outs, std::vector<dType>& targets );
 
         /*
          * ==================================================================================================
@@ -253,19 +238,6 @@ void softmaxPolicy<dType, nds, ipts, dth>::backward( std::vector<dType>& outs, s
     // Call CPU X minus Y kernel because these vectors will never be big 
     // enough to warrant the data transfer between the CPU and the GPU
     curnn::mathTest<dType, curnn::deviceType::CPU>::xmy( outs, targets, errors );
-}
-
-template <typename dType, uint nds, uint ipts, uint dth>
-void softmaxPolicy<dType, nds, ipts, dth>::determineErrors( std::vector<dType>& outs, std::vector<dType>& targets ) {
-    curnnError error;
-    if ( outs.size() != targets.size() ) {
-        curnn::err::dimError( error, stringify( outs ), stringify( targets ) );
-        return;
-    }
-    
-    for ( uint i = 0; i < errors.size(); i ++ ) {
-        errors[ i ] = outs[ i ] - targets[ i ];
-    }
 }
 
 }   // Namepsace lloss
