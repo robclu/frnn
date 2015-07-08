@@ -33,12 +33,12 @@ namespace curnn {
 
 /*
  * ==========================================================================================================
- * Enum         : deviceTypes
+ * Enum         : device
  * 
  * Decsiption   : Enumerator for the devices available for use
  * ==========================================================================================================
  */
-enum deviceType : bool {
+enum device : bool {
     CPU,
     GPU
 };

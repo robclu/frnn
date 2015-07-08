@@ -39,14 +39,14 @@ namespace curnn {
  * Description  : Defines a struct that holds function pointers to the relevant CPU or GPU implementation
  *                 depending on the CPU or GPU template parameter
  *                 
- * Params       : dType     : The type of data the function must use 
- *              : device    : The device to use ( CURNN_DEVICE__CPU | CURNN_DEVICE_GPU )
+ * Params       : dType  : The type of data the function must use 
+ *              : dev    : The device to use (CPU | GPU)
  * ==========================================================================================================
  */
-template <typename dType, curnn::deviceType device> struct mathTest;
+template <typename dType, curnn::device dev> struct mathTest;
 
 // Specify for CPU
-template <typename dType> struct mathTest<dType, curnn::deviceType::CPU> {
+template <typename dType> struct mathTest<dType, curnn::device::CPU> {
     
     // X minus Y function
     typedef void (*x_minus_y)( std::vector<dType>&, std::vector<dType>&, std::vector<dType>& );
@@ -55,7 +55,7 @@ template <typename dType> struct mathTest<dType, curnn::deviceType::CPU> {
 };
 
 // Specify for GPU
-template <typename dType> struct mathTest<dType, curnn::deviceType::GPU> {
+template <typename dType> struct mathTest<dType, curnn::device::GPU> {
     
     // a*X plus Y function 
     typedef void (*ax_plus_y)( curnnError&, std::vector<dType>&, std::vector<dType>& );

@@ -21,10 +21,26 @@
 #ifndef _CURNN_SOFTMAX_KERNELS_CPU_
 #define _CURNN_SOFTMAX_KERNELS_CPU_
 
+#include "../../curnn/types.h"
+#include "../../util/errors.h"
+#include "../../math/math_general.h"
+
 namespace curnn {
-   
+    
 template <typename dType>
-void forward( std::vector<dType>& ins, std::vector<dType>& outs ) {
+void softmax_backward_cpu( std::vector<dType>& outs, std::vector<dType>& targets, std::vector<dType>& errors ) {
+  
+    curnnError error; 
+    // Check dimensions
+    if ( outs.size() != targets.size() ) {
+        curnn::err::dimError( error, stringify( outs ), stringify( targets ) );
+    } else if ( outs.size() != errors.size() ) { 
+        curnn::err::dimError( error, stringify( outs ), stringify( errors ) );
+    }
+    
+    // Call CPU X minus Y kernel because these vectors will never be big 
+    // enough to warrant the data transfer between the CPU and the GPU
+    curnn::mathTest<dType, device::CPU>::xmy( outs, targets, errors );
 }
 
 }   // Namespace curnn

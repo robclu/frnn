@@ -33,19 +33,21 @@ namespace curnn {
  * Description  : Layer class for the cuRNN that defines a generic class for a layer
  *
  * Params       : dType         : The type of data for the layer
- *              : device        : The device to use (CPU or GPU)
+ *              : dev           : The device to use (CPU or GPU)
  *              : _nodes        : The number of nodes in the layer
  *              : _inputs       : The number of inputs to the layer
  *              : _depth        : The number of timesteps back or forward that have inputs to this layer
  *              : typePolicy    : The type of layer
  * ==========================================================================================================
  */
-template <typename                            dType,
-          curnn::deviceType                   dev,
-          uint                                _nodes,
-          uint                                _inputs,
-          uint                                _depth,
-          template <typename, curnn::deviceType, uint...>  class typePolicy >     
+template <typename                          dType,
+          device                            dev,
+          uint                              _nodes,
+          uint                              _inputs,
+          uint                              _depth,
+          template <typename      , 
+                    curnn::device , 
+                    uint...       >  class typePolicy >     
 class layer : public typePolicy<dType, dev, _nodes, _inputs, _depth> {  
 
     public:
@@ -77,7 +79,7 @@ class layer : public typePolicy<dType, dev, _nodes, _inputs, _depth> {
 
         /*
          * ==================================================================================================
-         * Function     : initializeWeights 
+         * Function     : initializeWeights
          * 
          * Description  : Initialzes the weights between a certain range (by default the weights are
          *                initialized to 0 during construction.
@@ -87,6 +89,8 @@ class layer : public typePolicy<dType, dev, _nodes, _inputs, _depth> {
          * ==================================================================================================
          */
         inline void initializeWeights( dType min, dType max ) {
+            // Use the layer policy weight intialization
+            // which will use the CPU/GPU as required
             for ( uint d = 0; d < depth; d++ ) {
                 for( uint i = 0; i < numInputs; i++ ) {
                     for ( uint n = 0; n < numNodes; n++ ) {
