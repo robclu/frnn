@@ -23,13 +23,14 @@
 
 #include "layer.hpp"
 #include "types/softmaxPolicy.hpp"
+#include "sizePolicy/sizePolicy.hpp"
 
 const size_t    INPUTS      = 3000;
 const size_t    NODES       = 40;
 const size_t    DEPTH       = 4;
 const float     TOLERANCE   = 1e-5;
 
-typedef curnn::layer<float, NODES, INPUTS, DEPTH, curnn::ltype::softmaxPolicy> curnnLayerSmaxf;
+typedef curnn::layer<float, NODES, INPUTS, DEPTH, curnn::ltype::softmaxPolicy>  curnnLayerSmaxf;
 
 TEST( curnnLayer, CanCreateSoftmaxLayerCorrectly ) {
     curnnLayerSmaxf softmaxLayer;

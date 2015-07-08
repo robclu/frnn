@@ -39,12 +39,12 @@ namespace curnn {
  *              : typePolicy    : The type of layer
  * ==========================================================================================================
  */
-template <typename  dType                               , 
-          uint       _nodes                             ,
-          uint       _inputs                            ,
-          uint       _depth                             ,
-          template <typename, uint...> class typePolicy >     
-class layer : public typePolicy<dType, _nodes, _inputs, _depth> {
+template <typename                            dType,
+          uint                                _nodes,
+          uint                                _inputs,
+          uint                                _depth,
+          template <typename, uint...>  class typePolicy >     
+class layer : public typePolicy<dType, _nodes, _inputs, _depth> {  
     public:
         uint                numNodes;
         uint                numInputs;
@@ -103,6 +103,7 @@ class layer : public typePolicy<dType, _nodes, _inputs, _depth> {
          * ==================================================================================================
          */
         inline const tensor4<dType>& getWBA() const { 
+            // wba tensor in the typePolicy instance
             return this->wba;
         }
         
@@ -129,6 +130,7 @@ class layer : public typePolicy<dType, _nodes, _inputs, _depth> {
          * ==================================================================================================
          */
         inline const dType* getErrors() const {
+            // Errors vector in typepolicy base
             return &(this->errors[ 0 ]); 
         }
 };

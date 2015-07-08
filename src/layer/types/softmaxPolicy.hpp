@@ -93,9 +93,21 @@ class softmaxPolicy {
          * ==================================================================================================
          */
         void backward( std::vector<dType>& outs, std::vector<dType>&targets );
+
+        /* 
+         * ==================================================================================================
+         * Function     : updateWba 
+         * 
+         * Description  : Updates the weights, biases and activations
+         * 
+         * Inputs       : prevLayerActs   : The activations (outputs) of the nodes in the previous layer
+         * ==================================================================================================
+         */
+        void updateWba( const curnn::tensor4<dType>& prevLayerActs );
         
     protected:
         tensor4<dType>      wba;            // Tensor for weights, biases, and activations
+        tensor4<dType>      wbaPrev;        // Tensor for weights, biases, and activations from the previous timestep
         std::vector<dType>  errors;         // Errors for the layer
         uint                numInputs;      // Number of inputs for the layer
 };
@@ -238,6 +250,11 @@ void softmaxPolicy<dType, nds, ipts, dth>::backward( std::vector<dType>& outs, s
     // Call CPU X minus Y kernel because these vectors will never be big 
     // enough to warrant the data transfer between the CPU and the GPU
     curnn::mathTest<dType, curnn::deviceType::CPU>::xmy( outs, targets, errors );
+}
+
+template <typename dType, uint nds, uint ipts, uint dth>
+void softmaxPolicy<dType, nds, ipts, dth>::updateWba( const curnn::tensor4<dType>& prevLayerActs ) {
+    
 }
 
 }   // Namepsace lloss
