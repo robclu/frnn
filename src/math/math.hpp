@@ -31,7 +31,7 @@
 #include "../tensor/tensor.cuh"
 #include "../util/errors.h"
 #include "../curnn/curnn.h"
-#include "blas/curnnBlas.h"
+#include "blas/curnn_blas.h"
 #include "math_kernels_gpu.cuh"
 #include "math_kernels_cpu.hpp"
 

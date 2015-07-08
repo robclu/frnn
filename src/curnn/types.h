@@ -22,8 +22,8 @@
 #define _CURNN_TYPES_
 
 // Other curnn types
-#include "vectorizedTypesCpu.h"
-#include "vectorizedTypesGpu.h"
+#include "vectorized_types_cpu.h"
+#include "vectorized_types_gpu.h"
 
 // Change if necessary
 #define MAX_BLOCKS          65536

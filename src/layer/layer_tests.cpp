@@ -22,8 +22,7 @@
 #include <iostream>
 
 #include "layer.hpp"
-#include "types/softmaxPolicy.hpp"
-#include "sizePolicy/sizePolicy.hpp"
+#include "types/softmax_policy.hpp"
 
 const size_t    INPUTS      = 3000;
 const size_t    NODES       = 40;

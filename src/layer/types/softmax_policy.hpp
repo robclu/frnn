@@ -29,7 +29,7 @@
 #include "../../util/errors.h"
 #include "../../curnn/curnn.h"
 #include "../../math/math_kernels_gpu.cuh"
-#include "../../math/blas/curnnBlas.h"
+#include "../../math/blas/curnn_blas.h"
 #include "../../math/math_general.h"
 
 namespace curnn {
