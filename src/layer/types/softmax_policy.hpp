@@ -47,7 +47,11 @@ namespace ltype {
  *              : depth     : The number of different inputs in the layer (almost always 1 for softmax)
  * ==========================================================================================================
  */
-template <typename dType, uint nodes, uint inputs, uint depth>
+template <typename          dType, 
+         curnn::deviceType  device,
+         uint               nodes, 
+         uint               inputs, 
+         uint               depth>
 class softmaxPolicy {
 
     public:
@@ -114,8 +118,8 @@ class softmaxPolicy {
 
 /* ==========================================  Implementations ============================================ */
 
-template <typename dType, uint nds, uint ipts, uint dth>
-void softmaxPolicy<dType, nds, ipts, dth>::forward( std::vector<dType>& ins, std::vector<dType>& outs ) {
+template <typename dType, curnn::deviceType dev, uint nds, uint ipts, uint dth>
+void softmaxPolicy<dType, dev, nds, ipts, dth>::forward( std::vector<dType>& ins, std::vector<dType>& outs ) {
 
     // Thread sizes
     size_t threadsX, threadsY, blocksX, blocksY;
@@ -237,8 +241,8 @@ void softmaxPolicy<dType, nds, ipts, dth>::forward( std::vector<dType>& ins, std
     cudaFree( results_d ); cudaFree( acts );
 }
 
-template <typename dType, uint nds, uint ipts, uint dth>
-void softmaxPolicy<dType, nds, ipts, dth>::backward( std::vector<dType>& outs, std::vector<dType>& targets ) {
+template <typename dType, curnn::deviceType dev, uint nds, uint ipts, uint dth>
+void softmaxPolicy<dType, dev, nds, ipts, dth>::backward( std::vector<dType>& outs, std::vector<dType>& targets ) {
     curnnError error; 
     // Check dimensions
     if ( outs.size() != targets.size() ) {
@@ -252,8 +256,8 @@ void softmaxPolicy<dType, nds, ipts, dth>::backward( std::vector<dType>& outs, s
     curnn::mathTest<dType, curnn::deviceType::CPU>::xmy( outs, targets, errors );
 }
 
-template <typename dType, uint nds, uint ipts, uint dth>
-void softmaxPolicy<dType, nds, ipts, dth>::updateWba( const curnn::tensor4<dType>& prevLayerActs ) {
+template <typename dType, curnn::deviceType dev, uint nds, uint ipts, uint dth>
+void softmaxPolicy<dType, dev, nds, ipts, dth>::updateWba( const curnn::tensor4<dType>& prevLayerActs ) {
     
 }
 

@@ -33,6 +33,7 @@ namespace curnn {
  * Description  : Layer class for the cuRNN that defines a generic class for a layer
  *
  * Params       : dType         : The type of data for the layer
+ *              : device        : The device to use (CPU or GPU)
  *              : _nodes        : The number of nodes in the layer
  *              : _inputs       : The number of inputs to the layer
  *              : _depth        : The number of timesteps back or forward that have inputs to this layer
@@ -40,11 +41,13 @@ namespace curnn {
  * ==========================================================================================================
  */
 template <typename                            dType,
+          curnn::deviceType                   dev,
           uint                                _nodes,
           uint                                _inputs,
           uint                                _depth,
-          template <typename, uint...>  class typePolicy >     
-class layer : public typePolicy<dType, _nodes, _inputs, _depth> {  
+          template <typename, curnn::deviceType, uint...>  class typePolicy >     
+class layer : public typePolicy<dType, dev, _nodes, _inputs, _depth> {  
+
     public:
         uint                numNodes;
         uint                numInputs;

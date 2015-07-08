@@ -29,7 +29,7 @@ const size_t    NODES       = 40;
 const size_t    DEPTH       = 4;
 const float     TOLERANCE   = 1e-5;
 
-typedef curnn::layer<float, NODES, INPUTS, DEPTH, curnn::ltype::softmaxPolicy>  curnnLayerSmaxf;
+typedef curnn::layer<float, curnn::deviceType::CPU, NODES, INPUTS, DEPTH, curnn::ltype::softmaxPolicy>  curnnLayerSmaxf;
 
 TEST( curnnLayer, CanCreateSoftmaxLayerCorrectly ) {
     curnnLayerSmaxf softmaxLayer;
