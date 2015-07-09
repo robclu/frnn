@@ -28,7 +28,7 @@
 namespace curnn {
     
 template <typename dType>
-void softmax_backward_cpu( std::vector<dType>& outs, std::vector<dType>& targets, std::vector<dType>& errors ) {
+void softmaxBackwardCpu( std::vector<dType>& outs, std::vector<dType>& targets, std::vector<dType>& errors ) {
   
     curnnError error; 
     // Check dimensions

@@ -34,7 +34,7 @@
  *       template <typename dType> 
  *       void example_function( ... ) {
  *			
- *			typedef typename curnn::vectorizedType<dType, 2> vec2;
+ *			typedef typename curnn::VectorizedTypeGpu<dType, 2> vec2;
  *
  *			vec2 vectorized_dtype;
  *		}			
@@ -42,101 +42,101 @@
  * ==========================================================================================================
  */
 
-TEST( curnnTypes, CanDetermineVectorizedDoublesFromDouble ) {
+TEST( curnnTypesGpu, CanDetermineVectorizedDoublesFromDouble ) {
 	double1 cudaDouble1;
 	double2 cudaDouble2;
 
 	// Declare a curnn vectorized doubles using type traits
-	curnn::vectorizedType<double, 1>::vectType curnnDouble1;
-	curnn::vectorizedType<double, 2>::vectType curnnDouble2;
+	curnn::VectorizedTypeGpu<double, 1>::vect_type curnnDouble1;
+	curnn::VectorizedTypeGpu<double, 2>::vect_type curnnDouble2;
 	
 	EXPECT_EQ( typeid( cudaDouble1 ).name(), typeid( curnnDouble1 ).name() );
 	EXPECT_EQ( typeid( cudaDouble2 ).name(), typeid( curnnDouble2 ).name() );
 }
 
-TEST( curnnTypes, CanDetermineVectorizedFloatFromFloat ) {
+TEST( curnnTypesGpu, CanDetermineVectorizedFloatFromFloat ) {
 	float1 cudaFloat1;
 	float2 cudaFloat2;
 	float4 cudaFloat4;
 
 	// Declare curnn vectorized floats using type traits
-	curnn::vectorizedType<float, 1>::vectType curnnFloat1;
-	curnn::vectorizedType<float, 2>::vectType curnnFloat2;
-	curnn::vectorizedType<float, 4>::vectType curnnFloat4;
+	curnn::VectorizedTypeGpu<float, 1>::vect_type curnnFloat1;
+	curnn::VectorizedTypeGpu<float, 2>::vect_type curnnFloat2;
+	curnn::VectorizedTypeGpu<float, 4>::vect_type curnnFloat4;
 	
 	EXPECT_EQ( typeid( cudaFloat1 ).name(), typeid( curnnFloat1 ).name() );
 	EXPECT_EQ( typeid( cudaFloat2 ).name(), typeid( curnnFloat2 ).name() );
 	EXPECT_EQ( typeid( cudaFloat4 ).name(), typeid( curnnFloat4 ).name() );
 }
 
-TEST( curnnTypes, CanDetermineVectorizedIntFromInt ) {
+TEST( curnnTypesGpu, CanDetermineVectorizedIntFromInt ) {
 	int1 cudaInt1;
 	int2 cudaInt2;
 	int4 cudaInt4;
 
 	// Declare curnn vectorized ints using type traits
-	curnn::vectorizedType<int, 1>::vectType curnnInt1;
-	curnn::vectorizedType<int, 2>::vectType curnnInt2;
-	curnn::vectorizedType<int, 4>::vectType curnnInt4;
+	curnn::VectorizedTypeGpu<int, 1>::vect_type curnnInt1;
+	curnn::VectorizedTypeGpu<int, 2>::vect_type curnnInt2;
+	curnn::VectorizedTypeGpu<int, 4>::vect_type curnnInt4;
 	
 	EXPECT_EQ( typeid( cudaInt1 ).name(), typeid( curnnInt1 ).name() );
 	EXPECT_EQ( typeid( cudaInt2 ).name(), typeid( curnnInt2 ).name() );
 	EXPECT_EQ( typeid( cudaInt4 ).name(), typeid( curnnInt4 ).name() );
 }
 
-TEST( curnnTypes, CanDetermineVectorizedUIntFromUInt ) {
+TEST( curnnTypesGpu, CanDetermineVectorizedUIntFromUInt ) {
 	uint1 cudaUint1;
 	uint2 cudaUint2;
 	uint4 cudaUint4;
 
 	// Declare curnn vectorized unsigned ints using type traits
-	curnn::vectorizedType<uint, 1>::vectType curnnUint1;
-	curnn::vectorizedType<uint, 2>::vectType curnnUint2;
-	curnn::vectorizedType<uint, 4>::vectType curnnUint4;
+	curnn::VectorizedTypeGpu<uint, 1>::vect_type curnnUint1;
+	curnn::VectorizedTypeGpu<uint, 2>::vect_type curnnUint2;
+	curnn::VectorizedTypeGpu<uint, 4>::vect_type curnnUint4;
 	
 	EXPECT_EQ( typeid( cudaUint1 ).name(), typeid( curnnUint1 ).name() );
 	EXPECT_EQ( typeid( cudaUint2 ).name(), typeid( curnnUint2 ).name() );
 	EXPECT_EQ( typeid( cudaUint4 ).name(), typeid( curnnUint4 ).name() );
 }
 
-TEST( curnnTypes, CanDetermineVectorizedCharFromChar ) {
+TEST( curnnTypesGpu, CanDetermineVectorizedCharFromChar ) {
 	char1 cudaChar1;
 	char2 cudaChar2;
 	char4 cudaChar4;
 
 	// Declare curnn vectorized unsigned ints using type traits
-	curnn::vectorizedType<char, 1>::vectType curnnChar1;
-	curnn::vectorizedType<char, 2>::vectType curnnChar2;
-	curnn::vectorizedType<char, 4>::vectType curnnChar4;
+	curnn::VectorizedTypeGpu<char, 1>::vect_type curnnChar1;
+	curnn::VectorizedTypeGpu<char, 2>::vect_type curnnChar2;
+	curnn::VectorizedTypeGpu<char, 4>::vect_type curnnChar4;
 	
 	EXPECT_EQ( typeid( cudaChar1 ).name(), typeid( curnnChar1 ).name() );
 	EXPECT_EQ( typeid( cudaChar2 ).name(), typeid( curnnChar2 ).name() );
 	EXPECT_EQ( typeid( cudaChar4 ).name(), typeid( curnnChar4 ).name() );
 }
 
-TEST( curnnTypes, CanDetermineVectorizedCpuFloatFromFloat ) {
-    curnn::vectorizedTypeCpu<float>::vectType curnnVectorizedCpu;
+TEST( curnnTypesCpu, CanDetermineVectorizedFloatFromFloat ) {
+    curnn::VectorizedTypeCpu<float>::vect_type curnnVectorizedCpu;
     __m128 sseVectorizedCpu;
     
     EXPECT_EQ( typeid( curnnVectorizedCpu ).name(), typeid( sseVectorizedCpu ).name() );
 }
 
-TEST( curnnTypes, CanDetermineVectorizedCpuDoubleFromDouble ) {
-    curnn::vectorizedTypeCpu<double>::vectType curnnVectorizedCpu;
+TEST( curnnTypesCpu, CanDetermineVectorizedDoubleFromDouble ) {
+    curnn::VectorizedTypeCpu<double>::vect_type curnnVectorizedCpu;
     __m128d sseVectorizedCpu;
     
     EXPECT_EQ( typeid( curnnVectorizedCpu ).name(), typeid( sseVectorizedCpu ).name() );
 }
 
-TEST( curnnTypes, CanDetermineVectorizedCpuIntFromInt ) {
-    curnn::vectorizedTypeCpu<int>::vectType curnnVectorizedCpu;
+TEST( curnnTypesCpu, CanDetermineVectorizedIntFromInt ) {
+    curnn::VectorizedTypeCpu<int>::vect_type curnnVectorizedCpu;
     __m128i sseVectorizedCpu;
     
     EXPECT_EQ( typeid( curnnVectorizedCpu ).name(), typeid( sseVectorizedCpu ).name() );
 }
 
-TEST( curnnTypes, CanDetermineVectorizedCpuCharFromChar ) {
-    curnn::vectorizedTypeCpu<char>::vectType curnnVectorizedCpu;
+TEST( curnnTypesCpu, CanDetermineVectorizedCharFromChar ) {
+    curnn::VectorizedTypeCpu<char>::vect_type curnnVectorizedCpu;
     __m128i sseVectorizedCpu;
     
     EXPECT_EQ( typeid( curnnVectorizedCpu ).name(), typeid( sseVectorizedCpu ).name() );

@@ -39,13 +39,13 @@ namespace curnn {
  *				: N			: The size of the vector (2, 4, 8 ..)
  * ==========================================================================================================
  */
-template <typename dType, int N> struct vectorizedType;
+template <typename dType, int N> struct VectorizedTypeGpu;
 
 // Macro to make instances of each type for all vector sizes for CUDA vectorized types
-#define CURNN_VECTORIZED_INSTANCE( dType )											\
-	template <> struct vectorizedType<dType, 1> { typedef dType ## 1 vectType; };	\
-	template <> struct vectorizedType<dType, 2> { typedef dType ## 2 vectType; };	\
-	template <> struct vectorizedType<dType, 4> { typedef dType ## 4 vectType; };	\
+#define CURNN_VECTORIZED_INSTANCE( dType )										  	    \
+	template <> struct VectorizedTypeGpu<dType, 1> { typedef dType ## 1 vect_type; };	\
+	template <> struct VectorizedTypeGpu<dType, 2> { typedef dType ## 2 vect_type; };	\
+	template <> struct VectorizedTypeGpu<dType, 4> { typedef dType ## 4 vect_type; };	\
 
 // Make partial specifications for different types
 CURNN_VECTORIZED_INSTANCE( double )

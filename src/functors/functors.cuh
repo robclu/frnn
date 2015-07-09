@@ -11,8 +11,8 @@
  *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT AN_size.y WARRANTY; without even the implied warranty of
- *  MERCHANTABILIT_size.y or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License along
@@ -28,7 +28,10 @@
 
 namespace curnn {
 namespace functors {
-    
+   
+// Note : Whike functors are technically structs, they behave as functions and hence the naming conventions of
+//        functions are used for functors (camel case, start with lowercase letter) 
+
 /*
  * ==========================================================================================================
  * Struct       : sigmoid

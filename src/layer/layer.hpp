@@ -41,18 +41,18 @@ namespace curnn {
  * ==========================================================================================================
  */
 template <typename                          dType,
-          device                            dev,
+          curnn::device                     dev,
           uint                              _nodes,
           uint                              _inputs,
           uint                              _depth,
           template <typename      , 
                     curnn::device , 
-                    uint...       >  class typePolicy >     
-class layer : public typePolicy<dType, dev, _nodes, _inputs, _depth> {  
+                    uint...       >  class TypePolicy >     
+class Layer : public TypePolicy<dType, dev, _nodes, _inputs, _depth> {  
 
     public:
-        uint                numNodes;
-        uint                numInputs;
+        uint                num_nodes;
+        uint                num_inputs;
         uint                depth;
         std::vector<dType>  outputs;
     public:
@@ -74,8 +74,8 @@ class layer : public typePolicy<dType, dev, _nodes, _inputs, _depth> {
          *
          * ==================================================================================================
          */
-        explicit layer() :
-            numNodes( _nodes ), numInputs( _inputs ), depth( _depth ), outputs( _nodes, 0 ) {}
+        explicit Layer() :
+            num_nodes( _nodes ), num_inputs( _inputs ), depth( _depth ), outputs( _nodes, 0 ) {}
 
         /*
          * ==================================================================================================
@@ -92,8 +92,8 @@ class layer : public typePolicy<dType, dev, _nodes, _inputs, _depth> {
             // Use the layer policy weight intialization
             // which will use the CPU/GPU as required
             for ( uint d = 0; d < depth; d++ ) {
-                for( uint i = 0; i < numInputs; i++ ) {
-                    for ( uint n = 0; n < numNodes; n++ ) {
+                for( uint i = 0; i < num_inputs; i++ ) {
+                    for ( uint n = 0; n < num_nodes; n++ ) {
                        this->wba( n, i, d, 0 ) = curnn::math::rand( min, max );
                     }
                 }
@@ -102,14 +102,14 @@ class layer : public typePolicy<dType, dev, _nodes, _inputs, _depth> {
         
         /*
          * ==================================================================================================
-         * Function     : getWeights
+         * Function     : getWBA
          * 
          * Description  : Returns a constant pointer to the weights (read-only)
          * 
          * Outputs      : A constant pointer to the weights, biases, and activations of the layer
          * ==================================================================================================
          */
-        inline const tensor4<dType>& getWBA() const { 
+        inline const Tensor4<dType>& getWBA() const { 
             // wba tensor in the typePolicy instance
             return this->wba;
         }

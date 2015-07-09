@@ -60,23 +60,23 @@ template <typename dType>
 __inline__ __global__ void xpny( dType** vectors, size_t N, size_t M ) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int idy = blockIdx.y * blockDim.y + threadIdx.y;
-    int yStride = M / 2;
+    int y_stride = M / 2;
 
-    extern __shared__ dType s[];
+    extern __shared__ dType shared_mem[];
 
-    if ( idy < yStride ) {
-        s[ ( idx * yStride ) + idy ] 
+    if ( idy < y_stride ) {
+        shared_mem[ ( idx * y_stride ) + idy ] 
             = vectors[ idy ][ idx ] + vectors[ idy + ( M / 2 ) ][ idx ];
     }
 
     // Add lasit elements if M = odd
-    if ( ( M & 1 != 0 ) && idy == 0 ) s[ idx * yStride ] += vectors[ M - 1 ][ idx ];
+    if ( ( M & 1 != 0 ) && idy == 0 ) shared_mem[ idx * y_stride ] += vectors[ M - 1 ][ idx ];
     __syncthreads();
 
     if ( idy == 0 ) {
         vectors[ 0 ][ idx ] = 0;                        // Bad - need to improve this
         for ( int i = 0; i < ( M / 2 ); i++ ) {
-            vectors[0][idx] += s[ idx * yStride + i ];
+            vectors[0][idx] += shared_mem[ idx * y_stride + i ];
         }
     }
 }
@@ -141,16 +141,16 @@ __inline__ __device__ dType warpReduceAll( dType val ) {
  */ 
 template <typename dType>
 __inline__ __device__ dType blockReduce( dType val ) {
-    static __shared__ dType shared[ 32 ];
-    int lane = threadIdx.x % warpSize;              // Index in warp
-    int wid  = threadIdx.x / warpSize;              // Warp index in block
+    static __shared__ dType shared_mem[ 32 ];
+    int lane = threadIdx.x % warpSize;                  // Index in warp
+    int wid  = threadIdx.x / warpSize;                  // Warp index in block
 
-    val = warpReduce( val );                        // Do reduction on warp
-    if ( lane == 0 ) shared[ wid ] = val;           // Write reduction to shared memory
+    val = warpReduce( val );                            // Do reduction on warp
+    if ( lane == 0 ) shared_mem[ wid ] = val;           // Write reduction to shared memory
     __syncthreads();
 
     // Read into shared mem if threadID is less than num warps
-    val = ( threadIdx.x < blockDim.x / warpSize ) ? shared[ lane ] : 0;
+    val = ( threadIdx.x < blockDim.x / warpSize ) ? shared_mem[ lane ] : 0;
 
     // Do the reduction on the first warp
     if ( wid == 0 ) val = warpReduce( val );
@@ -173,16 +173,16 @@ __inline__ __device__ dType blockReduce( dType val ) {
  */ 
 template <typename dType>
 __inline__ __device__ dType blockReduceAll( dType val ) {
-    static __shared__ dType shared[ 32 ];
-    int lane = threadIdx.x % warpSize;              // Index in warp
-    int wid  = threadIdx.x / warpSize;              // Warp index in block
+    static __shared__ dType shared_mem[ 32 ];
+    int lane = threadIdx.x % warpSize;                  // Index in warp
+    int wid  = threadIdx.x / warpSize;                  // Warp index in block
 
-    val = warpReduceAll( val );                     // Do reduction on warp (all threads have shared[ 0 ]
-    if ( lane == 0 ) shared[ wid ] = val;           // Write reduction to shared memory
+    val = warpReduceAll( val );                         // Do reduction on warp (all threads have shared[ 0 ]
+    if ( lane == 0 ) shared_mem[ wid ] = val;           // Write reduction to shared memory
     __syncthreads();                                
 
-    // Give each warp the reduced value in shared[ 0 ]
-    val = ( lane < blockDim.x / warpSize ) ? shared[ lane ] : 0;
+    // Give each warp the reduced value in shared_mem[ 0 ]
+    val = ( lane < blockDim.x / warpSize ) ? shared_mem[ lane ] : 0;
 
     // Have each war perform the butterfly reduction
     // so that all threads in the block have the shared[ 0 ]
@@ -208,12 +208,12 @@ __inline__ __device__ dType blockReduceAll( dType val ) {
 template <typename dType>
 __global__ void blockReduceAtomicVectorized( dType* in, dType* out, size_t N ) {
     dType sum = dType( 0 );
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int   idx = blockIdx.x * blockDim.x + threadIdx.x;
 
     // Get data to reduce from the input data
     for ( int i = idx; i < ( N / 2 ); i += blockDim.x * gridDim.x ) {
         // Convert to vectorized type and add to sum 
-        typedef typename curnn::vectorizedType<dType, 2>::vectType vect2;
+        typedef typename curnn::VectorizedTypeGpu<dType, 2>::vect_type vect2;
         vect2 val = reinterpret_cast<vect2*>( in )[ i ];
         sum += val.x + val.y;
     }
@@ -248,7 +248,7 @@ __global__ void blockReduceAtomicVectorized( dType* in, dType* out, size_t N ) {
  */ 
 template <typename dType, typename F = functors::voidFunctor>
 __global__ void blockReduceAtomicVectorizedAll( dType* in, dType* out, size_t N, F f = functors::voidFunctor() ) {
-    typedef typename curnn::vectorizedType<dType, 4>::vectType vect4;
+    typedef typename curnn::VectorizedTypeGpu<dType, 4>::vect_type vect4;
     dType   sum  = dType( 0 );
     int     idx  = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -290,19 +290,19 @@ __global__ void blockReduceAtomicVectorizedAll( dType* in, dType* out, size_t N,
  */ 
 template <class dType> 
 __global__ void blockScatter( dType* data, size_t N ) {
-    static __shared__ dType shared[ 1 ];
+    static __shared__ dType shared_mem[ 1 ];
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     
     // Copy the first element of the block to shared memory
     if ( threadIdx.x == 0  && blockIdx.x < blockDim.x ) {
-        shared[ 0 ] = data[ idx ];
+        shared_mem[ 0 ] = data[ idx ];
     } else if ( threadIdx.x == 0 && blockIdx.x >= blockDim.x ) { // If blockID > threads per block
-        shared[ 0 ] = data[ idx - blockDim.x * blockIdx.x ];
+        shared_mem[ 0 ] = data[ idx - blockDim.x * blockIdx.x ];
     }
     __syncthreads();
 
     // Copy from block shared mem to all threads in block
-    if ( idx < N ) data[ idx ] = shared[ 0 ];
+    if ( idx < N ) data[ idx ] = shared_mem[ 0 ];
 }
 
 /*

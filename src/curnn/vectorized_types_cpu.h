@@ -32,7 +32,7 @@ namespace curnn {
     
 /*
  * ==========================================================================================================
- * Struct       : vectorizedTypeCpu
+ * Struct       : VectorizedTypeCpu
  * 
  * Description  : Gets a vectorized (v4) version of a type for sse instructions.
  * 
@@ -41,17 +41,17 @@ namespace curnn {
  * Example      : Calling curnn::vectorizedTypeCpu<float>::vectType will then use the __m128 type
  * ==========================================================================================================
  */
-template <typename dType> struct vectorizedTypeCpu;
+template <typename dType> struct VectorizedTypeCpu;
 
-template <> struct vectorizedTypeCpu<int>    { typedef __m128i vectType; };
-template <> struct vectorizedTypeCpu<char>   { typedef __m128i vectType; };
-template <> struct vectorizedTypeCpu<float>  { typedef __m128  vectType; };
-template <> struct vectorizedTypeCpu<double> { typedef __m128d vectType; };
-template <> struct vectorizedTypeCpu<float*>  { typedef __m128*  vectType; };
+template <> struct VectorizedTypeCpu<int>    { typedef __m128i vect_type; };
+template <> struct VectorizedTypeCpu<char>   { typedef __m128i vect_type; };
+template <> struct VectorizedTypeCpu<float>  { typedef __m128  vect_type; };
+template <> struct VectorizedTypeCpu<double> { typedef __m128d vect_type; };
+template <> struct VectorizedTypeCpu<float*> { typedef __m128* vect_type; };
 
 /*
  * ==========================================================================================================
- * Struct       : vectInstructions 
+ * Struct       : VectorizedInstructions 
  * 
  * Description  : Provides general names for the SIMD instructions for any type instance of the class. The
  *                function pointers allow the functions to be called without an instance of the struct
@@ -60,16 +60,16 @@ template <> struct vectorizedTypeCpu<float*>  { typedef __m128*  vectType; };
  * ==========================================================================================================
  */
 
-template <typename dType> struct vectInstructions;
+template <typename dType> struct VectorizedInstructionsCpu;
 
 // Size functions for float and double
-constexpr size_t sizeFloatVect()  { return 4; }
-constexpr size_t sizeDoubleVect() { return 2; }
+constexpr size_t sizeFloatVectorized()  { return 4; }
+constexpr size_t sizeDoubleVectorized() { return 2; }
 
 // Float specification
-template <> struct vectInstructions<float> {
+template <> struct VectorizedInstructionsCpu<float> {
     
-    static constexpr auto typeSize = &sizeFloatVect;
+    static constexpr auto typeSize = &sizeFloatVectorized;
     
     typedef __m128 (*load)( const float* );
     static constexpr load mm_load_u = &_mm_loadu_ps;
@@ -82,9 +82,9 @@ template <> struct vectInstructions<float> {
 };
 
 // Double specification
-template <> struct vectInstructions<double> {
+template <> struct VectorizedInstructionsCpu<double> {
    
-    static constexpr auto typeSize = &sizeDoubleVect;
+    static constexpr auto typeSize = &sizeDoubleVectorized;
 
     typedef __m128d (*load)( const double* );
     static constexpr load mm_load_u = &_mm_loadu_pd;

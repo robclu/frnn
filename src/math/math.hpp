@@ -264,10 +264,10 @@ template <typename dType>
 void softmax( curnn::curnnError& error, const std::vector<dType>& x, std::vector<dType>& val ) {
 
     dType* in = 0, *out = 0;
-    functors::exp expOp;           // Define operation on each element to be exponentiation
+    functors::exp exp_op;           // Define operation on each element to be exponentiation
 
     // Check output vector can hold all reasults
-    if ( val.capacity() < x.size() ) val.reserve( x.size() );
+    if ( val.size() < x.size() ) val.resize( x.size(), 0 );
     
     // Alllocate memory on the device
     if ( cudaMalloc( (void**)&in, x.size() * sizeof( dType ) ) != cudaSuccess ) {
@@ -294,7 +294,7 @@ void softmax( curnn::curnnError& error, const std::vector<dType>& x, std::vector
 
     // Execute kernel to reduce all blocks, using the exp functor to
     // exponentiate each element before addition
-    blockReduceAtomicVectorizedAll<<<blocks, threads>>>( in, out, x.size(), expOp );
+    blockReduceAtomicVectorizedAll<<<blocks, threads>>>( in, out, x.size(), exp_op );
     // Copy result from the first thread inea ch block to the others
     blockScatter<<<blocks, threads>>>( out, x.size() );
     // Do normalization to get get softmax

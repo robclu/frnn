@@ -29,23 +29,23 @@ const size_t    NODES       = 40;
 const size_t    DEPTH       = 4;
 const float     TOLERANCE   = 1e-5;
 
-typedef curnn::layer<float,                             // Data type
+typedef curnn::Layer<float,                             // Data type
                      curnn::device::CPU,                // Device type
                      NODES, INPUTS, DEPTH,              // Size
-                     curnn::ltype::softmaxPolicy>  curnnLayerSmaxf;        
+                     curnn::ltype::SoftmaxPolicy>  curnnLayerSmaxf;        
 
 TEST( curnnLayer, CanCreateSoftmaxLayerCorrectly ) {
     curnnLayerSmaxf softmaxLayer;
 
-    EXPECT_EQ( softmaxLayer.numNodes    , NODES  );
-    EXPECT_EQ( softmaxLayer.numInputs   , INPUTS );
-    EXPECT_EQ( softmaxLayer.depth       , DEPTH  );
+    EXPECT_EQ( softmaxLayer.num_nodes    , NODES  );
+    EXPECT_EQ( softmaxLayer.num_inputs   , INPUTS );
+    EXPECT_EQ( softmaxLayer.depth        , DEPTH  );
 }
 
 TEST( curnnLayer, InitializesWeightsBiasesAndActivationsToZero ) {
     curnnLayerSmaxf softmaxLayer;
    
-   const curnn::tensor4<float> layerWghtsBiasActs = softmaxLayer.getWBA();
+   const curnn::Tensor4<float> layerWghtsBiasActs = softmaxLayer.getWBA();
     
    // Just checking first depth level
    for ( uint i = 0; i < INPUTS + 2; i++ ) {
@@ -59,7 +59,7 @@ TEST( curnnLayer, CanInitializeAndReadWeights ) {
     curnnLayerSmaxf softmaxLayer;
     softmaxLayer.initializeWeights( 0.0f, 1.0f );
    
-   const curnn::tensor4<float> layerWghtsBiasActs = softmaxLayer.getWBA();
+   const curnn::Tensor4<float> layerWghtsBiasActs = softmaxLayer.getWBA();
     
    // Just checking first depth level
    for ( uint i = 0; i < INPUTS; i++ ) {

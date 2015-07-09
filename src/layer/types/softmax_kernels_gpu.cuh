@@ -33,13 +33,13 @@
 namespace curnn{
     
 template <typename dType>
-void softmax_forward_gpu( std::vector<dType>& ins       , 
-                          tensor4<dType>&     wba       ,
-                          uint                numInputs ,
-                          std::vector<dType>& outs      ) {         
+void softmaxForwardGpu( std::vector<dType>& ins       , 
+                        Tensor4<dType>&     wba       ,
+                        uint                num_inputs ,
+                        std::vector<dType>& outs      ) {         
    
     // Thread sizes
-    size_t threadsX, threadsY, blocksX, blocksY;
+    size_t threads_x, threads_y, blocks_x, blocks_y;
 
     // Statuses
     curnnError      error;
@@ -51,56 +51,58 @@ void softmax_forward_gpu( std::vector<dType>& ins       ,
 
     // Device pointers : For each page (wba.z) we need a pointer for :
     //      inputs, weights, biases
-    std::vector<dType*> dPointers( 3 * wba.z(), 0 );
+    std::vector<dType*> d_pointers( 3 * wba.z(), 0 );
     dType*              results_h[ wba.z() ];           // Pointers to results of W*x + b on host
     dType**             results_d;                      // Pointers to results of W*x + b on device
-    functors::exp       expOp;                          // Exp operation for softmax
+    functors::exp       exp_op;                         // Exp operation for softmax
 
     // Outputs vector must have same dimension as number of nodes
     if ( outs.size() < wba.x() ) outs.resize( wba.x(), 0 );
     // Inputs vector must have same dimension as weight metrix num inputs
-    if ( ins.size() != numInputs ) {
-        curnn::err::dimError( error, stringify( ins ), stringify( numInputs ) );
+    if ( ins.size() != num_inputs ) {
+        curnn::err::dimError( error, stringify( ins ), stringify( num_inputs ) );
         return;
     }
 
     // Each page is done by a separate kernel
     #pragma omp parallel num_threads( wba.z() )
     {
-        int threadId = omp_get_thread_num();
-        int inOffset = 3 * threadId;
-        int wOffset  = 3 * threadId + 1;
-        int bOffset  = 3 * threadId + 2;
+        int thread_id      = omp_get_thread_num();
+        int in_offset      = 3 * thread_id;
+        int weight_offset  = 3 * thread_id + 1;
+        int bias_offset    = 3 * thread_id + 2;
 
         // Alllocate memory on the device
-        if ( cudaMalloc( (void**)&dPointers[ inOffset ], ins.size() * sizeof( dType ) ) != cudaSuccess ) {
+        if ( cudaMalloc( (void**)&d_pointers[ in_offset ], ins.size() * sizeof( dType ) ) != cudaSuccess ) {
             curnn::err::allocError( error, stringify( ins ) );
         }
-        if ( cudaMalloc( (void**)&dPointers[ wOffset ], wba.x() * numInputs * sizeof( dType ) ) != cudaSuccess ) {
+        if ( cudaMalloc( (void**)&d_pointers[ weight_offset ], wba.x() * num_inputs * sizeof( dType ) ) != cudaSuccess ) {
             curnn::err::allocError( error, stringify( weights ) );
         }
-        if ( cudaMalloc( (void**)&dPointers[ bOffset ], wba.x() * sizeof( dType) ) != cudaSuccess ) {
+        if ( cudaMalloc( (void**)&d_pointers[ bias_offset ], wba.x() * sizeof( dType) ) != cudaSuccess ) {
             curnn::err::allocError( error, stringify( biases ) );
         }
         // Copy data from host to device
-        if ( cudaMemcpy( dPointers[ inOffset ], &ins[0], ins.size() * sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
+        if ( cudaMemcpy( d_pointers[ in_offset ], &ins[0], ins.size() * sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
             curnn::err::copyError( error, stringify( ins ) );
         }
-        if ( cudaMemcpy( dPointers[ wOffset ], &wba( 0, 0, threadId, 0 ), wba.x() * numInputs * sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
+        if ( cudaMemcpy( d_pointers[ weight_offset ]            , &wba( 0, 0, thread_id, 0 ), 
+                         wba.x() * num_inputs * sizeof( dType ) , cudaMemcpyHostToDevice   ) != cudaSuccess ) {
             curnn::err::copyError( error, stringify( weights ) );
         }
-        if ( cudaMemcpy( dPointers[ bOffset ], &wba( 0, numInputs, threadId, 0 ), wba.x() * sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
+        if ( cudaMemcpy( d_pointers[ bias_offset ], &wba( 0, num_inputs, thread_id, 0 ), 
+                         wba.x() * sizeof( dType ), cudaMemcpyHostToDevice            ) != cudaSuccess ) {
             curnn::err::copyError( error, stringify( biases ) );
         }
 
         // Multiply inputs and weights (column-wise) and add biases { W^(T)*x + b }
         dType alpha = 1; dType beta = 1;
         status = curnn::blas::functions<dType>::gemv( 
-                handle , CUBLAS_OP_N          , wba.x(), numInputs, &alpha              , dPointers[ wOffset ]  , 
-                wba.x(), dPointers[ inOffset ], 1      , &beta    , dPointers[ bOffset ], 1                     );
+                handle , CUBLAS_OP_N            , wba.x(), num_inputs, &alpha                   , d_pointers[ weight_offset ]  , 
+                wba.x(), d_pointers[ in_offset ], 1      , &beta      , d_pointers[ bias_offset ], 1                            );
         
         // Assign results to results pointer array
-        results_h[ threadId ] = dPointers[ bOffset ];
+        results_h[ thread_id ] = d_pointers[ bias_offset ];
     }
 
     // Allocate space and copy the pointers to the resuls to host memory
@@ -113,14 +115,14 @@ void softmax_forward_gpu( std::vector<dType>& ins       ,
 
     if ( wba.z() > 1 ) {
         // Determine sizes of blocks and threads for next kernel
-        threadsX = wba.x() >= THREADS_PER_BLOCK ? THREADS_PER_BLOCK : wba.x();
-        threadsY = wba.z() >= THREADS_PER_BLOCK ? THREADS_PER_BLOCK : wba.z();
-        blocksX  = wba.x()  > THREADS_PER_BLOCK ? wba.x() / THREADS_PER_BLOCK + 1 : 1;
-        blocksY  = wba.z()  > THREADS_PER_BLOCK ? wba.z() / THREADS_PER_BLOCK + 1 : 1;
+        threads_x = wba.x() >= THREADS_PER_BLOCK ? THREADS_PER_BLOCK : wba.x();
+        threads_y = wba.z() >= THREADS_PER_BLOCK ? THREADS_PER_BLOCK : wba.z();
+        blocks_x  = wba.x()  > THREADS_PER_BLOCK ? wba.x() / THREADS_PER_BLOCK + 1 : 1;
+        blocks_y  = wba.z()  > THREADS_PER_BLOCK ? wba.z() / THREADS_PER_BLOCK + 1 : 1;
         size_t sharedMemAmount = wba.z() * ( wba.x() / 2 ) * sizeof( dType );
 
-        dim3 blocks(  blocksX , blocksY  );
-        dim3 threads( threadsX, threadsY );
+        dim3 blocks(  blocks_x , blocks_y  );
+        dim3 threads( threads_x, threads_y );
 
         // Sum all the results of W*x + b from each page (or layer in network)
         xpny<<<blocks, threads, sharedMemAmount>>>( results_d, wba.x(), wba.z() );
@@ -137,16 +139,16 @@ void softmax_forward_gpu( std::vector<dType>& ins       ,
 
     // Define grid size for the softmax operations 
     wba.x() > THREADS_PER_BLOCK * MAX_BLOCKS    ? 
-        threadsX = 2 * THREADS_PER_BLOCK        : 
-        threadsX = THREADS_PER_BLOCK;
+        threads_x = 2 * THREADS_PER_BLOCK       : 
+        threads_x = THREADS_PER_BLOCK;
     
-    blocksX = std::min( static_cast<int>( wba.x() / threadsX ), MAX_BLOCKS );
-    if ( blocksX * threadsX < wba.x() ) blocksX++;
+    blocks_x = std::min( static_cast<int>( wba.x() / threads_x ), MAX_BLOCKS );
+    if ( blocks_x * threads_x < wba.x() ) blocks_x++;
 
     // Perform softmax on results of Wx + b (see math softmax for what each kernel does)
-    blockReduceAtomicVectorizedAll<<<blocksX, threadsX>>>( dPointers[ 2 ], acts, wba.x(), expOp );
-    blockScatter<<<blocksX, threadsX>>>( acts, wba.x() );
-    softmaxKernel<<<blocksX, threadsX>>>( dPointers[ 2 ], acts, wba.x() );      
+    blockReduceAtomicVectorizedAll<<<blocks_x, threads_x>>>( d_pointers[ 2 ], acts, wba.x(), exp_op );
+    blockScatter<<<blocks_x, threads_x>>>( acts, wba.x() );
+    softmaxKernel<<<blocks_x, threads_x>>>( d_pointers[ 2 ], acts, wba.x() );      
 
     if ( cudaMemcpy( &outs[ 0 ], acts, wba.x() * sizeof( dType ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
         curnn::err::copyError( error, stringify( outs ) );
@@ -154,13 +156,13 @@ void softmax_forward_gpu( std::vector<dType>& ins       ,
 
     cublasDestroy( handle );
  
-    for ( int i = 0; i < dPointers.size(); i++ ) cudaFree( dPointers[i] );
+    for ( int i = 0; i < d_pointers.size(); i++ ) cudaFree( d_pointers[i] );
     cudaFree( results_d ); cudaFree( acts );
 }
 
 template <typename dType>
-void softmax_upadate_wba_gpu( tensor4<dType>& prev_wba, uint act_start,
-                              tensor4<dType>& curr_wba, uint err_start ) {
+void softmaxUpadateWbaGpu( Tensor4<dType>& prev_wba, uint act_start,
+                           Tensor4<dType>& curr_wba, uint err_start ) {
     //
 }
 

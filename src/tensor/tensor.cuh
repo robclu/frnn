@@ -9,11 +9,11 @@
  *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT AN_size.y WARRANTY; without even the implied warranty of
+ *  but w_ITHOUT AN_size.y WARRANTy_; without even the implied warranty of
  *  MERCHANTABILIT_size.y or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License along
+ *  y_ou should have received a copy of the GNU General Public License along
  *  with this program; if not, write to the Free Software Foundation,
  *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
@@ -29,7 +29,7 @@ namespace curnn  {
 
 /*
  * ==========================================================================================================
- * Class		: tensor4
+ * Class		: Tensor4
  *
  * Description	: Provides a 4D tensor to store 4 dimensionaly data, or to join data to 4 dimensions to that
  *				  less passes need to be made to the GPU
@@ -38,27 +38,27 @@ namespace curnn  {
  * ==========================================================================================================
  */
 template <typename dType>
-class tensor4 {
+class Tensor4 {
 	private:
-		uint				W;
-		uint				X;
-		uint				Y; 
-		uint				Z;
+		uint				w_;
+		uint				x_;
+		uint				y_; 
+		uint				z_;
 		std::vector<dType>	data;
 	public:
 		/*
 		 * ==================================================================================================
-		 * Function			: tensor4 
+		 * Function			: Tensor4 
 		 *
 		 * Description		: Default constructor which sets the dimensions of the tensor to be 0
 		 * ==================================================================================================
 		 */
-		explicit tensor4() :
-			X( 0 ), Y( 0 ), Z( 0 ), W( 0 ) {}
+		explicit Tensor4() :
+			x_( 0 ), y_( 0 ), z_( 0 ), w_( 0 ) {}
 
 		/*
 		 * ==================================================================================================
-		 * Function			: tensor4 (constructor)
+		 * Function			: Tensor4 (constructor)
 		 *
 		 * Description		: Sets the number of elements in each dimension of the tensor and allocates and 
 		 *					  sets the tensor data to be zero
@@ -69,8 +69,8 @@ class tensor4 {
 		 *					: _w	: Number of elements in the 4th dimension
 		 * ==================================================================================================
 		 */
-		tensor4( uint _x, uint _y, uint _z, uint _w ) :
-			X( _x ), Y( _y ), Z( _z ), W( _w ), data( _x * _y * _z * _w, 0 ) {}
+		Tensor4( uint _x, uint _y, uint _z, uint _w ) :
+			x_( _x ), y_( _y ), z_( _z ), w_( _w ), data( _x * _y * _z * _w, 0 ) {}
 
 		/* ==================================================================================================
 		 * Function		: size
@@ -82,10 +82,10 @@ class tensor4 {
 			return data.size();
 		}
 
-		__inline__ __device__ __host__ uint x() const { return X; }
-		__inline__ __device__ __host__ uint y() const { return Y; }
-		__inline__ __device__ __host__ uint z() const { return Z; }
-		__inline__ __device__ __host__ uint w() const { return W; }
+		__inline__ __device__ __host__ uint x() const { return x_; }
+		__inline__ __device__ __host__ uint y() const { return y_; }
+		__inline__ __device__ __host__ uint z() const { return z_; }
+		__inline__ __device__ __host__ uint w() const { return w_; }
 
 		/*
 		 * ==================================================================================================
@@ -100,11 +100,11 @@ class tensor4 {
 		 * ==================================================================================================
 		 */
 		__inline__ __device__ __host__ void reshape( int x_new, int y_new, int z_new, int w_new ) {
-			X = ( x_new != -1 ) ? static_cast<uint>(x_new) : X;		
-			Y = ( y_new != -1 ) ? static_cast<uint>(y_new) : Y;		
-			Z = ( z_new != -1 ) ? static_cast<uint>(z_new) : Z;		
-			W = ( w_new != -1 ) ? static_cast<uint>(w_new) : W;		
-			data.resize( W * X * Y * Z, 0 );
+			x_ = ( x_new != -1 ) ? static_cast<uint>(x_new) : x_;		
+			y_ = ( y_new != -1 ) ? static_cast<uint>(y_new) : y_;		
+			z_ = ( z_new != -1 ) ? static_cast<uint>(z_new) : z_;		
+			w_ = ( w_new != -1 ) ? static_cast<uint>(w_new) : w_;		
+			data.resize( w_ * x_ * y_ * z_, 0 );
 		}
 
 		/*
@@ -121,10 +121,10 @@ class tensor4 {
 		 */
 		dType& operator() ( uint x_elem, uint y_elem, uint z_elem, uint w_elem ) {
 			int error = 0;
-			if ( x_elem < 0 || x_elem >= X ) error = -1;
-			if ( y_elem < 0 || y_elem >= Y ) error = -2;
-			if ( z_elem < 0 || z_elem >= Z ) error = -3;
-			if ( w_elem < 0 || w_elem >= W ) error = -4;
+			if ( x_elem < 0 || x_elem >= x_ ) error = -1;
+			if ( y_elem < 0 || y_elem >= y_ ) error = -2;
+			if ( z_elem < 0 || z_elem >= z_ ) error = -3;
+			if ( w_elem < 0 || w_elem >= w_ ) error = -4;
 
 			switch ( error ) {
 				case -1:
@@ -144,9 +144,9 @@ class tensor4 {
 						         " out of range of dimension 4 for rensor : Returning first element\n";
 					return data[ 0 ];
 			}
-			int offset = X * Y * Z * w_elem	+			// 4th dimension offset
-				         X * Y * z_elem		+			// 3rd dimension offset
-						 X * y_elem			+			// 2nd dimension offset
+			int offset = x_ * y_ * z_ * w_elem	+			// 4th dimension offset
+				         x_ * y_ * z_elem		+			// 3rd dimension offset
+						 x_ * y_elem			+			// 2nd dimension offset
 						 x_elem;						// 1st dimension offset
 			return 	data[ offset ];
 		}
@@ -165,10 +165,10 @@ class tensor4 {
 		 */
 		dType const& operator()( uint x_elem, uint y_elem, uint z_elem, uint w_elem ) const {
 			int error = 0;
-			if ( x_elem < 0 || x_elem >= X ) error = -1;
-			if ( y_elem < 0 || y_elem >= Y ) error = -2;
-			if ( z_elem < 0 || z_elem >= Z ) error = -3;
-			if ( w_elem < 0 || w_elem >= W ) error = -4;
+			if ( x_elem < 0 || x_elem >= x_ ) error = -1;
+			if ( y_elem < 0 || y_elem >= y_ ) error = -2;
+			if ( z_elem < 0 || z_elem >= z_ ) error = -3;
+			if ( w_elem < 0 || w_elem >= w_ ) error = -4;
 
 			switch ( error ) {
 				case -1:
@@ -188,9 +188,9 @@ class tensor4 {
 						         " out of range of dimension 4 for rensor : Returning first element\n";
 					return data[ 0 ];
 			}
-			int offset = X * Y * Z * w_elem	+			// 4th dimension offset
-				         X * Y * z_elem		+			// 3rd dimension offset
-						 X * y_elem			+			// 2nd dimension offset
+			int offset = x_ * y_ * z_ * w_elem	+			// 4th dimension offset
+				         x_ * y_ * z_elem		+			// 3rd dimension offset
+						 x_ * y_elem			+			// 2nd dimension offset
 						 x_elem;						// 1st dimension offset
 			return data[ offset ];
 		}
