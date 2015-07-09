@@ -94,7 +94,7 @@ class Layer : public TypePolicy<dType, dev, _nodes, _inputs, _depth> {
             for ( uint d = 0; d < depth; d++ ) {
                 for( uint i = 0; i < num_inputs; i++ ) {
                     for ( uint n = 0; n < num_nodes; n++ ) {
-                       this->wba( n, i, d, 0 ) = curnn::math::rand( min, max );
+                       this->wba( n, i, d, 0 ) = curnn::math<dType, curnn::device::CPU>::rand( min, max );
                     }
                 }
             }

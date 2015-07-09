@@ -23,7 +23,7 @@
 
 #include "../../curnn/types.h"
 #include "../../util/errors.h"
-#include "../../math/math_general.h"
+#include "../../math/math.hpp"
 
 namespace curnn {
     
@@ -40,7 +40,7 @@ void softmaxBackwardCpu( std::vector<dType>& outs, std::vector<dType>& targets, 
     
     // Call CPU X minus Y kernel because these vectors will never be big 
     // enough to warrant the data transfer between the CPU and the GPU
-    curnn::mathTest<dType, device::CPU>::xmy( outs, targets, errors );
+    curnn::math<dType, device::CPU>::xmy( outs, targets, errors );
 }
 
 }   // Namespace curnn
