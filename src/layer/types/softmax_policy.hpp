@@ -194,10 +194,10 @@ class softmaxPolicy<dType, device::CPU, nodes, inputs, depth> {
 /* ======================================= GPU IMPLEMENTATIONS ============================================ */
 
 template <typename dType, uint nds, uint ipts, uint dth>
-void softmaxPolicy<dType, device::GPU, nds, ipts, dth>::forward (
+void softmax_policy<dType, device::GPU, nds, ipts, dth>::forward (
         std::vector<dType>& ins, std::vector<dType>& outs ) {
     // Call softmax forward gpu version 
-    softmax_forawrd_gpu( ins, wba, numInputs, outs );
+    softmaxForawrdGpu( ins, wba, numInputs, outs );
 }
 
 template <typename dType, uint nds, uint ipts, uint dth>
@@ -205,7 +205,7 @@ void softmaxPolicy<dType, device::GPU, nds, ipts, dth>::backward(
         std::vector<dType>& outs, std::vector<dType>& targets ) {
     // Even though this is the GPU version, 
     // the CPU version is faster, so use that
-    softmax_backward_cpu( outs, targets, errors );
+    softmaxBackwardCpu( outs, targets, errors );
 }
 
 // NOT DONE
@@ -221,14 +221,14 @@ template <typename dType, uint nds, uint ipts, uint dth>
 void softmaxPolicy<dType, device::CPU, nds, ipts, dth>::forward( 
         std::vector<dType>& ins, std::vector<dType>& outs ) {
     // CPU implementation not done yet, use gpu
-    softmax_forward_gpu( ins, wba, numInputs, outs );
+    softmaxForwardGpu( ins, wba, numInputs, outs );
 }
 
 template <typename dType, uint nds, uint ipts, uint dth>
 void softmaxPolicy<dType, device::CPU, nds, ipts, dth>::backward( 
         std::vector<dType>& outs, std::vector<dType>& targets ) {
     // Call softmax backward cpu kernel
-    softmax_backward_cpu( outs, targets, errors );
+    softmaxBackwardCpu( outs, targets, errors );
 }
 
 // NOT DONE
