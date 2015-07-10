@@ -27,9 +27,8 @@
 #include <vector>
 
 #include "../curnn/types.h"
-//#include "math.hpp"
 #include "math_cpu.hpp"
-#include "math_gpu.h"
+#include "math_gpu.hpp"
 
 namespace curnn {
  
