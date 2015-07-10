@@ -23,7 +23,7 @@ INCLUDES		:= -I/usr/local/cuda-7.0/include        \
 #					LIBRARIES						   #
 ########################################################
 
-CUDA_LIBS		:= -lcuda -lcublas -lcuart -lgomp 
+CUDA_LIBS		:= -lcuda -lcublas -lgomp 
 TEST_LIBS		:= -lgtest -lgtest_main                 \
 				   -lpthread
 

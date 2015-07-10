@@ -74,7 +74,7 @@ TEST( curnnMathGpu, AxpyOperationComputesCorrectlyWithFloats ) {
         EXPECT_EQ( y[i], A * i + i );
     }
 }
-/*
+
 TEST( curnnMathGpu, AxpyOperationComputesCorrectlyWithDoubles ) {
     curnn::curnnError error;
     const double A = 2.0f;
@@ -95,7 +95,7 @@ TEST( curnnMathGpu, AxpyOperationComputesCorrectlyWithDoubles ) {
         EXPECT_EQ( y[i], A * i + i );
     }
 }
-*/
+
 TEST( curnnMathGpu, ReductionSumComputesCorrectlyWithFloats ) {
     curnn::curnnError error;
     vector<float> x;

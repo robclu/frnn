@@ -40,7 +40,7 @@
  * ==========================================================================================================
  * Function     : axpyGpu
  *
- * Description  : Performs simgle precision a*X + Y, using CUBLAS
+ * Description  : Performs simgle/double precision a*X + Y, using CUBLAS
  *
  * Inputs       : error     : cuRNN error type for result of operations
  *              : a         : Constant for multiplication 
@@ -96,6 +96,23 @@ void axpyGpu( curnn::curnnError& error, const dType a, const std::vector<dType>&
     cudaFree( dx );
     cudaFree( dy );
 } 
+
+/*
+ * ==========================================================================================================
+ * Function     : axpyGpu (for ints)
+ *
+ * Description  : Performs a*X + Y, using own implementation for ints
+ *
+ * Inputs       : error     : cuRNN error type for result of operations
+ *              : a         : Constant for multiplication 
+ *              : x         : Vector to multiply with a
+ * 
+ * Outputs      : y         : Vector used in a*X + Y, and where the result of a*X + Y is stored
+ * ==========================================================================================================
+ */
+void axpyGpu( curnn::curnnError& error, const int a, const std::vector<int>& x, std::vector<int>& y ) {
+    // Still implement - placeholder for now
+}
 
 /*
  * ==========================================================================================================

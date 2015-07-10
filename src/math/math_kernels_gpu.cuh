@@ -42,6 +42,30 @@ using namespace curnn;
 
 /*
  * ==========================================================================================================
+ * Function     : atomicAdd
+ * 
+ * Description  : Provides atotic addition for doubles - provided by Nvidia C programming guide.
+ * 
+ * Inputs       : address   : The address of the variable to be added to
+ *              : val       : The val to add to the address 
+ * ==========================================================================================================
+ */
+__device__ double atomicAdd( double* address, double val ) { 
+    unsigned long long int* address_as_ull = (unsigned long long int*)address; 
+    unsigned long long int  old            = *address_as_ull, assumed; 
+    do { 
+        assumed = old; 
+        old = atomicCAS( address_as_ull, 
+                         assumed, 
+                         __double_as_longlong( val + __longlong_as_double( assumed ) ) ); 
+        // Note: uses integer comparison to avoid hang in case of NaN (since NaN != NaN) } 
+    } while ( assumed != old ); 
+    
+    return __longlong_as_double( old ); 
+}
+
+/*
+ * ==========================================================================================================
  * Function     : xpny (x plus ny )
  *                
  * Description  : Performs vector addition of x plus n other vectors and stores the result in x
