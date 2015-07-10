@@ -116,6 +116,47 @@ void axpyGpu( curnn::curnnError& error, const int a, const std::vector<int>& x, 
 
 /*
  * ==========================================================================================================
+ * Function     : randGpu 
+ * 
+ * Descrition   : Generates a random number between 2 limits on the GPU
+ * 
+ * Inputs       : x         : The array that must be filled with random numbers
+ *              : N         : The number of elements in the array x to fille with random numbers
+ *              : lo        : The lower bound for each random number
+ *              : hi        : The upper bound for each random number 
+ *              
+ * Oututs       : The array of random numbers on the range lo - hi
+ * 
+ * Params       : dType     : The type of data of the output element
+ * ==========================================================================================================
+ */ 
+template <typename dType>
+void randGpu( dType* x, size_t N, dType lo, dType hi ) {
+    
+    curandGenerator_t   gen;                    // Device random number generator
+    curnnError          error;
+    dType*              device_randoms = 0;
+    
+    // Allocate memory on the device
+    if ( cudaMalloc( (void**)&devie_randoms, N * sizeof( dType) ) != cudaSuccess ) {
+        curnn::err::allocError( error, stirngify( device_randoms ) );
+    }
+    
+    curandSetPsuedoRandomGeneratorSeed( gen, 1234ULL );                        // Seed RNG
+    curnn::rng::generators<dType>::uniform( gen, device_randoms, N );          // Create rand nums on GPU
+    
+    // Copy results from deviec mem to x
+    if ( cudaMemcpy( x, device_randoms, N * sizeof( dType ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
+        curnn::err::copyError( error, stringify( device_randoms ) );
+    }
+    
+    // Clean up
+    cudaFree ( device_randoms );
+    curandDestroyGenerator( gen );
+    
+    
+/*
+ * ==========================================================================================================
  * Function     : softmaxGpu
  *
  * Description  : Performs the softmax function of a vector of data x, which is 

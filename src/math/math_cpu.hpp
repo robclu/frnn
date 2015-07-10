@@ -30,22 +30,27 @@
  * ==========================================================================================================
  * Function     : rand 
  * 
- * Descrition   : Generates a random number between 2 limits
+ * Descrition   : Generates a random number between 2 limits for each element in an array
  * 
- * Inputs       : lo        : The lower bound for the random number
- *              : hi        : The upper bound for the random number 
+ * Inputs       : x         : The array that must be filled with random numbers
+ *              : N         : The number of elements in the array that must be filled with a randomm number
+ *              : lo        : The lower bound for each random number
+ *              : hi        : The upper bound for each random number 
  *              
- * Oututs       : A random number between lo and hi
+ * Oututs       : An array of random number on the range lo - hi
  * 
  * Params       : dType     : The type of data of the output element
  * ==========================================================================================================
  */
 template <typename dType>
-dType randCpu( dType lo, dType hi ) {
+void randCpu( dType* x, size_t N, dType lo, dType hi ) {
     std::random_device                  rd;                             // Random device
     std::mt19937                        gen( rd() );                    // Generator
     std::uniform_real_distribution<>    dist( lo, hi );
-    return static_cast<dType>( dist( gen ) );
+    
+    for ( size_t i = 0; i < N; i++ ) {
+        x[ i ] = return static_cast<dType>( dist( gen ) );
+    }
 }
 
 /*
