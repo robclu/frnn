@@ -22,6 +22,7 @@
 #ifndef _CURNN_MATH_GPU_
 #define _CURNN_MATH_GPU_
 
+#include <cuda.h>
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
 
@@ -32,8 +33,8 @@
 #include "../tensor/tensor.cuh"
 #include "../util/errors.h"
 #include "../curnn/curnn.h"
-#include "blas/curnn_blas.h"
 #include "math_kernels_gpu.cuh"
+#include "blas/curnn_blas.h"
 
 /*
  * ==========================================================================================================

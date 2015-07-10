@@ -16,15 +16,15 @@ CXX				:= $(HOST_COMPILER)
 #				INCLUDE DIRECTORIES					   #
 ########################################################
 
-INCLUDES		:= -I/usr/local/cuda-7.0/include \
+INCLUDES		:= -I/usr/local/cuda-7.0/include        \
 				   -I../Util
 
 ########################################################
 #					LIBRARIES						   #
 ########################################################
 
-CUDA_LIBS		:= -lcuda -lcublas -lgomp
-TEST_LIBS		:= -lgtest -lgtest_main \
+CUDA_LIBS		:= -lcuda -lcublas -lcuart -lgomp 
+TEST_LIBS		:= -lgtest -lgtest_main                 \
 				   -lpthread
 
 LIB_DIR			:= -L/usr/local/cuda/lib64
@@ -49,16 +49,16 @@ all: tests
 tests: tests
 
 main.o : main.cpp
-	$(NVCC) -x cu $(INLCUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -c $<
+	$(NVCC) -x cu $(INLCUDES) $(CUFLAGS) $(CCFLAGS) -o $@ -c $<
 
 math_tests.o: math_tests.cpp 
-	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -c $<
+	$(NVCC) -x cu $(INCLUDES) $(CUFLAGS) $(CCFLAGS) -o $@ -dc $<
 
 errors.o: ../util/errors.cpp 
-	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -c $<
+	$(NVCC) -x cu $(INCLUDES) $(CUFLAGS) $(CCFLAGS) -o $@ -c $<
 
 tests: errors.o math_tests.o main.o
-	$(NVCC) $(LDFLAGS) -o $(EXE) $+ $(LIB_DIR) \
+	$(NVCC) -arch=sm_30 $(LDFLAGS) -o $(EXE) $+ $(LIB_DIR) \
 		$(CUDA_LIBS) $(TEST_LIBS)	
 		
 cleanobs:
