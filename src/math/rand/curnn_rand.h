@@ -21,13 +21,15 @@
  */
 
 #ifndef _CURNN_RAND_
-#ifndef _CURNN_RAND_
+#define _CURNN_RAND_
 
 namespace curnn {
 namespace rng {
     
 #include <cuda.h> 
 #include <curand.h>
+
+#include "curnn_rand_kernels.h"     
     
 /*
  * ==========================================================================================================
@@ -41,7 +43,7 @@ namespace rng {
 template <typename dType> struct generators;
 
 // Specialization for floats
-template <> struct<float> generators {
+template <> struct generators<float> {
     
     // Normal distribution
     typedef curandStatus_t (*curandUniform)( curandGenerator_t, float*, size_t );
@@ -49,13 +51,22 @@ template <> struct<float> generators {
 };
 
 // Specialization for doubles
-template <> struct<double> generators {
+template <> struct generators<double> {
     
     // Normal distribution
     typedef curandStatus_t (*curandUniform)( curandGenerator_t, double*, size_t );
     static constexpr curandUniform uniform = &curandGenerateUniformDouble;
 };
 
+// Specialization for floats
+template <> struct generators<int> {
+    
+    // Normal distribution
+    typedef curandStatus_t (*curandUniform)( curandGenerator_t, int*, size_t );
+    static constexpr curandUniform uniform = &curnnGenerateUniform;
+};
 }   // Namespace rng
 }   // Namepsace curnn
+
 #endif 
+

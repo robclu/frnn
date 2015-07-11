@@ -53,7 +53,7 @@ template <typename dType> struct math<dType, curnn::device::CPU> {
     static constexpr x_minus_y_cpu xmy = &xmyCpu;
     
     // Rand function
-    typedef void (*rand_cpu)( dType*, size_t dType, dType );
+    typedef void (*rand_cpu)( dType*, size_t, dType, dType );
     static constexpr rand_cpu rand = &randCpu; 
 
 };
@@ -66,7 +66,7 @@ template <typename dType> struct math<dType, curnn::device::GPU> {
     static constexpr ax_plus_y_gpu axpy = &axpyGpu;
   
     // Rand function
-    typedef void (*rand_gpu)( dType*, size_t dType, dType );
+    typedef void (*rand_gpu)( dType*, size_t, dType, dType );
     static constexpr rand_gpu rand = &randGpu; 
     
     // Softmax fucntion 

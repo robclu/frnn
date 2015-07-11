@@ -49,7 +49,7 @@ void randCpu( dType* x, size_t N, dType lo, dType hi ) {
     std::uniform_real_distribution<>    dist( lo, hi );
     
     for ( size_t i = 0; i < N; i++ ) {
-        x[ i ] = return static_cast<dType>( dist( gen ) );
+        x[ i ] = static_cast<dType>( dist( gen ) );
     }
 }
 

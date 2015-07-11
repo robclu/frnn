@@ -45,13 +45,17 @@ const float  TOLERANCE    = 1e-4;     // For difference between GPU and CPU math
  * ==========================================================================================================
  */
 
-TEST( curnnMathGpu, CanGenerateRandomNumbersUniformDistribution ) {
+TEST( curnnMathGpu, CanGenerateNRandomNumbersUniformDistribution ) {
     float lo = 0.0f; float hi = 0.1f;
-
-    float random_number = curnn::math<float, curnn::device::CPU>::rand( lo, hi );    
+    float random_numbers[ 10 ];
     
-    EXPECT_GE( random_number, lo );
-    EXPECT_LT( random_number, hi );
+    // Generate 10 randon numbers on the GPU
+    curnn::math<float, curnn::device::GPU>::rand( random_numbers, 10, lo, hi );    
+    
+    for ( size_t i = 0; i < 10; i++ ) {
+        EXPECT_GE( random_numbers[ i ], lo );
+        EXPECT_LT( random_numbers[ i ], hi );
+    }
 }
 
 TEST( curnnMathGpu, AxpyOperationComputesCorrectlyWithFloats ) {
@@ -208,6 +212,19 @@ TEST( curnnMathGpu, SoftmaxComputesCorrectlyForFloats ) {
         float softmax_i = exp( 1.f ) / ( exp( 1.f ) * (float)NUM_ELEMENTS );
         // Account for difference in GPU exp and CPU exp
         EXPECT_NEAR( softmax_i, results[ i ], TOLERANCE );
+    }
+}
+
+TEST( curnnMathCpu, CanGenerateNRandomNumbersUniformDistribution ) {
+    float lo = 0.0f; float hi = 0.1f;
+    float random_numbers[ 10 ];
+    
+    // Generate 10 randon numbers on the CPU
+    curnn::math<float, curnn::device::CPU>::rand( random_numbers, 10, lo, hi );    
+    
+    for ( size_t i = 0; i < 10; i++ ) {
+        EXPECT_GE( random_numbers[ i ], lo );
+        EXPECT_LT( random_numbers[ i ], hi );
     }
 }
 

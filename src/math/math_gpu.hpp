@@ -25,6 +25,7 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
+#include <curand.h>
 
 #include <vector>
 #include <random>
@@ -35,6 +36,7 @@
 #include "../curnn/curnn.h"
 #include "math_kernels_gpu.cuh"
 #include "blas/curnn_blas.h"
+#include "rand/curnn_rand.h"
 
 /*
  * ==========================================================================================================
@@ -138,11 +140,11 @@ void randGpu( dType* x, size_t N, dType lo, dType hi ) {
     dType*              device_randoms = 0;
     
     // Allocate memory on the device
-    if ( cudaMalloc( (void**)&devie_randoms, N * sizeof( dType) ) != cudaSuccess ) {
-        curnn::err::allocError( error, stirngify( device_randoms ) );
+    if ( cudaMalloc( (void**)&device_randoms, N * sizeof( dType) ) != cudaSuccess ) {
+        curnn::err::allocError( error, stringify( device_randoms ) );
     }
     
-    curandSetPsuedoRandomGeneratorSeed( gen, 1234ULL );                        // Seed RNG
+    curandSetPseudoRandomGeneratorSeed( gen, 1234ULL );                        // Seed RNG
     curnn::rng::generators<dType>::uniform( gen, device_randoms, N );          // Create rand nums on GPU
     
     // Copy results from deviec mem to x
@@ -153,7 +155,7 @@ void randGpu( dType* x, size_t N, dType lo, dType hi ) {
     // Clean up
     cudaFree ( device_randoms );
     curandDestroyGenerator( gen );
-    
+}    
     
 /*
  * ==========================================================================================================
