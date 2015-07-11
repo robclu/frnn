@@ -23,14 +23,15 @@
 
 #include "layer.hpp"
 #include "types/softmax_policy.hpp"
+#include "../curnn/curnn.h"
 
-const size_t    INPUTS      = 3000;
-const size_t    NODES       = 40;
+const size_t    INPUTS      = 2000;
+const size_t    NODES       = 8;
 const size_t    DEPTH       = 4;
 const float     TOLERANCE   = 1e-5;
 
 typedef curnn::Layer<float,                             // Data type
-                     curnn::device::CPU,                // Device type
+                     curnn::device::GPU,                // Device type
                      NODES, INPUTS, DEPTH,              // Size
                      curnn::ltype::SoftmaxPolicy>  curnnLayerSmaxf;        
 

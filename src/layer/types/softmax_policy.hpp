@@ -197,7 +197,7 @@ template <typename dType, uint nds, uint ipts, uint dth>
 void SoftmaxPolicy<dType, device::GPU, nds, ipts, dth>::forward (
         std::vector<dType>& ins, std::vector<dType>& outs ) {
     // Call softmax forward gpu version 
-    softmaxForawrdGpu( ins, wba, num_inputs, outs );
+    softmaxForwardGpu( ins, wba, num_inputs, outs );
 }
 
 template <typename dType, uint nds, uint ipts, uint dth>

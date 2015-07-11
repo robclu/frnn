@@ -117,6 +117,17 @@ TEST( curnnTensor, CanGetPointerToElement ) {
 	EXPECT_EQ( *testVal, 10.f );
 }
 
+TEST( curnnTensor, CanModifyElementThroughPointer ) {
+   	curnn::Tensor4<float> testTensor( X, Y, Z, W );
+
+	testTensor( 0, 0, 1, 0 ) = 10.f;	
+	float* testVal = &testTensor( 0, 0, 1, 0 );
+
+    *testVal = 4.f;
+    
+	EXPECT_EQ( *testVal, 4.f );
+}
+
 TEST( curnnTensor, CanCreateArrayFromTensor ) {
 	curnn::Tensor4<float> testTensor( X, Y, Z, W );
 

@@ -21,6 +21,8 @@
 #ifndef _CURNN_LAYER_
 #define _CURNN_LAYER_
 
+#include <omp.h>
+
 #include "../tensor/tensor.cuh"
 #include "../math/math.hpp"
 
@@ -89,14 +91,15 @@ class Layer : public TypePolicy<dType, dev, _nodes, _inputs, _depth> {
          * ==================================================================================================
          */
         inline void initializeWeights( dType min, dType max ) {
-            // Use the layer policy weight intialization
-            // which will use the CPU/GPU as required
-            for ( uint d = 0; d < depth; d++ ) {
-                for( uint i = 0; i < num_inputs; i++ ) {
-                    for ( uint n = 0; n < num_nodes; n++ ) {
-                       this->wba( n, i, d, 0 ) = curnn::math<dType, curnn::device::CPU>::rand( min, max );
-                    }
-                }
+            // For each page in the tensor, use a thread to initialize the weights
+            #pragma omp parallel num_threads ( depth )
+            {
+                int thread_id       = omp_get_thread_num();
+                dType* weight_start = &this->wba( 0, 0, thread_id, 0 );
+                size_t num_elements = num_nodes * std::max( num_nodes, num_inputs );
+                
+                // CPU version is a lot faster at the moment due to PCU-GPU transfer, so use CPU
+                curnn::math<dType, curnn::device::CPU>::rand( weight_start, num_elements, min, max );
             }
         }
         
