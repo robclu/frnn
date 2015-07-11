@@ -143,9 +143,18 @@ void randGpu( dType* x, size_t N, dType lo, dType hi ) {
     if ( cudaMalloc( (void**)&device_randoms, N * sizeof( dType) ) != cudaSuccess ) {
         curnn::err::allocError( error, stringify( device_randoms ) );
     }
-    
+   
+    curandCreateGenerator( &gen, CURAND_RNG_PSEUDO_DEFAULT );                  // Create generator
     curandSetPseudoRandomGeneratorSeed( gen, 1234ULL );                        // Seed RNG
     curnn::rng::generators<dType>::uniform( gen, device_randoms, N );          // Create rand nums on GPU
+    
+    int threads, blocks;
+    threads = ( ( N < 1024 ) ? N : 1024 );
+    blocks  = std::min( static_cast<int>( N / threads + 1 ), MAX_BLOCKS );
+    
+
+    // Call kernel to chnage the range from 0 - 1 to lo - hi
+    scale<<<blocks, threads>>>( device_randoms, N, lo, hi );
     
     // Copy results from deviec mem to x
     if ( cudaMemcpy( x, device_randoms, N * sizeof( dType ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {

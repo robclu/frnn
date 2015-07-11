@@ -30,8 +30,10 @@ using curnn::device;
 // General tesing parameres 
 // Note : Do not make this so big that the GPU will run out of memory,
 //        which is only really a problem for the double precision functions
-const size_t NUM_ELEMENTS = 3e6;
-const float  TOLERANCE    = 1e-4;     // For difference between GPU and CPU math functions
+const size_t NUM_ELEMENTS      = 3e6;
+const size_t NUM_ELEMENTS_RAND = 1e5;
+const size_t NUM_ELEMENTS_CPU  = 3e6;
+const float  TOLERANCE         = 1e-4;     // For difference between GPU and CPU math functions
 
 /* =========================================== NOTES ========================================================
  *
@@ -46,13 +48,13 @@ const float  TOLERANCE    = 1e-4;     // For difference between GPU and CPU math
  */
 
 TEST( curnnMathGpu, CanGenerateNRandomNumbersUniformDistribution ) {
-    float lo = 0.0f; float hi = 0.1f;
-    float random_numbers[ 10 ];
+    float lo = -2.0f; float hi = 10.f;
+    float random_numbers[ NUM_ELEMENTS_RAND ];
     
     // Generate 10 randon numbers on the GPU
-    curnn::math<float, curnn::device::GPU>::rand( random_numbers, 10, lo, hi );    
+    curnn::math<float, curnn::device::GPU>::rand( random_numbers, NUM_ELEMENTS_RAND, lo, hi );    
     
-    for ( size_t i = 0; i < 10; i++ ) {
+    for ( size_t i = 0; i < NUM_ELEMENTS_RAND; i++ ) {
         EXPECT_GE( random_numbers[ i ], lo );
         EXPECT_LT( random_numbers[ i ], hi );
     }
@@ -216,13 +218,13 @@ TEST( curnnMathGpu, SoftmaxComputesCorrectlyForFloats ) {
 }
 
 TEST( curnnMathCpu, CanGenerateNRandomNumbersUniformDistribution ) {
-    float lo = 0.0f; float hi = 0.1f;
-    float random_numbers[ 10 ];
+    float lo = 2.0f; float hi = 13.1f;
+    float random_numbers[ NUM_ELEMENTS_RAND ];
     
     // Generate 10 randon numbers on the CPU
-    curnn::math<float, curnn::device::CPU>::rand( random_numbers, 10, lo, hi );    
+    curnn::math<float, curnn::device::CPU>::rand( random_numbers, NUM_ELEMENTS_RAND, lo, hi );    
     
-    for ( size_t i = 0; i < 10; i++ ) {
+    for ( size_t i = 0; i < NUM_ELEMENTS_RAND; i++ ) {
         EXPECT_GE( random_numbers[ i ], lo );
         EXPECT_LT( random_numbers[ i ], hi );
     }
@@ -233,7 +235,7 @@ TEST( curnnMathCpu, CanPerformXminusYWithVectorizedCpuKernelWithFloats ) {
     std::vector<float> y;
     std::vector<float> out;
     
-    for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+    for ( size_t i = 0; i < NUM_ELEMENTS_CPU; i++ ) {
         x.push_back( float( i ) );
         y.push_back( float( i + 1 ) );
         out.push_back( 0.0f );
@@ -252,7 +254,7 @@ TEST( curnnMathCpu, CanPerformXminusYWithVectorizedCpuKernelWithDoubles ) {
     std::vector<double> y;
     std::vector<double> out;
     
-    for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
+    for ( size_t i = 0; i < NUM_ELEMENTS_CPU; i++ ) {
         x.push_back( double( i ) );
         y.push_back( double( i + 1 ) );
         out.push_back( 0.0 );

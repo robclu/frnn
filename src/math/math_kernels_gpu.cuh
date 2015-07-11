@@ -357,4 +357,28 @@ __global__ void softmaxKernel( dType* in, dType* out, size_t N, F f = functors::
     if ( idx < N ) out[ idx ] = f( in[ idx ] ) / out[ idx ];
 }
 
+/*
+ * ==========================================================================================================
+ * Function     : scale 
+ * 
+ * Description  : Takes N values on the range 0.0 - 1.0 and scales them to the range lo - hi
+ * 
+ * Inputs       : x         : The array of elements to scale
+ *              : N         : The number of elements in the array
+ *              : lo        : The lower bound for the range of values
+ *              : hi        : The upper bound for the range of values
+ *
+ * Outputs      : x         : The modified array with each element being on the range lo - hi
+ * 
+ * Params       : dType     : The type of data to use. This should be float or double, however, ints will work
+ *                            but will give a terrible distribution due to rounding
+ * ==========================================================================================================
+ */
+template <typename dType>
+__global__ void scale( dType* x, size_t N, dType lo, dType hi ) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    if ( idx < N ) x[ idx ] = x[ idx ] * ( hi - lo ) + lo;
+}
+
 #endif
