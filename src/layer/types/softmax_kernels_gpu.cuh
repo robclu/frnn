@@ -30,7 +30,7 @@
 #include "../../curnn/curnn.h"
 #include "../../math/blas/curnn_blas.h"
 
-namespace curnn{
+namespace curnn {
     
 template <typename dType>
 void softmaxForwardGpu( std::vector<dType>& ins       , 

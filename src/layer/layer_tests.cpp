@@ -25,8 +25,8 @@
 #include "types/softmax_policy.hpp"
 #include "../curnn/curnn.h"
 
-const size_t    INPUTS      = 2000;
-const size_t    NODES       = 8;
+const size_t    INPUTS      = 200;
+const size_t    NODES       = 80;
 const size_t    DEPTH       = 4;
 const float     TOLERANCE   = 1e-5;
 
@@ -58,14 +58,17 @@ TEST( curnnLayer, InitializesWeightsBiasesAndActivationsToZero ) {
 
 TEST( curnnLayer, CanInitializeAndReadWeights ) {
     curnnLayerSmaxf softmaxLayer;
-    softmaxLayer.initializeWeights( 0.0f, 1.0f );
+    float lo = 0.0f; float high = 1.0f;
+    
+    softmaxLayer.initializeWeights( lo, high );
    
    const curnn::Tensor4<float> layerWghtsBiasActs = softmaxLayer.getWBA();
     
    // Just checking first depth level
    for ( uint i = 0; i < INPUTS; i++ ) {
        for ( uint n = 0; n < NODES; n++ ) {
-            EXPECT_NE( layerWghtsBiasActs( n, i, 0, 0 ), 0.0f );
+            EXPECT_GE( layerWghtsBiasActs( n, i, 0, 0 ), lo );
+            EXPECT_LE( layerWghtsBiasActs( n, i, 0, 0 ), high );
        }
    }
 }
