@@ -25,8 +25,8 @@
 
 #include "../../tensor/tensor.cuh"
 #include "../../curnn/curnn.h"
-#include "softmax_kernels_cpu.hpp"
-#include "softmax_kernels_gpu.cuh"
+#include "softmax_cpu_functions.hpp"
+#include "softmax_gpu_functions.cuh"
 
 namespace curnn {
 namespace ltype {
