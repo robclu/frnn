@@ -25,10 +25,13 @@
 #include <cuda_runtime.h>
 
 template <typename dType>
-void updateWeights( dType* prev_acts, size_t N,
-                    dType* curr_errs, size_t M ) {
+void updateWeights( dType* prev_acts , size_t N         ,
+                    dType* curr_errs , size_t M         ,
+                    dType  learn_rate, dType momentum   ) { 
     
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    // Update weights 
 }
 
 #endif
