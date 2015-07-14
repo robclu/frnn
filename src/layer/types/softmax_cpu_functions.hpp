@@ -1,5 +1,5 @@
 /*
- *  Header file for cuRNN softmax layer cpu kernels.
+ *  Header file for fastRNN softmax layer cpu kernels.
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
@@ -18,31 +18,31 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _CURNN_SOFTMAX_KERNELS_CPU_
-#define _CURNN_SOFTMAX_KERNELS_CPU_
+#ifndef _FRNN_SOFTMAX_KERNELS_CPU_
+#define _FRNN_SOFTMAX_KERNELS_CPU_
 
-#include "../../curnn/types.h"
+#include "../../frnn/types.h"
 #include "../../util/errors.h"
 #include "../../math/math.hpp"
 
-namespace curnn {
+namespace frnn {
     
 template <typename dType>
 void softmaxBackwardCpu( std::vector<dType>& outs, std::vector<dType>& targets, std::vector<dType>& errors ) {
   
-    curnnError error; 
+    frnnError error; 
     // Check dimensions
     if ( outs.size() != targets.size() ) {
-        curnn::err::dimError( error, stringify( outs ), stringify( targets ) );
+        frnn::err::dimError( error, stringify( outs ), stringify( targets ) );
     } else if ( outs.size() != errors.size() ) { 
-        curnn::err::dimError( error, stringify( outs ), stringify( errors ) );
+        frnn::err::dimError( error, stringify( outs ), stringify( errors ) );
     }
     
     // Call CPU X minus Y kernel because these vectors will never be big 
     // enough to warrant the data transfer between the CPU and the GPU
-    curnn::math<dType, device::CPU>::xmy( outs, targets, errors );
+    frnn::math<dType, device::CPU>::xmy( outs, targets, errors );
 }
 
-}   // Namespace curnn
+}   // Namespace frnn
 
 #endif

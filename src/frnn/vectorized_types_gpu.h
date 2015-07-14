@@ -1,5 +1,5 @@
 /*
- *  Header file for cuRNN GPU vectorized types. Provides wrappers around 
+ *  Header file for fastRNN GPU vectorized types. Provides wrappers around 
  *  the CUDA vectorized types to allow the correct type to be used in 
  *  templated functions.
  *  
@@ -21,12 +21,12 @@
  *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _CURNN_VECTORIZED_TYPES_GPU_
-#define _CURNN_VECTORIZED_TYPES_GPU_
+#ifndef _FRNN_VECTORIZED_TYPES_GPU_
+#define _FRNN_VECTORIZED_TYPES_GPU_
 
 #include <cuda.h>
 
-namespace curnn {
+namespace frnn {
     
 /* 
  * ==========================================================================================================
@@ -42,20 +42,20 @@ namespace curnn {
 template <typename dType, int N> struct VectorizedTypeGpu;
 
 // Macro to make instances of each type for all vector sizes for CUDA vectorized types
-#define CURNN_VECTORIZED_INSTANCE( dType )										  	    \
+#define FRNN_VECTORIZED_INSTANCE( dType )										  	    \
 	template <> struct VectorizedTypeGpu<dType, 1> { typedef dType ## 1 vect_type; };	\
 	template <> struct VectorizedTypeGpu<dType, 2> { typedef dType ## 2 vect_type; };	\
 	template <> struct VectorizedTypeGpu<dType, 4> { typedef dType ## 4 vect_type; };	\
 
 // Make partial specifications for different types
-CURNN_VECTORIZED_INSTANCE( double )
-CURNN_VECTORIZED_INSTANCE( float  )
-CURNN_VECTORIZED_INSTANCE( int    )
-CURNN_VECTORIZED_INSTANCE( uint   )
-CURNN_VECTORIZED_INSTANCE( char	  )
+FRNN_VECTORIZED_INSTANCE( double )
+FRNN_VECTORIZED_INSTANCE( float  )
+FRNN_VECTORIZED_INSTANCE( int    )
+FRNN_VECTORIZED_INSTANCE( uint   )
+FRNN_VECTORIZED_INSTANCE( char	  )
 
-#undef CURNN_VECTORIZED_INSTANCE
+#undef FRNN_VECTORIZED_INSTANCE
 
-}   // Namespace curnn
+}   // Namespace frnn
 
 #endif

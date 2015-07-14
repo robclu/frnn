@@ -1,5 +1,5 @@
 /*
- *  Test file for cuRNN matrx class.
+ *  Test file for fastRNN matrx class.
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
@@ -28,8 +28,8 @@ const size_t X = 4;
 const size_t Y = 4;
 const size_t Z = 4;
 
-TEST( curnnTensor, CanCreateTensorCorrectly ) {
-	curnn::Tensor4<float> testTensor( X, Y, Z, W );
+TEST( frnnTensor, CanCreateTensorCorrectly ) {
+	frnn::Tensor4<float> testTensor( X, Y, Z, W );
 
 	EXPECT_EQ( testTensor.w(), W );
 	EXPECT_EQ( testTensor.x(), X );
@@ -38,8 +38,8 @@ TEST( curnnTensor, CanCreateTensorCorrectly ) {
 	EXPECT_EQ( testTensor.size(), W * X * Y * Z );
 }
 
-TEST( curnnTensor, TensorValuesDefaultToZero ) {
-	curnn::Tensor4<float> testTensor( X, Y, Z, W );
+TEST( frnnTensor, TensorValuesDefaultToZero ) {
+	frnn::Tensor4<float> testTensor( X, Y, Z, W );
 
 	for ( size_t l = 0; l < testTensor.w(); l++ ) {
 		for ( size_t k = 0; k < testTensor.z(); k++ ) {
@@ -52,8 +52,8 @@ TEST( curnnTensor, TensorValuesDefaultToZero ) {
 	}
 }
 
-TEST( curnnTensor, CanReshapeTensor ) {
-	curnn::Tensor4<float> testTensor( X, Y, Z, W );
+TEST( frnnTensor, CanReshapeTensor ) {
+	frnn::Tensor4<float> testTensor( X, Y, Z, W );
 
 	testTensor.reshape( 10, 10, 7, 2 );
 
@@ -64,8 +64,8 @@ TEST( curnnTensor, CanReshapeTensor ) {
 	EXPECT_EQ( testTensor.size(), 10 * 10 * 7 * 2 );
 }
 
-TEST( curnnTensor, TensorValuesAreZeroAfterReshape ) {
-	curnn::Tensor4<float> testTensor( X, Y, Z, W );
+TEST( frnnTensor, TensorValuesAreZeroAfterReshape ) {
+	frnn::Tensor4<float> testTensor( X, Y, Z, W );
 	testTensor.reshape( 10, 2, 3, 9 );
 
 	for ( size_t l = 0; l < testTensor.w(); l++ ) {
@@ -79,8 +79,8 @@ TEST( curnnTensor, TensorValuesAreZeroAfterReshape ) {
 	}
 }
 
-TEST( curnnTensor, ReshapeCanUsexistingDimensionality ) {
-	curnn::Tensor4<float> testTensor( X, Y, Z, W );
+TEST( frnnTensor, ReshapeCanUsexistingDimensionality ) {
+	frnn::Tensor4<float> testTensor( X, Y, Z, W );
 	testTensor.reshape( 10, -1, 3, -1 );
 
 	EXPECT_EQ( testTensor.x(), 10 );
@@ -90,8 +90,8 @@ TEST( curnnTensor, ReshapeCanUsexistingDimensionality ) {
 	EXPECT_EQ( testTensor.size(), 10 * Y * 3 * W );
 }
 
-TEST( curnnTensor, CanGetAndSetElementWithAccessOperator ) {
-	curnn::Tensor4<float> testTensor( X, Y, Z, W );
+TEST( frnnTensor, CanGetAndSetElementWithAccessOperator ) {
+	frnn::Tensor4<float> testTensor( X, Y, Z, W );
 	testTensor( 1, 0, 0, 0 ) = 5.f;
 
 	// Use operator
@@ -100,16 +100,16 @@ TEST( curnnTensor, CanGetAndSetElementWithAccessOperator ) {
 	EXPECT_EQ( testVal, 5.f );
 }
 
-TEST( curnnTensor, OutputsErrorForOutOfRangeIndxAndReturnsFirstElementValue ) {
-	curnn::Tensor4<float> testTensor( X, Y, Z, W );
+TEST( frnnTensor, OutputsErrorForOutOfRangeIndxAndReturnsFirstElementValue ) {
+	frnn::Tensor4<float> testTensor( X, Y, Z, W );
 
 	float testVal = testTensor( 100, 12, 34, 2 );
 
 	EXPECT_EQ( testVal, testTensor( 0, 0, 0, 0 ) );
 }
 
-TEST( curnnTensor, CanGetPointerToElement ) {
-	curnn::Tensor4<float> testTensor( X, Y, Z, W );
+TEST( frnnTensor, CanGetPointerToElement ) {
+	frnn::Tensor4<float> testTensor( X, Y, Z, W );
 
 	testTensor( 0, 0, 1, 0 ) = 10.f;	
 	float* testVal = &testTensor( 0, 0, 1, 0 );
@@ -117,8 +117,8 @@ TEST( curnnTensor, CanGetPointerToElement ) {
 	EXPECT_EQ( *testVal, 10.f );
 }
 
-TEST( curnnTensor, CanModifyElementThroughPointer ) {
-   	curnn::Tensor4<float> testTensor( X, Y, Z, W );
+TEST( frnnTensor, CanModifyElementThroughPointer ) {
+   	frnn::Tensor4<float> testTensor( X, Y, Z, W );
 
 	testTensor( 0, 0, 1, 0 ) = 10.f;	
 	float* testVal = &testTensor( 0, 0, 1, 0 );
@@ -128,8 +128,8 @@ TEST( curnnTensor, CanModifyElementThroughPointer ) {
 	EXPECT_EQ( *testVal, 4.f );
 }
 
-TEST( curnnTensor, CanCreateArrayFromTensor ) {
-	curnn::Tensor4<float> testTensor( X, Y, Z, W );
+TEST( frnnTensor, CanCreateArrayFromTensor ) {
+	frnn::Tensor4<float> testTensor( X, Y, Z, W );
 
 	// Set elements
 	for ( size_t i = 0; i < testTensor.x(); i++ ) {

@@ -20,13 +20,13 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _CURNN_RAND_KERNELS_
-#define _CURNN_RAND_KERNELS_
+#ifndef _FRNN_RAND_KERNELS_
+#define _FRNN_RAND_KERNELS_
 
 #include <cuda.h>
 #include <curand.h>
 
-curandStatus_t curnnGenerateUniform( curandGenerator_t genenrator , int* outputPtr, size_t num ) {
+curandStatus_t frnnGenerateUniform( curandGenerator_t genenrator , int* outputPtr, size_t num ) {
     // Do nothing for the moment
 }
 

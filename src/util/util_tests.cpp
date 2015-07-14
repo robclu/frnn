@@ -1,5 +1,5 @@
 /*
- *  Test file for cuRNN util functions.
+ *  Test file for fastRNN util functions.
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
@@ -21,37 +21,37 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
-#include "../curnn/curnn.h"
+#include "../frnn/frnn.h"
 
-TEST( curnnErrors, DeterminesErrorForBadAlloc ) {
+TEST( frnnErrors, DeterminesErrorForBadAlloc ) {
     
-    curnn::curnnError error;    
+    frnn::frnnError error;    
     float* devPointer;
 
     // Try an malloc without casting to void pointer, to get error
     if ( cudaMalloc( (void**)devPointer, sizeof( float ) ) != cudaSuccess ) {
-        curnn::err::allocError( error, stringify( devPointer ) );
+        frnn::err::allocError( error, stringify( devPointer ) );
     }
 
-    EXPECT_EQ( error, curnn::curnnError::CURNN_ALLOC_ERROR );
+    EXPECT_EQ( error, frnn::frnnError::FRNN_ALLOC_ERROR );
 }
 
-TEST( curnnErrors, DeterminesErrorForBadCopy ) {
+TEST( frnnErrors, DeterminesErrorForBadCopy ) {
     
-    curnn::curnnError error;
+    frnn::frnnError error;
     std::vector<float> hostData = { 3.f, 4.f };
     float* devData;
 
     // Allocate memory on device (for 1 float)
     if ( cudaMalloc( (void**)&devData, sizeof( float ) ) != cudaSuccess ) {
-        curnn::err::allocError( error, stringify( devPointer ) );
+        frnn::err::allocError( error, stringify( devPointer ) );
     }
 
     // Try and copy too much data
     if ( cudaMemcpy( devData, &hostData[0], hostData.size() * sizeof( float ), cudaMemcpyHostToDevice ) !=
            cudaSuccess ) {
-        curnn::err::copyError( error, stringify( devData ) );
+        frnn::err::copyError( error, stringify( devData ) );
     }
 
-    EXPECT_EQ( error, curnn::curnnError::CURNN_COPY_ERROR );
+    EXPECT_EQ( error, frnn::frnnError::FRNN_COPY_ERROR );
 }

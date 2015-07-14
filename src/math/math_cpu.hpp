@@ -1,5 +1,5 @@
 /*
- *  Header file for cuRNN CPU math kernel functions.
+ *  Header file for fastRNN CPU math kernel functions.
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
@@ -18,13 +18,13 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _CURNN_MATH_KERNELS_CPU_
-#define _CURNN_MATH_KERNELS_CPU_
+#ifndef _FRNN_MATH_KERNELS_CPU_
+#define _FRNN_MATH_KERNELS_CPU_
 
 #include <vector>
 #include <random>
 
-#include "../curnn/types.h"
+#include "../frnn/types.h"
 
 /*
  * ==========================================================================================================
@@ -69,8 +69,8 @@ void randCpu( dType* x, size_t N, dType lo, dType hi ) {
  */
 template <typename dType>
 void xmyCpu( std::vector<dType>& x, std::vector<dType>& y, std::vector<dType>& result ) {
-    typedef typename curnn::VectorizedInstructionsCpu<dType>    vect_ins;
-    typedef typename curnn::VectorizedTypeCpu<dType>::vect_type vect4;
+    typedef typename frnn::VectorizedInstructionsCpu<dType>    vect_ins;
+    typedef typename frnn::VectorizedTypeCpu<dType>::vect_type vect4;
     
     // Get size and pointers 
     const size_t N     = x.size();

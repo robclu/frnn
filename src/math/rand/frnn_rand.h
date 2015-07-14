@@ -1,5 +1,5 @@
 /*
- *  Header file for cuRNN rand functions, which are simply structs
+ *  Header file for fastRNN rand functions, which are simply structs
  *  with function pointers that call curand functions, but can determine
  *  if the float or double version of the curand functions should be called.
  *
@@ -20,16 +20,16 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _CURNN_RAND_
-#define _CURNN_RAND_
+#ifndef _FRNN_RAND_
+#define _FRNN_RAND_
 
-namespace curnn {
+namespace frnn {
 namespace rng {
     
 #include <cuda.h> 
 #include <curand.h>
 
-#include "curnn_rand_kernels.h"     
+#include "frnn_rand_kernels.h"     
     
 /*
  * ==========================================================================================================
@@ -63,10 +63,10 @@ template <> struct generators<int> {
     
     // Normal distribution
     typedef curandStatus_t (*curandUniform)( curandGenerator_t, int*, size_t );
-    static constexpr curandUniform uniform = &curnnGenerateUniform;
+    static constexpr curandUniform uniform = &frnnGenerateUniform;
 };
 }   // Namespace rng
-}   // Namepsace curnn
+}   // Namepsace frnn
 
 #endif 
 

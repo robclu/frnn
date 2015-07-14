@@ -1,5 +1,5 @@
 /*
- *  Header file for cuRNN softmax gpu kernels.
+ *  Header file for fastRNN softmax gpu kernels.
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
@@ -18,8 +18,8 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _CURNN_SOFTAMX_KERNELS_GPU_
-#define _CURNN_SOFTAMX_KERNELS_GPU_
+#ifndef _FRNN_SOFTAMX_KERNELS_GPU_
+#define _FRNN_SOFTAMX_KERNELS_GPU_
 
 #include <cuda.h>
 #include <cuda_runtime.h>

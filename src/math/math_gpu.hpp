@@ -1,5 +1,5 @@
 /*
- *  Header file for cuRNN math C++ interfaces for executing the GPU 
+ *  Header file for fastRNN math C++ interfaces for executing the GPU 
  *  instances.
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
@@ -19,8 +19,8 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _CURNN_MATH_GPU_
-#define _CURNN_MATH_GPU_
+#ifndef _FRNN_MATH_GPU_
+#define _FRNN_MATH_GPU_
 
 #include <cuda.h>
 #include <cuda_runtime.h>
@@ -33,10 +33,10 @@
 
 #include "../tensor/tensor.cuh"
 #include "../util/errors.h"
-#include "../curnn/curnn.h"
+#include "../frnn/frnn.h"
 #include "math_kernels_gpu.cuh"
-#include "blas/curnn_blas.h"
-#include "rand/curnn_rand.h"
+#include "blas/frnn_blas.h"
+#include "rand/frnn_rand.h"
 
 /*
  * ==========================================================================================================
@@ -44,7 +44,7 @@
  *
  * Description  : Performs simgle/double precision a*X + Y, using CUBLAS
  *
- * Inputs       : error     : cuRNN error type for result of operations
+ * Inputs       : error     : fastRNN error type for result of operations
  *              : a         : Constant for multiplication 
  *              : x         : Vector to multiply with a
  * 
@@ -54,7 +54,7 @@
  * ==========================================================================================================
  */
 template <typename dType>
-void axpyGpu( curnn::curnnError& error, const dType a, const std::vector<dType>& x, std::vector<dType>& y ) {
+void axpyGpu( frnn::frnnError& error, const dType a, const std::vector<dType>& x, std::vector<dType>& y ) {
 
     cublasHandle_t handle;
     cublasStatus_t status;
@@ -65,31 +65,31 @@ void axpyGpu( curnn::curnnError& error, const dType a, const std::vector<dType>&
 
     // Allocate and fill device vectors with host vector data 
     if ( cudaMalloc( (void**)&da, sizeof( dType ) ) != cudaSuccess ) {
-        curnn::err::allocError( error, stringify( da ) );
+        frnn::err::allocError( error, stringify( da ) );
     }
     if ( cudaMalloc( (void**)&dx, x.size() * sizeof( dType ) ) != cudaSuccess ) {
-        curnn::err::allocError( error, stringify( dx ) );   
+        frnn::err::allocError( error, stringify( dx ) );   
     }
     if ( cudaMalloc( (void**)&dy, y.size() * sizeof( dType ) ) != cudaSuccess ) {
-        curnn::err::allocError( error, stringify( dy ) );   
+        frnn::err::allocError( error, stringify( dy ) );   
     }
 
     // Fill device vectors with data
     if ( cudaMemcpy( da, &a, sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
-        curnn::err::copyError( error, stringify( da ) );
+        frnn::err::copyError( error, stringify( da ) );
     }
     if ( cudaMemcpy( dx, &x[0], x.size() * sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
-        curnn::err::copyError( error, stringify( da ) );
+        frnn::err::copyError( error, stringify( da ) );
     }
     if ( cudaMemcpy( dy, &y[0], y.size() * sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
-        curnn::err::copyError( error, stringify( da ) );
+        frnn::err::copyError( error, stringify( da ) );
     }
 
     // Perform CUBLAS axpy using wrapper blas library
-    status = curnn::blas::functions<dType>::axpy( handle, x.size(), da, dx, 1, dy, 1 );
+    status = frnn::blas::functions<dType>::axpy( handle, x.size(), da, dx, 1, dy, 1 );
 
     if ( cudaMemcpy( &y[0], dy, y.size() * sizeof( dType ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
-        curnn::err::copyError( error, stringify( y ) );
+        frnn::err::copyError( error, stringify( y ) );
     }
 
     status = cublasDestroy( handle );
@@ -105,14 +105,14 @@ void axpyGpu( curnn::curnnError& error, const dType a, const std::vector<dType>&
  *
  * Description  : Performs a*X + Y, using own implementation for ints
  *
- * Inputs       : error     : cuRNN error type for result of operations
+ * Inputs       : error     : fastRNN error type for result of operations
  *              : a         : Constant for multiplication 
  *              : x         : Vector to multiply with a
  * 
  * Outputs      : y         : Vector used in a*X + Y, and where the result of a*X + Y is stored
  * ==========================================================================================================
  */
-void axpyGpu( curnn::curnnError& error, const int a, const std::vector<int>& x, std::vector<int>& y ) {
+void axpyGpu( frnn::frnnError& error, const int a, const std::vector<int>& x, std::vector<int>& y ) {
     // Still implement - placeholder for now
 }
 
@@ -136,17 +136,17 @@ template <typename dType>
 void randGpu( dType* x, size_t N, dType lo, dType hi ) {
     
     curandGenerator_t   gen;                    // Device random number generator
-    curnnError          error;
+    frnnError          error;
     dType*              device_randoms = 0;
     
     // Allocate memory on the device
     if ( cudaMalloc( (void**)&device_randoms, N * sizeof( dType) ) != cudaSuccess ) {
-        curnn::err::allocError( error, stringify( device_randoms ) );
+        frnn::err::allocError( error, stringify( device_randoms ) );
     }
    
     curandCreateGenerator( &gen, CURAND_RNG_PSEUDO_DEFAULT );                  // Create generator
     curandSetPseudoRandomGeneratorSeed( gen, 1234ULL );                        // Seed RNG
-    curnn::rng::generators<dType>::uniform( gen, device_randoms, N );          // Create rand nums on GPU
+    frnn::rng::generators<dType>::uniform( gen, device_randoms, N );          // Create rand nums on GPU
     
     int threads, blocks;
     threads = ( ( N < 1024 ) ? N : 1024 );
@@ -158,7 +158,7 @@ void randGpu( dType* x, size_t N, dType lo, dType hi ) {
     
     // Copy results from deviec mem to x
     if ( cudaMemcpy( x, device_randoms, N * sizeof( dType ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
-        curnn::err::copyError( error, stringify( device_randoms ) );
+        frnn::err::copyError( error, stringify( device_randoms ) );
     }
     
     // Clean up
@@ -184,28 +184,28 @@ void randGpu( dType* x, size_t N, dType lo, dType hi ) {
  */ 
 
 template <typename dType>
-void softmaxGpu( curnn::curnnError& error, const std::vector<dType>& x, std::vector<dType>& val ) {
+void softmaxGpu( frnn::frnnError& error, const std::vector<dType>& x, std::vector<dType>& val ) {
 
     dType* in = 0, *out = 0;
-    curnn::functors::exp exp_op;           // Define operation on each element to be exponentiation
+    frnn::functors::exp exp_op;           // Define operation on each element to be exponentiation
 
     // Check output vector can hold all reasults
     if ( val.size() < x.size() ) val.resize( x.size(), 0 );
     
     // Alllocate memory on the device
     if ( cudaMalloc( (void**)&in, x.size() * sizeof( dType ) ) != cudaSuccess ) {
-        curnn::err::allocError( error, stringify( in ) );
+        frnn::err::allocError( error, stringify( in ) );
     }
     if ( cudaMalloc( (void**)&out, x.size() * sizeof( dType) ) != cudaSuccess ) {
-        curnn::err::allocError( error, stringify( out ) );
+        frnn::err::allocError( error, stringify( out ) );
     }
     
     // Copy data from x to in
     if ( cudaMemcpy( in, &x[0], x.size() * sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
-        curnn::err::copyError( error, stringify( in ) );
+        frnn::err::copyError( error, stringify( in ) );
     }
     if ( cudaMemset( out, 0, x.size() * sizeof( dType ) ) != cudaSuccess ) {
-        curnn::err::copyError( error, stringify( out ) );
+        frnn::err::copyError( error, stringify( out ) );
     }
     
     // Determine the size of the grids for the kernel, we need enough blocks
@@ -225,7 +225,7 @@ void softmaxGpu( curnn::curnnError& error, const std::vector<dType>& x, std::vec
     softmaxKernel<<<blocks, threads>>>( in, out, x.size() );        
 
     if ( cudaMemcpy( &val[0], out, x.size() * sizeof( dType ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
-        curnn::err::copyError( error, stringify( val ) );
+        frnn::err::copyError( error, stringify( val ) );
     }
 
     cudaFree( in ); cudaFree( out );
@@ -237,7 +237,7 @@ void softmaxGpu( curnn::curnnError& error, const std::vector<dType>& x, std::vec
  *
  * Description  : Performs the sum of the elements in a vector
  *                  
- * Inputs       : error     : cuRNN error type for results of opsofterations
+ * Inputs       : error     : fastRNN error type for results of opsofterations
  *              : x         : The vector, araary etc.. (data) to comupte the sum of
  *        
  * Outputs      : val       : The result of the sum of the array 
@@ -246,25 +246,25 @@ void softmaxGpu( curnn::curnnError& error, const std::vector<dType>& x, std::vec
  * ==========================================================================================================
  */  
 template <typename dType>
-dType sumGpu( curnn::curnnError& error, const std::vector<dType>& x ) {
+dType sumGpu( frnn::frnnError& error, const std::vector<dType>& x ) {
 
     dType* in = 0, *out = 0, val = 0;
 
     // Alllocate memory on the device
     if ( cudaMalloc( (void**)&in, x.size() * sizeof( dType ) ) != cudaSuccess ) {
-        curnn::err::allocError( error, stringify( in ) );
+        frnn::err::allocError( error, stringify( in ) );
     }
     if ( cudaMalloc( (void**)&out, sizeof( dType) ) != cudaSuccess ) {
-        curnn::err::allocError( error, stringify( out ) );
+        frnn::err::allocError( error, stringify( out ) );
     }
 
     // Copy data from x to in
     if ( cudaMemcpy( in, &x[0], x.size() * sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
-        curnn::err::copyError( error, stringify( in ) );
+        frnn::err::copyError( error, stringify( in ) );
     }
     // Set out to 0 on the device
     if ( cudaMemsetAsync( out, 0, sizeof( dType) ) != cudaSuccess ) {
-        curnn::err::copyError( error, stringify( out ) );
+        frnn::err::copyError( error, stringify( out ) );
     }
 
     // 256 threads per block is optimal, however, if this isn't enough use more
@@ -275,7 +275,7 @@ dType sumGpu( curnn::curnnError& error, const std::vector<dType>& x ) {
     blockReduceAtomicVectorized<<<blocks, threads>>>( in, out, x.size() );
 
     if ( cudaMemcpy( &val, out, sizeof( dType ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
-        curnn::err::copyError( error, stringify( out ) );
+        frnn::err::copyError( error, stringify( out ) );
     }
 
     cudaFree( in ); cudaFree( out );
@@ -289,7 +289,7 @@ dType sumGpu( curnn::curnnError& error, const std::vector<dType>& x ) {
  * Description  : Performs the sum of the elements in a vector and returns a vector of the same
  *                dimension with each element having the result
  *                  
- * Inputs       : error     : cuRNN error type for results of operations
+ * Inputs       : error     : fastRNN error type for results of operations
  *              : x         : The vector, araary etc.. (data) to comupte the sum of
  *        
  * Outputs      : val       : A vector where each element holds the result of the sum
@@ -298,7 +298,7 @@ dType sumGpu( curnn::curnnError& error, const std::vector<dType>& x ) {
  * ==========================================================================================================
  */  
 template <typename dType>
-void sumVectorizedGpu( curnnError& error, const std::vector<dType>& x, std::vector<dType>& val ) {
+void sumVectorizedGpu( frnnError& error, const std::vector<dType>& x, std::vector<dType>& val ) {
 
     dType* in = 0, *out = 0;
     
@@ -307,18 +307,18 @@ void sumVectorizedGpu( curnnError& error, const std::vector<dType>& x, std::vect
 
     // Alllocate memory on the device
     if ( cudaMalloc( (void**)&in, x.size() * sizeof( dType ) ) != cudaSuccess ) {
-        curnn::err::allocError( error, stringify( in ) );
+        frnn::err::allocError( error, stringify( in ) );
     }
     if ( cudaMalloc( (void**)&out, x.size() * sizeof( dType) ) != cudaSuccess ) {
-        curnn::err::allocError( error, stringify( out ) );
+        frnn::err::allocError( error, stringify( out ) );
     }
     
     // Copy data from x to in
     if ( cudaMemcpy( in, &x[0], x.size() * sizeof( dType ), cudaMemcpyHostToDevice ) != cudaSuccess ) {
-        curnn::err::copyError( error, stringify( in ) );
+        frnn::err::copyError( error, stringify( in ) );
     }
     if ( cudaMemset( out, 0, x.size() * sizeof( dType ) ) != cudaSuccess ) {
-        curnn::err::copyError( error, stringify( out ) );
+        frnn::err::copyError( error, stringify( out ) );
     }
     
     // Determine the size of the grids for the kernel, we need enough blocks
@@ -333,7 +333,7 @@ void sumVectorizedGpu( curnnError& error, const std::vector<dType>& x, std::vect
     blockScatter<<<blocks, threads>>>( out, x.size() );         
 
     if ( cudaMemcpy( &val[0], out, x.size() * sizeof( dType ), cudaMemcpyDeviceToHost ) != cudaSuccess ) {
-        curnn::err::copyError( error, stringify( val ) );
+        frnn::err::copyError( error, stringify( val ) );
     }
 
     cudaFree( in ); cudaFree( out );

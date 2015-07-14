@@ -1,5 +1,5 @@
 /*
- *  Test file for cuRNN math functions.
+ *  Test file for fastRNN math functions.
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
@@ -21,11 +21,11 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
-#include "../curnn/types.h"
+#include "../frnn/types.h"
 #include "math.hpp"             // Math functions for both CPU and GPU
 
 using std::vector;
-using curnn::device;
+using frnn::device;
 
 // General tesing parameres 
 // Note : Do not make this so big that the GPU will run out of memory,
@@ -47,12 +47,12 @@ const float  TOLERANCE         = 1e-4;     // For difference between GPU and CPU
  * ==========================================================================================================
  */
 
-TEST( curnnMathGpu, CanGenerateNRandomNumbersUniformDistribution ) {
+TEST( frnnMathGpu, CanGenerateNRandomNumbersUniformDistribution ) {
     float lo = -2.0f; float hi = 10.f;
     float random_numbers[ NUM_ELEMENTS_RAND ];
     
     // Generate 10 randon numbers on the GPU
-    curnn::math<float, curnn::device::GPU>::rand( random_numbers, NUM_ELEMENTS_RAND, lo, hi );    
+    frnn::math<float, frnn::device::GPU>::rand( random_numbers, NUM_ELEMENTS_RAND, lo, hi );    
     
     for ( size_t i = 0; i < NUM_ELEMENTS_RAND; i++ ) {
         EXPECT_GE( random_numbers[ i ], lo );
@@ -60,8 +60,8 @@ TEST( curnnMathGpu, CanGenerateNRandomNumbersUniformDistribution ) {
     }
 }
 
-TEST( curnnMathGpu, AxpyOperationComputesCorrectlyWithFloats ) {
-    curnn::curnnError error;
+TEST( frnnMathGpu, AxpyOperationComputesCorrectlyWithFloats ) {
+    frnn::frnnError error;
     const float A = 2.0f;
 
     vector<float> x;
@@ -74,15 +74,15 @@ TEST( curnnMathGpu, AxpyOperationComputesCorrectlyWithFloats ) {
     }
 
     // axpy with floats
-    curnn::math<float, curnn::device::GPU>::axpy( error, A, x, y );
+    frnn::math<float, frnn::device::GPU>::axpy( error, A, x, y );
 
     for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
         EXPECT_EQ( y[i], A * i + i );
     }
 }
 
-TEST( curnnMathGpu, AxpyOperationComputesCorrectlyWithDoubles ) {
-    curnn::curnnError error;
+TEST( frnnMathGpu, AxpyOperationComputesCorrectlyWithDoubles ) {
+    frnn::frnnError error;
     const double A = 2.0f;
     
     vector<double> x;
@@ -95,15 +95,15 @@ TEST( curnnMathGpu, AxpyOperationComputesCorrectlyWithDoubles ) {
     }
 
     // Performs axpy with doubles
-    curnn::math<double, curnn::device::GPU>::axpy( error, A, x, y );
+    frnn::math<double, frnn::device::GPU>::axpy( error, A, x, y );
 
     for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
         EXPECT_EQ( y[i], A * i + i );
     }
 }
 
-TEST( curnnMathGpu, ReductionSumComputesCorrectlyWithFloats ) {
-    curnn::curnnError error;
+TEST( frnnMathGpu, ReductionSumComputesCorrectlyWithFloats ) {
+    frnn::frnnError error;
     vector<float> x;
 
     // Fill x with data 
@@ -111,12 +111,12 @@ TEST( curnnMathGpu, ReductionSumComputesCorrectlyWithFloats ) {
         x.push_back( 1.f );
     }
     
-    float sum_of_elements = curnn::math<float, curnn::device::GPU>::sum( error, x );
+    float sum_of_elements = frnn::math<float, frnn::device::GPU>::sum( error, x );
     EXPECT_EQ( NUM_ELEMENTS, sum_of_elements );
 }
 
-TEST( curnnMathGpu, ReductionSumComputesCorrectlyWithInts ) {
-    curnn::curnnError error;
+TEST( frnnMathGpu, ReductionSumComputesCorrectlyWithInts ) {
+    frnn::frnnError error;
     vector<int> x;
 
     // Fill x with data 
@@ -124,12 +124,12 @@ TEST( curnnMathGpu, ReductionSumComputesCorrectlyWithInts ) {
         x.push_back( int( 1 ) );
     }
     
-    int sum_of_elements = curnn::math<int, curnn::device::GPU>::sum( error, x );
+    int sum_of_elements = frnn::math<int, frnn::device::GPU>::sum( error, x );
     EXPECT_EQ( NUM_ELEMENTS, sum_of_elements );
 }
 
-TEST( curnnMathGpu, ReductionSumVectorizedComputesCorrectlyWithFloatsAndEmptyResultsVector ) {
-    curnn::curnnError error;
+TEST( frnnMathGpu, ReductionSumVectorizedComputesCorrectlyWithFloatsAndEmptyResultsVector ) {
+    frnn::frnnError error;
     vector<float> x, results;
 
     // Fill x with data 
@@ -138,15 +138,15 @@ TEST( curnnMathGpu, ReductionSumVectorizedComputesCorrectlyWithFloatsAndEmptyRes
     }
 
     // Get the results of the sum into the results vector
-    curnn::math<float, curnn::device::GPU>::sumVectorized( error, x, results );
+    frnn::math<float, frnn::device::GPU>::sumVectorized( error, x, results );
 
     for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
         EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
     }
 }
 
-TEST( curnnMathGpu, ReductionSumVectorizedComputesCorrectlyWithFloatsAndFullResultsVector ) {
-    curnn::curnnError error;
+TEST( frnnMathGpu, ReductionSumVectorizedComputesCorrectlyWithFloatsAndFullResultsVector ) {
+    frnn::frnnError error;
     vector<float> x, results;
 
     // Fill x with data 
@@ -156,15 +156,15 @@ TEST( curnnMathGpu, ReductionSumVectorizedComputesCorrectlyWithFloatsAndFullResu
     }
 
     // Get the results of the sum into the results vector
-    curnn::math<float, curnn::device::GPU>::sumVectorized( error, x, results );
+    frnn::math<float, frnn::device::GPU>::sumVectorized( error, x, results );
         
     for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
         EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
     }
 }
 
-TEST( curnnMathGpu, ReductionSumVectorizedComputesCorrectlyWithIntsAndEmptyResultsVector ) {
-    curnn::curnnError error;
+TEST( frnnMathGpu, ReductionSumVectorizedComputesCorrectlyWithIntsAndEmptyResultsVector ) {
+    frnn::frnnError error;
     vector<int> x, results;
 
     // Fill x with data 
@@ -173,15 +173,15 @@ TEST( curnnMathGpu, ReductionSumVectorizedComputesCorrectlyWithIntsAndEmptyResul
     }
 
     // Get the results of the sum into the results vector
-    curnn::math<int, curnn::device::GPU>::sumVectorized( error, x, results );
+    frnn::math<int, frnn::device::GPU>::sumVectorized( error, x, results );
 
     for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
         EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
     }
 }
 
-TEST( curnnMathGpu, ReductionSumVectorizedComputesCorrectlyWithIntsAndFullResultsVector ) {
-    curnn::curnnError error;
+TEST( frnnMathGpu, ReductionSumVectorizedComputesCorrectlyWithIntsAndFullResultsVector ) {
+    frnn::frnnError error;
     vector<int> x, results;
 
     // Fill x with data 
@@ -191,15 +191,15 @@ TEST( curnnMathGpu, ReductionSumVectorizedComputesCorrectlyWithIntsAndFullResult
     }
 
     // Get the results of the sum into the results vector
-    curnn::math<int, curnn::device::GPU>::sumVectorized( error, x, results );
+    frnn::math<int, frnn::device::GPU>::sumVectorized( error, x, results );
 
     for ( size_t i = 0; i < NUM_ELEMENTS; i++ ) {
         EXPECT_EQ( NUM_ELEMENTS, results[ i ]  );
     }
 }
 
-TEST( curnnMathGpu, SoftmaxComputesCorrectlyForFloats ) {
-    curnn::curnnError error;
+TEST( frnnMathGpu, SoftmaxComputesCorrectlyForFloats ) {
+    frnn::frnnError error;
     vector<float> x, results;
 
     // Fill x with data 
@@ -208,7 +208,7 @@ TEST( curnnMathGpu, SoftmaxComputesCorrectlyForFloats ) {
     }
 
     // Get the results of the sum into the results vector
-    curnn::math<float, curnn::device::GPU>::softmax( error, x, results );
+    frnn::math<float, frnn::device::GPU>::softmax( error, x, results );
 
     for ( size_t i = 1; i < NUM_ELEMENTS; i++ ) {
         float softmax_i = exp( 1.f ) / ( exp( 1.f ) * (float)NUM_ELEMENTS );
@@ -217,12 +217,12 @@ TEST( curnnMathGpu, SoftmaxComputesCorrectlyForFloats ) {
     }
 }
 
-TEST( curnnMathCpu, CanGenerateNRandomNumbersUniformDistribution ) {
+TEST( frnnMathCpu, CanGenerateNRandomNumbersUniformDistribution ) {
     float lo = 2.0f; float hi = 13.1f;
     float random_numbers[ NUM_ELEMENTS_RAND ];
     
     // Generate 10 randon numbers on the CPU
-    curnn::math<float, curnn::device::CPU>::rand( random_numbers, NUM_ELEMENTS_RAND, lo, hi );    
+    frnn::math<float, frnn::device::CPU>::rand( random_numbers, NUM_ELEMENTS_RAND, lo, hi );    
     
     for ( size_t i = 0; i < NUM_ELEMENTS_RAND; i++ ) {
         EXPECT_GE( random_numbers[ i ], lo );
@@ -230,7 +230,7 @@ TEST( curnnMathCpu, CanGenerateNRandomNumbersUniformDistribution ) {
     }
 }
 
-TEST( curnnMathCpu, CanPerformXminusYWithVectorizedCpuKernelWithFloats ) {
+TEST( frnnMathCpu, CanPerformXminusYWithVectorizedCpuKernelWithFloats ) {
     std::vector<float> x;
     std::vector<float> y;
     std::vector<float> out;
@@ -242,14 +242,14 @@ TEST( curnnMathCpu, CanPerformXminusYWithVectorizedCpuKernelWithFloats ) {
     }
     
     // Perform CPU X - Y
-    curnn::math<float, curnn::device::CPU>::xmy( x, y, out );
+    frnn::math<float, frnn::device::CPU>::xmy( x, y, out );
     
     for ( size_t i = 0; i < out.size(); i++ ) {
         EXPECT_EQ( out[ i ], -1.f );
     }
 }
 
-TEST( curnnMathCpu, CanPerformXminusYWithVectorizedCpuKernelWithDoubles ) {
+TEST( frnnMathCpu, CanPerformXminusYWithVectorizedCpuKernelWithDoubles ) {
     std::vector<double> x;
     std::vector<double> y;
     std::vector<double> out;
@@ -261,7 +261,7 @@ TEST( curnnMathCpu, CanPerformXminusYWithVectorizedCpuKernelWithDoubles ) {
     }
     
     // Perform CPU X - Y
-    curnn::math<double, curnn::device::CPU>::xmy( x, y, out );
+    frnn::math<double, frnn::device::CPU>::xmy( x, y, out );
     
     for ( size_t i = 0; i < out.size(); i++ ) {
         EXPECT_EQ( out[ i ], -1.0 );

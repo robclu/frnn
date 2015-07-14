@@ -1,8 +1,8 @@
 /*
- *  Header file for cuRNN COU vectorized types and isntructions The provide 
+ *  Header file for fastRNN CPU vectorized types and isntructions The provide 
  *  a wrapped to the SIMD instructions and types required for using the SIMD
  *  instructions. The reason for this is that the instructions are sepcific to 
- *  the type (float, double ...) but the curnn functions are all tyoe templates
+ *  the type (float, double ...) but the frnn functions are all tyoe templates
  *  so the wrapper allows the correct functiosn and types to be called for any 
  *  templated function.
  *
@@ -23,12 +23,12 @@
  *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _CURNN_VECTORIZED_TYPES_CPU_
-#define _CURNN_VECTORIZED_TYPES_CPU_
+#ifndef _FRNN_VECTORIZED_TYPES_CPU_
+#define _FRNN_VECTORIZED_TYPES_CPU_
 
 #include <emmintrin.h>          // SSE vectorized types
 
-namespace curnn {
+namespace frnn {
     
 /*
  * ==========================================================================================================
@@ -38,7 +38,7 @@ namespace curnn {
  * 
  * Params       : dType     : The type of data (float, double, int )
  * 
- * Example      : Calling curnn::vectorizedTypeCpu<float>::vectType will then use the __m128 type
+ * Example      : Calling frnn::vectorizedTypeCpu<float>::vectType will then use the __m128 type
  * ==========================================================================================================
  */
 template <typename dType> struct VectorizedTypeCpu;
@@ -96,7 +96,7 @@ template <> struct VectorizedInstructionsCpu<double> {
     static constexpr store mm_store_p = &_mm_store_pd;
 };
 
-}   // Namespace curnn
+}   // Namespace frnn
 
 
 #endif

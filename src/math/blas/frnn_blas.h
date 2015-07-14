@@ -1,5 +1,5 @@
 /*
- *  Header file for cuRNN blas functions, whicha are simply structs
+ *  Header file for fastRNN blas functions, whicha are simply structs
  *  with function pointers that call cublas functions, but can determine
  *  if the float or double version of the cublas functions should be called.
  *
@@ -20,8 +20,8 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _CURNN_BLAS_
-#define _CURNN_BLAS_
+#ifndef _FRNN_BLAS_
+#define _FRNN_BLAS_
 
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
@@ -29,12 +29,12 @@
 /*
  * ========================================= NOTES ==========================================================
  * 1. The functions in this namespace are simply 'wrappers' that allow the cublas functions to be called in
- *    templated functions in other part of the cuRNN library, they are not my own implementation of these
+ *    templated functions in other part of the fastRNN library, they are not my own implementation of these
  *    functions
  * ==========================================================================================================
  */
 
-namespace curnn {
+namespace frnn {
 namespace blas  {
 /*
  * ==========================================================================================================

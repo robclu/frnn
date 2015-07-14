@@ -1,5 +1,5 @@
 /*
- *  Header file for cuRNN math functions. The math struct is defined which 
+ *  Header file for fastRNN math functions. The math struct is defined which 
  *  uses a template parameter to determine if the CPU or GPU functions 
  *  should be used. static constexpr function pointers are then used to call
  *  the relevant CPU or GPU implementation.
@@ -21,16 +21,16 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _CURNN_MATH_GENERAL_
-#define _CURNN_MATH_GENERAL_
+#ifndef _FRNN_MATH_GENERAL_
+#define _FRNN_MATH_GENERAL_
 
 #include <vector>
 
-#include "../curnn/types.h"
+#include "../frnn/types.h"
 #include "math_cpu.hpp"
 #include "math_gpu.hpp"
 
-namespace curnn {
+namespace frnn {
  
 /*
  * ==========================================================================================================
@@ -43,10 +43,10 @@ namespace curnn {
  *              : dev    : The device to use (CPU | GPU)
  * ==========================================================================================================
  */
-template <typename dType, curnn::device dev> struct math;
+template <typename dType, frnn::device dev> struct math;
 
 // Specify for CPU
-template <typename dType> struct math<dType, curnn::device::CPU> {
+template <typename dType> struct math<dType, frnn::device::CPU> {
     
     // X minus Y function
     typedef void (*x_minus_y_cpu)( std::vector<dType>&, std::vector<dType>&, std::vector<dType>& );
@@ -59,10 +59,10 @@ template <typename dType> struct math<dType, curnn::device::CPU> {
 };
 
 // Specify for GPU
-template <typename dType> struct math<dType, curnn::device::GPU> {
+template <typename dType> struct math<dType, frnn::device::GPU> {
     
     // a*X plus Y function 
-    typedef void (*ax_plus_y_gpu)( curnnError&, const dType a, const std::vector<dType>&, std::vector<dType>& );
+    typedef void (*ax_plus_y_gpu)( frnnError&, const dType a, const std::vector<dType>&, std::vector<dType>& );
     static constexpr ax_plus_y_gpu axpy = &axpyGpu;
   
     // Rand function
@@ -70,15 +70,15 @@ template <typename dType> struct math<dType, curnn::device::GPU> {
     static constexpr rand_gpu rand = &randGpu; 
     
     // Softmax fucntion 
-    typedef void (*softmax_gpu)( curnnError&, const std::vector<dType>&, std::vector<dType>& );
+    typedef void (*softmax_gpu)( frnnError&, const std::vector<dType>&, std::vector<dType>& );
     static constexpr softmax_gpu softmax = &softmaxGpu;
     
     // Sum function
-    typedef dType (*sum_gpu)( curnnError&, const std::vector<dType>& );
+    typedef dType (*sum_gpu)( frnnError&, const std::vector<dType>& );
     static constexpr sum_gpu sum = &sumGpu;
     
     // Sum vectorized function
-    typedef void (*sum_vectorized_gpu)( curnnError&, const std::vector<dType>&, std::vector<dType>&);
+    typedef void (*sum_vectorized_gpu)( frnnError&, const std::vector<dType>&, std::vector<dType>&);
     static constexpr sum_vectorized_gpu sumVectorized = &sumVectorizedGpu;
     
 };

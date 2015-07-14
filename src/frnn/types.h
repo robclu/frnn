@@ -1,5 +1,5 @@
 /*
- *  Header file for cuRNN types.
+ *  Header file for fastRNN types.
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
@@ -18,10 +18,10 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _CURNN_TYPES_
-#define _CURNN_TYPES_
+#ifndef _FRNN_TYPES_
+#define _FRNN_TYPES_
 
-// Other curnn types
+// Other frnn types
 #include "vectorized_types_cpu.h"
 #include "vectorized_types_gpu.h"
 
@@ -29,7 +29,7 @@
 #define MAX_BLOCKS          65536
 #define THREADS_PER_BLOCK   256
 
-namespace curnn {
+namespace frnn {
 
 /*
  * ==========================================================================================================
@@ -45,17 +45,17 @@ enum device : bool {
 
 /*
  * ==========================================================================================================
- * Enum         : curnnError
+ * Enum         : frnnError
  *
- * Description  : Enumerator for possible erorrs in curnn.
+ * Description  : Enumerator for possible erorrs in frnn.
  * ==========================================================================================================
  */
-enum curnnError {
-    CURNN_ALLOC_ERROR       = 1,
-    CURNN_COPY_ERROR        = 2,
-    CURNN_DIMENSION_ERROR   = 3
+enum frnnError {
+    FRNN_ALLOC_ERROR       = 1,
+    FRNN_COPY_ERROR        = 2,
+    FRNN_DIMENSION_ERROR   = 3
  };
 
-}   // Namepace curnn
+}   // Namepace frnn
 
 #endif

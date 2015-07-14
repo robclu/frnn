@@ -1,5 +1,5 @@
 /*
- *  Namespace declarations for cuRNN. I honestly don't know why these 
+ *  Namespace declarations for fastRNN. I honestly don't know why these 
  *  functions can be forward declared in this file but not found in their
  *  header files, but defining them in this header file and including it 
  *  works, and is also a lot cleaner!
@@ -21,20 +21,20 @@
  *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _CURNN_CURNN_
-#define _CURNN_CURNN_
+#ifndef _FRNN_FRNN_
+#define _FRNN_FRNN_
 
 #include "types.h"
 #include "../util/errors.h"
 
-namespace curnn {
+namespace frnn {
 namespace err {
 
-void allocError( curnn::curnnError&, const char* );
-void copyError(  curnn::curnnError&, const char* );
-void dimError(   curnn::curnnError&, const char*, const char* );
+void allocError( frnn::frnnError&, const char* );
+void copyError(  frnn::frnnError&, const char* );
+void dimError(   frnn::frnnError&, const char*, const char* );
 	
 }	// Namespace err
-}	// Namespace curnn
+}	// Namespace frnn
 
 #endif 

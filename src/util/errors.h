@@ -1,5 +1,5 @@
 /*
- *  Header file for cuRNN error functions.
+ *  Header file for fastRNN error functions.
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
@@ -18,12 +18,12 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _CURNN_ERRORS_
-#define _CURNN_ERRORS_
+#ifndef _FRNN_ERRORS_
+#define _FRNN_ERRORS_
 
 #include <iostream>
 
-#include "../curnn/types.h"
+#include "../frnn/types.h"
 
 // To convert variable names to strings
 #define stringify( name ) varname( #name )
@@ -41,7 +41,7 @@ namespace err {
  * Inputs       : varname   : The name of the variable that could not be allocated
  * ==============================================================================================
  */
-void allocError( curnn::curnnError& error, const char * varname );  
+void allocError( frnn::frnnError& error, const char * varname );  
 
 /*
  * ==============================================================================================
@@ -52,7 +52,7 @@ void allocError( curnn::curnnError& error, const char * varname );
  * Inputs       : varname   : The name of the variable that could not be copied to/from
  * ==============================================================================================
  */
-void copyError( curnn::curnnError& error, const char* varname );
+void copyError( frnn::frnnError& error, const char* varname );
 
 /*
  * ==============================================================================================
@@ -64,10 +64,10 @@ void copyError( curnn::curnnError& error, const char* varname );
  *              : varanme2  : The name of the second variable causing the dimension error
  * ==============================================================================================
  */
-void dimError( curnn::curnnError& error, const char* varname1, const char* varname2 );
+void dimError( frnn::frnnError& error, const char* varname1, const char* varname2 );
 
 }   // Namepsace err
-}   // Namespace curnn
+}   // Namespace frnn
 
 #endif
 

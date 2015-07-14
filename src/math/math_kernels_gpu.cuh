@@ -1,5 +1,5 @@
 /*
- *  Header file for cuRNN math kernel functions.
+ *  Header file for fastRNN math kernel functions.
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
@@ -18,8 +18,8 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _CURNN_MATH_KERNELS_
-#define _CURNN_MATH_KERNELS_
+#ifndef _FRNN_MATH_KERNELS_
+#define _FRNN_MATH_KERNELS_
 
 #include <cuda.h>
 #include <cuda_runtime.h>
@@ -27,7 +27,7 @@
 #include <math.h>
 #include <cmath>
 
-#include "../curnn/types.h"
+#include "../frnn/types.h"
 #include "../functors/functors.cuh"
 
 /* ============================================= NOTES ======================================================
@@ -38,7 +38,7 @@
  * ==========================================================================================================
  */
  
-using namespace curnn;
+using namespace frnn;
 
 /*
  * ==========================================================================================================
@@ -237,7 +237,7 @@ __global__ void blockReduceAtomicVectorized( dType* in, dType* out, size_t N ) {
     // Get data to reduce from the input data
     for ( int i = idx; i < ( N / 2 ); i += blockDim.x * gridDim.x ) {
         // Convert to vectorized type and add to sum 
-        typedef typename curnn::VectorizedTypeGpu<dType, 2>::vect_type vect2;
+        typedef typename frnn::VectorizedTypeGpu<dType, 2>::vect_type vect2;
         vect2 val = reinterpret_cast<vect2*>( in )[ i ];
         sum += val.x + val.y;
     }
@@ -272,7 +272,7 @@ __global__ void blockReduceAtomicVectorized( dType* in, dType* out, size_t N ) {
  */ 
 template <typename dType, typename F = functors::voidFunctor>
 __global__ void blockReduceAtomicVectorizedAll( dType* in, dType* out, size_t N, F f = functors::voidFunctor() ) {
-    typedef typename curnn::VectorizedTypeGpu<dType, 4>::vect_type vect4;
+    typedef typename frnn::VectorizedTypeGpu<dType, 4>::vect_type vect4;
     dType   sum  = dType( 0 );
     int     idx  = blockIdx.x * blockDim.x + threadIdx.x;
 

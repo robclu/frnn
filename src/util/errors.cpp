@@ -1,5 +1,5 @@
 /*
- *  Implementation file for cuRNN error functions.
+ *  Implementation file for fastRNN error functions.
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
@@ -20,23 +20,23 @@
 
 #include "errors.h"
 
-namespace curnn {
+namespace frnn {
 namespace err {
 
-void allocError( curnn::curnnError& error, const char * varname ) {
+void allocError( frnn::frnnError& error, const char * varname ) {
     std::cerr << "Error : Could not allocate memory for variable " << varname << "\n";
-    error = curnn::curnnError::CURNN_ALLOC_ERROR;
+    error = frnn::frnnError::FRNN_ALLOC_ERROR;
 }               
 
-void copyError( curnn::curnnError& error, const char* varname ) {
+void copyError( frnn::frnnError& error, const char* varname ) {
     std::cerr << "Error : Could not copy to/from variable " << varname << "\n";
-    error = curnn::curnnError::CURNN_COPY_ERROR;
+    error = frnn::frnnError::FRNN_COPY_ERROR;
 }
 
-void dimError( curnn::curnnError& error, const char* varname1, const char* varname2 ) {
+void dimError( frnn::frnnError& error, const char* varname1, const char* varname2 ) {
     std::cerr << "Error : Dimension mismatch for variables " << varname1 << " and " << varname2 << "\n";
-    error = curnn::curnnError::CURNN_DIMENSION_ERROR;
+    error = frnn::frnnError::FRNN_DIMENSION_ERROR;
 }
 
 }   // Namepsace err
-}   // Namespace curnn
+}   // Namespace frnn

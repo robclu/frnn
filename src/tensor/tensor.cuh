@@ -1,5 +1,5 @@
 /*
- *  Header file for cuRNN tensor class.
+ *  Header file for fastRNN tensor class.
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
@@ -18,14 +18,14 @@
  *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _CURNN_TENSOR_
-#define _CURNN_TENSOR_
+#ifndef _FRNN_TENSOR_
+#define _FRNN_TENSOR_
 
 #include <vector>
 #include <iostream>
 #include <limits>
 
-namespace curnn  {
+namespace frnn  {
 
 /*
  * ==========================================================================================================

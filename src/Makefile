@@ -57,7 +57,7 @@ errors.o: util/errors.cpp
 
 ##################### GENERAL ##########################
 
-general_tests.o : curnn/general_tests.cpp
+general_tests.o : frnn/general_tests.cpp
 	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -c $<
 
 ###################### MATH ############################

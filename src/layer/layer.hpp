@@ -1,5 +1,5 @@
 /*
- *  Header file for cuRNN layer class.
+ *  Header file for fastRNN layer class.
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
@@ -18,21 +18,21 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _CURNN_LAYER_
-#define _CURNN_LAYER_
+#ifndef _FRNN_LAYER_
+#define _FRNN_LAYER_
 
 #include <omp.h>
 
 #include "../tensor/tensor.cuh"
 #include "../math/math.hpp"
 
-namespace curnn {
+namespace frnn {
 
 /*
  * ==========================================================================================================
  * Class        : layer 
  *
- * Description  : Layer class for the cuRNN that defines a generic class for a layer
+ * Description  : Layer class for the fastRNN that defines a generic class for a layer
  *
  * Params       : dType         : The type of data for the layer
  *              : dev           : The device to use (CPU or GPU)
@@ -43,12 +43,12 @@ namespace curnn {
  * ==========================================================================================================
  */
 template <typename                          dType,
-          curnn::device                     dev,
+          frnn::device                     dev,
           uint                              _nodes,
           uint                              _inputs,
           uint                              _depth,
           template <typename      , 
-                    curnn::device , 
+                    frnn::device , 
                     uint...       >  class TypePolicy >     
 class Layer : public TypePolicy<dType, dev, _nodes, _inputs, _depth> {  
 
@@ -99,7 +99,7 @@ class Layer : public TypePolicy<dType, dev, _nodes, _inputs, _depth> {
                 size_t num_elements = num_nodes * std::max( num_nodes, num_inputs );
                 
                 // CPU version is a lot faster at the moment due to PCU-GPU transfer, so use CPU
-                curnn::math<dType, curnn::device::CPU>::rand( weight_start, num_elements, min, max );
+                frnn::math<dType, frnn::device::CPU>::rand( weight_start, num_elements, min, max );
             }
         }
         
@@ -145,6 +145,6 @@ class Layer : public TypePolicy<dType, dev, _nodes, _inputs, _depth> {
         }
 };
 
-}   // Namespace curnn
+}   // Namespace frnn
 
 #endif

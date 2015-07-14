@@ -1,5 +1,5 @@
 /*
- *  Header file for cuRNN softmax policy class.
+ *  Header file for fastRNN softmax policy class.
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
@@ -18,17 +18,17 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _CURNN_SOFTMAX_POLICY_
-#define _CURNN_SOFTMAX_POLICY_
+#ifndef _FRNN_SOFTMAX_POLICY_
+#define _FRNN_SOFTMAX_POLICY_
 
 #include <vector>
 
 #include "../../tensor/tensor.cuh"
-#include "../../curnn/curnn.h"
+#include "../../frnn/frnn.h"
 #include "softmax_cpu_functions.hpp"
 #include "softmax_gpu_functions.cuh"
 
-namespace curnn {
+namespace frnn {
 namespace ltype {
 
 /*
@@ -45,7 +45,7 @@ namespace ltype {
  * ==========================================================================================================
  */
 template <typename          dType, 
-         curnn::device      dev,
+         frnn::device      dev,
          uint               nodes, 
          uint               inputs, 
          uint               depth>
@@ -57,7 +57,7 @@ template <typename          dType,
           uint              nodes,
           uint              inputs,
           uint              depth>
-class SoftmaxPolicy<dType, curnn::device::GPU, nodes, inputs, depth> {
+class SoftmaxPolicy<dType, frnn::device::GPU, nodes, inputs, depth> {
     
     public:
         /*
@@ -112,7 +112,7 @@ class SoftmaxPolicy<dType, curnn::device::GPU, nodes, inputs, depth> {
          * Inputs       : prevLayerActs   : The activations (outputs) of the nodes in the previous layer
          * ==================================================================================================
          */
-        void updateWba( const curnn::Tensor4<dType>& prevLayerActs );
+        void updateWba( const frnn::Tensor4<dType>& prevLayerActs );
         
     protected:
         Tensor4<dType>      wba;             // Tensor for weights, biases, and activations
@@ -127,7 +127,7 @@ template <typename          dType,
           uint              nodes,
           uint              inputs,
           uint              depth>
-class SoftmaxPolicy<dType, curnn::device::CPU, nodes, inputs, depth> {
+class SoftmaxPolicy<dType, frnn::device::CPU, nodes, inputs, depth> {
     
     public:
         /*
@@ -182,7 +182,7 @@ class SoftmaxPolicy<dType, curnn::device::CPU, nodes, inputs, depth> {
          * Inputs       : prevLayerActs   : The activations (outputs) of the nodes in the previous layer
          * ==================================================================================================
          */
-        void updateWba( const curnn::Tensor4<dType>& prevLayerActs );
+        void updateWba( const frnn::Tensor4<dType>& prevLayerActs );
         
     protected:
         Tensor4<dType>      wba;             // Tensor for weights, biases, and activations
@@ -211,7 +211,7 @@ void SoftmaxPolicy<dType, device::GPU, nds, ipts, dth>::backward(
 // NOT DONE
 template <typename dType, uint nds, uint ipts, uint dth>
 void SoftmaxPolicy<dType, device::GPU, nds, ipts, dth>::updateWba( 
-        const curnn::Tensor4<dType>& prev_layer_acts ) {
+        const frnn::Tensor4<dType>& prev_layer_acts ) {
 }
 
 /* ======================================= CPU IMPLEMENTATIONS  =========================================== */
@@ -234,10 +234,10 @@ void SoftmaxPolicy<dType, device::CPU, nds, ipts, dth>::backward(
 // NOT DONE
 template <typename dType, uint nds, uint ipts, uint dth>
 void SoftmaxPolicy<dType, device::CPU, nds, ipts, dth>::updateWba( 
-        const curnn::Tensor4<dType>& prev_layer_acts ) {
+        const frnn::Tensor4<dType>& prev_layer_acts ) {
     
 }
 
 }   // Namepsace lloss
-}   // Namepsace curnn
+}   // Namepsace frnn
 #endif 

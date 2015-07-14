@@ -1,5 +1,5 @@
 /*
- *  cuRNN functors. Define general operations which are normally passed 
+ *  fastRNN functors. Define general operations which are normally passed 
  *  as template parameters to allow multiple operations for a function/
  *  kernel.
  *
@@ -20,13 +20,13 @@
  *	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _CURNN_FUNCTORS_
-#define _CURNN_FUNCTORS_
+#ifndef _FRNN_FUNCTORS_
+#define _FRNN_FUNCTORS_
 
 #include <math.h>
 #include <cmath>
 
-namespace curnn {
+namespace frnn {
 namespace functors {
    
 // Note : Whike functors are technically structs, they behave as functions and hence the naming conventions of
@@ -142,6 +142,6 @@ struct voidFunctor {
 };
 
 }   // Namespace functors
-}	// Namespace curnn
+}	// Namespace frnn
 
 #endif
