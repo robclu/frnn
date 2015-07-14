@@ -1,16 +1,16 @@
-# cuRNN
+# fastRNN
 
 ## Overview
 
-cuRNN is a Cuda Recurrent Neural Network library. The long term aim is to provide support for all possible RNN configurations (Deep, LSTM, Bi-Directional ...), as well as for OpenCL, eventually. 
+fastRNN is a fast Recurrent Neural Network library. The long term aim is to provide support for all possible RNN configurations (Deep, LSTM, Bi-Directional, etc...), with a fast implementation. 
 
-The long term goal is to provide support for both CUDA and OpenCL. CUDA provides support for modern C++ and is beneficial for systems which use Nvidia GPUs. Initially all parallel components will be implemented using CUDA. OpenCL is more similar to C, however, provides support for many vendors as well as for CPUs. OpenCL support will be implemented to take advantage of using the CPU and GPU in some places, as well as to provide support for powerful CPU only, or AMD GPU systems.
+Gpu support will be provided for CUDA and OpenCL (later, so that all gpu vendors are supported). The implementation will use cpu or gpu functions whereever the most speedup can be gained, and will provide full cpu support if there are no gpus present in the system.
 
 ## Support 
 
 ### Software
 
-The currently used/supported software is:
+The currently supported/used software is:
 
 * C++11 (Testing with gtest)
 * CUDA 7.0
@@ -43,8 +43,9 @@ __Note__: See the wiki for details on the functions and conceptual explanations 
 __Note__: All makefiles assume that CUDA is installed as the default cuda-7.0 in /usr/local.
           If this is not the case you will need to change this in the Makefiles. 
 
-Tests are written for each of the components of the library. The tests for the individual components can be
-run or all tests can be run.
+__Note__: There will be a config file in the future that will allow for a custom install.
+
+Tests are written for each of the components of the library. The tests for each component can be run individually, or all tests can be run at once.
 
 ### Running All Tests
 
@@ -78,3 +79,5 @@ The following system parameters are used for testing:
 OS &nbsp; : Linux Ubuntu 14.04  
 CPU : Intel i7-3615QM (Quad-core @ 2.3GHz)  
 GPU : Nvidia GeForce GT 650M (344 cores, 900Mhz)  
+
+__Note__: The development system will upgrade in the (near) future to include multiple cpu and gpus and will support mpi.
