@@ -56,10 +56,10 @@ void updateWeights( dType* curr_wba       , size_t ces       , size_t num_errs,
     
     // Determine the weight update (might need atomics)
     dType prev_weight_update = prev_wba_delta[ idx ];
-    prev_weight_delta[ idx ] = momentum * prev_weight_update -              // Momentum contribution
-                                learn_rate *                                // Gradient descent
-                                curr_wba[ ces + ( idx % num_errs ) ] *      // This layers error      
-                                prev_wba[ pas + ( idx / num_acts ) ];       // Prev layer activation
+    prev_wba_delta[ idx ] = ( momentum * prev_weight_update  ) -            // Momentum contribution
+                            ( learn_rate *                                  // Gradient descent
+                              curr_wba[ ces + ( idx % num_errs ) ] *        // This layers error      
+                              prev_wba[ pas + ( idx / num_acts ) ] );       // Prev layer activation
     // Update the weight with the weight update
     curr_wba[ idx ] += prev_weight_delts[ idx ];
 }

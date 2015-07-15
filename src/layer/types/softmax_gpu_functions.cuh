@@ -190,7 +190,6 @@ void softmaxUpadateWbaGpu( Tensor4<dType>& prev_wba, uint act_start, size_t N,
         }
         
         // Invoke the kernel to upadte the weights
-         
     }
     
 }

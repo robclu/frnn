@@ -70,7 +70,8 @@ class SoftmaxPolicy<dType, frnn::device::GPU, nodes, inputs, depth> {
          * ==================================================================================================
          */
         explicit SoftmaxPolicy() :
-            wba( nodes, inputs + 2, depth, 1 ), num_inputs( inputs ), errors( nodes, 0 ) {}
+            wba( nodes, inputs + 2, depth, 1 ), num_inputs( inputs ), errors( nodes, 0 ),
+            wba_prev( nodes, inputs + 2, depth, 1 ), num_inputs( inputs ), errors( nodes, 0 ) {}
 
         /*
          * ==================================================================================================
@@ -140,7 +141,8 @@ class SoftmaxPolicy<dType, frnn::device::CPU, nodes, inputs, depth> {
          * ==================================================================================================
          */
         explicit SoftmaxPolicy() :
-            wba( nodes, inputs + 2, depth, 1 ), num_inputs( inputs ), errors( nodes, 0 ) {}
+            wba( nodes, inputs + 2, depth, 1 ), num_inputs( inputs ), errors( nodes, 0 ),
+            wba_prev( nodes, inputs + 2, depth, 1 ), num_inputs( inputs ), errors( nodes, 0 ) {}
 
         /*
          * ==================================================================================================

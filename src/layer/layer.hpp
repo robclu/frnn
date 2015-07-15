@@ -43,12 +43,12 @@ namespace frnn {
  * ==========================================================================================================
  */
 template <typename                          dType,
-          frnn::device                     dev,
+          frnn::device                      dev,
           uint                              _nodes,
           uint                              _inputs,
           uint                              _depth,
           template <typename      , 
-                    frnn::device , 
+                    frnn::device  , 
                     uint...       >  class TypePolicy >     
 class Layer : public TypePolicy<dType, dev, _nodes, _inputs, _depth> {  
 

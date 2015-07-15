@@ -143,3 +143,23 @@ TEST( frnnTensor, CanCreateArrayFromTensor ) {
 		EXPECT_EQ( float( i ), testPointer[ i ] );
 	}
 }
+
+TEST( frnnTensor, CanMoveTensorDataCorrectly ) {
+    frnn::Tensor4<float> t1( 2, 2, 1, 1 );
+    frnn::Tensor4<float> t2( 2, 2, 1, 1 );
+    
+    for ( int i = 0; i < 2; i++ ) {
+        for ( int j = 0; j < 2; j++ ) {
+            t1( i, j, 0, 0 ) = float( j );
+        }
+    }
+    
+    t1.moveData( t2 );
+    
+    for ( int i = 0; i < 2; i++ ) {
+        for ( int j = 0; j < 2; j++ ) {
+            EXPECT_EQ( t2( i, j, 0, 0 ), float( j ) );
+        }
+    }
+}
+

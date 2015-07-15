@@ -72,6 +72,30 @@ class Tensor4 {
 		Tensor4( uint _x, uint _y, uint _z, uint _w ) :
 			x_( _x ), y_( _y ), z_( _z ), w_( _w ), data( _x * _y * _z * _w, 0 ) {}
 
+        /*
+         * ==================================================================================================
+         * Function         : getData 
+         * 
+         * Description      : Gets the data vector from the Tesnor
+         * 
+         * Outputs          : The data vector for the Tensor (to support moving)
+         * ==================================================================================================
+         */
+        inline std::vector<dType>& getData() { return data; }
+        
+        /*
+         * ==================================================================================================
+         * Function         : moveData
+         * 
+         * Description      : Moves the data from another tensor into this Tensor4
+         *  
+         * Inputs           : otherTensor   : The tensor from which the data must be moved from
+         * ==================================================================================================
+         */
+        inline void moveData( Tensor4<dType>& otherTensor ) {
+            otherTensor.getData() = std::move( data );
+        }
+         
 		/* ==================================================================================================
 		 * Function		: size
 		 *
