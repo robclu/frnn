@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="fastRNN : fastRNN is a fast Recurrent Neural Network library. The long term aim is to provide support for all possible RNN configurations (Deep, LSTM, Bi-Directional, etc...), with a very fast implementation. ">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>fastRNN</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/robclu/fastRNN">View on GitHub</a>
+
+          <h1 id="project_title">fastRNN</h1>
+          <h2 id="project_tagline">fastRNN is a fast Recurrent Neural Network library. The long term aim is to provide support for all possible RNN configurations (Deep, LSTM, Bi-Directional, etc...), with a very fast implementation. </h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/robclu/fastRNN/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/robclu/fastRNN/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="fastrnn" class="anchor" href="#fastrnn" aria-hidden="true"><span class="octicon octicon-link"></span></a>fastRNN</h1>
+
+<h2>
+<a id="overview" class="anchor" href="#overview" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overview</h2>
+
+<p>fastRNN is a fast Recurrent Neural Network library. The long term aim is to provide support for all possible RNN configurations (Deep, LSTM, Bi-Directional, etc...), with a fast implementation. </p>
+
+<p>Gpu support will be provided for CUDA and OpenCL (later, so that all gpu vendors are supported). The implementation will use cpu or gpu functions whereever the most speedup can be gained, and will provide full cpu support if there are no gpus present in the system.</p>
+
+<h2>
+<a id="support" class="anchor" href="#support" aria-hidden="true"><span class="octicon octicon-link"></span></a>Support</h2>
+
+<h3>
+<a id="software" class="anchor" href="#software" aria-hidden="true"><span class="octicon octicon-link"></span></a>Software</h3>
+
+<p>The currently supported/used software is:</p>
+
+<ul>
+<li>C++11 (Testing with gtest)</li>
+<li>CUDA 7.0</li>
+<li>Linux </li>
+</ul>
+
+<h3>
+<a id="hardware" class="anchor" href="#hardware" aria-hidden="true"><span class="octicon octicon-link"></span></a>Hardware</h3>
+
+<ul>
+<li>CUDA Compute Capability &gt;= 3.0 </li>
+</ul>
+
+<h2>
+<a id="current-functionality" class="anchor" href="#current-functionality" aria-hidden="true"><span class="octicon octicon-link"></span></a>Current Functionality</h2>
+
+<p>The current version is v1.0.0 and supports the following functionality:</p>
+
+<p><strong>Note</strong>: See the wiki for details on the functions and conceptual explanations (coming soon). </p>
+
+<ul>
+<li>Data :
+
+<ul>
+<li>tensor4 (4D tensor)</li>
+</ul>
+</li>
+<li>Layers :
+
+<ul>
+<li>softmax (negative log liklihood loss)</li>
+</ul>
+</li>
+<li>Math :
+
+<ul>
+<li>axpy (a x X + Y) [GPU]</li>
+<li>sum (sum of a vector, result is returned) [GPU]</li>
+<li>sumVectorized (sum of a vector, each element gets result) [GPU]</li>
+<li>softmax [GPU]</li>
+<li>xmy (X - Y) [CPU]</li>
+</ul>
+</li>
+</ul>
+
+<h2>
+<a id="compiling-and-running" class="anchor" href="#compiling-and-running" aria-hidden="true"><span class="octicon octicon-link"></span></a>Compiling and Running</h2>
+
+<p><strong>Note</strong>: All makefiles assume that CUDA is installed as the default cuda-7.0 in /usr/local.
+          If this is not the case you will need to change this in the Makefiles. </p>
+
+<p><strong>Note</strong>: There will be a config file in the future that will allow for a custom install.</p>
+
+<p>Tests are written for each of the components of the library. The tests for each component can be run individually, or all tests can be run at once.</p>
+
+<h3>
+<a id="running-all-tests" class="anchor" href="#running-all-tests" aria-hidden="true"><span class="octicon octicon-link"></span></a>Running All Tests</h3>
+
+<p>To run all tests, go to the <strong>src</strong> directory and issue the following commands</p>
+
+<pre><code>make 
+./all_tests
+</code></pre>
+
+<h3>
+<a id="running-individual-component-tests" class="anchor" href="#running-individual-component-tests" aria-hidden="true"><span class="octicon octicon-link"></span></a>Running Individual Component Tests</h3>
+
+<p>To run the tests for an indivdual component, got the <strong>src/component</strong> directory, where <strong>component</strong> is
+the component you want to run the tests for (for example math), then similarly issue</p>
+
+<pre><code>make 
+./component_tests
+</code></pre>
+
+<h3>
+<a id="cleaning" class="anchor" href="#cleaning" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cleaning</h3>
+
+<p>Issuing </p>
+
+<pre><code>make clean
+</code></pre>
+
+<p>will clean any executable after making it.</p>
+
+<h3>
+<a id="development-system" class="anchor" href="#development-system" aria-hidden="true"><span class="octicon octicon-link"></span></a>Development system</h3>
+
+<p>The following system parameters are used for testing:</p>
+
+<p>OS   : Linux Ubuntu 14.04<br>
+CPU : Intel i7-3615QM (Quad-core @ 2.3GHz)<br>
+GPU : Nvidia GeForce GT 650M (344 cores, 900Mhz)  </p>
+
+<p><strong>Note</strong>: The development system will upgrade in the (near) future to include multiple cpu and gpus and will support mpi.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">fastRNN maintained by <a href="https://github.com/robclu">robclu</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
