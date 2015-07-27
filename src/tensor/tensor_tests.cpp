@@ -28,8 +28,8 @@ const size_t X = 4;
 const size_t Y = 4;
 const size_t Z = 4;
 
-TEST( frnnTensor, CanCreateTensorCorrectly ) {
-	frnn::Tensor4<float> testTensor( X, Y, Z, W );
+TEST(frnnTensor, CanCreateTensorCorrectly) {
+	frnn::Tensor4<float> testTensor(X, Y, Z, W);
 
 	EXPECT_EQ( testTensor.w(), W );
 	EXPECT_EQ( testTensor.x(), X );
@@ -38,127 +38,127 @@ TEST( frnnTensor, CanCreateTensorCorrectly ) {
 	EXPECT_EQ( testTensor.size(), W * X * Y * Z );
 }
 
-TEST( frnnTensor, TensorValuesDefaultToZero ) {
-	frnn::Tensor4<float> testTensor( X, Y, Z, W );
+TEST(frnnTensor, TensorValuesDefaultToZero) {
+	frnn::Tensor4<float> testTensor(X, Y, Z, W);
 
-	for ( size_t l = 0; l < testTensor.w(); l++ ) {
-		for ( size_t k = 0; k < testTensor.z(); k++ ) {
-			for ( size_t j = 0; j < testTensor.y(); j++ ) {
-				for ( size_t i = 0; i < testTensor.x(); i++ ) {
-					EXPECT_EQ( testTensor( i, j, k, l ), (float)0 );
+	for (size_t l = 0; l < testTensor.w(); l++) {
+		for (size_t k = 0; k < testTensor.z(); k++) {
+			for (size_t j = 0; j < testTensor.y(); j++) {
+				for (size_t i = 0; i < testTensor.x(); i++) {
+					EXPECT_EQ( testTensor(i, j, k, l), 0.f );
 				}
 			}
 		}
 	}
 }
 
-TEST( frnnTensor, CanReshapeTensor ) {
-	frnn::Tensor4<float> testTensor( X, Y, Z, W );
+TEST(frnnTensor, CanReshapeTensor) {
+	frnn::Tensor4<float> testTensor(X, Y, Z, W);
 
-	testTensor.reshape( 10, 10, 7, 2 );
+	testTensor.reshape(10, 10, 7, 2);
 
-	EXPECT_EQ( testTensor.w(), 2 );
+	EXPECT_EQ( testTensor.w(), 2  );
 	EXPECT_EQ( testTensor.x(), 10 );
 	EXPECT_EQ( testTensor.y(), 10 );
-	EXPECT_EQ( testTensor.z(), 7 );
+	EXPECT_EQ( testTensor.z(), 7  );
 	EXPECT_EQ( testTensor.size(), 10 * 10 * 7 * 2 );
 }
 
-TEST( frnnTensor, TensorValuesAreZeroAfterReshape ) {
-	frnn::Tensor4<float> testTensor( X, Y, Z, W );
-	testTensor.reshape( 10, 2, 3, 9 );
+TEST(frnnTensor, TensorValuesAreZeroAfterReshape) {
+	frnn::Tensor4<float> testTensor(X, Y, Z, W);
+	testTensor.reshape(10, 2, 3, 9);
 
-	for ( size_t l = 0; l < testTensor.w(); l++ ) {
-		for ( size_t k = 0; k < testTensor.z(); k++ ) {
-			for ( size_t j = 0; j < testTensor.y(); j++ ) {
-				for ( size_t i = 0; i < testTensor.x(); i++ ) {
-					EXPECT_EQ( testTensor( i, j, k, l ), (float)0 );
+	for (size_t l = 0; l < testTensor.w(); l++) {
+		for (size_t k = 0; k < testTensor.z(); k++) {
+			for (size_t j = 0; j < testTensor.y(); j++) {
+				for (size_t i = 0; i < testTensor.x(); i++) {
+					EXPECT_EQ( testTensor(i, j, k, l), 0.f );
 				}
 			}
 		}
 	}
 }
 
-TEST( frnnTensor, ReshapeCanUsexistingDimensionality ) {
-	frnn::Tensor4<float> testTensor( X, Y, Z, W );
-	testTensor.reshape( 10, -1, 3, -1 );
+TEST(frnnTensor, ReshapeCanUsexistingDimensionality) {
+	frnn::Tensor4<float> testTensor(X, Y, Z, W);
+	testTensor.reshape(10, -1, 3, -1);
 
 	EXPECT_EQ( testTensor.x(), 10 );
-	EXPECT_EQ( testTensor.y(), Y );
-	EXPECT_EQ( testTensor.z(), 3 );
-	EXPECT_EQ( testTensor.w(), W );
+	EXPECT_EQ( testTensor.y(), Y  );
+	EXPECT_EQ( testTensor.z(), 3  );
+	EXPECT_EQ( testTensor.w(), W  );
 	EXPECT_EQ( testTensor.size(), 10 * Y * 3 * W );
 }
 
-TEST( frnnTensor, CanGetAndSetElementWithAccessOperator ) {
-	frnn::Tensor4<float> testTensor( X, Y, Z, W );
-	testTensor( 1, 0, 0, 0 ) = 5.f;
+TEST(frnnTensor, CanGetAndSetElementWithAccessOperator) {
+	frnn::Tensor4<float> testTensor(X, Y, Z, W);
+	testTensor(1, 0, 0, 0) = 5.f;
 
 	// Use operator
-	float testVal = testTensor( 1, 0, 0, 0 );
+	float testVal = testTensor(1, 0, 0, 0);
 
 	EXPECT_EQ( testVal, 5.f );
 }
 
-TEST( frnnTensor, OutputsErrorForOutOfRangeIndxAndReturnsFirstElementValue ) {
+TEST(frnnTensor, OutputsErrorForOutOfRangeIndxAndReturnsFirstElementValue) {
 	frnn::Tensor4<float> testTensor( X, Y, Z, W );
 
-	float testVal = testTensor( 100, 12, 34, 2 );
+	float testVal = testTensor(100, 12, 34, 2);
 
-	EXPECT_EQ( testVal, testTensor( 0, 0, 0, 0 ) );
+	EXPECT_EQ( testVal, testTensor(0, 0, 0, 0) );
 }
 
-TEST( frnnTensor, CanGetPointerToElement ) {
-	frnn::Tensor4<float> testTensor( X, Y, Z, W );
+TEST(frnnTensor, CanGetPointerToElement) {
+	frnn::Tensor4<float> testTensor(X, Y, Z, W);
 
-	testTensor( 0, 0, 1, 0 ) = 10.f;	
-	float* testVal = &testTensor( 0, 0, 1, 0 );
+	testTensor(0, 0, 1, 0) = 10.f;	
+	float* testVal = &testTensor(0, 0, 1, 0);
 
 	EXPECT_EQ( *testVal, 10.f );
 }
 
-TEST( frnnTensor, CanModifyElementThroughPointer ) {
-   	frnn::Tensor4<float> testTensor( X, Y, Z, W );
+TEST(frnnTensor, CanModifyElementThroughPointer) {
+   	frnn::Tensor4<float> testTensor(X, Y, Z, W);
 
-	testTensor( 0, 0, 1, 0 ) = 10.f;	
-	float* testVal = &testTensor( 0, 0, 1, 0 );
+	testTensor(0, 0, 1, 0) = 10.f;	
+	float* testVal = &testTensor(0, 0, 1, 0);
 
     *testVal = 4.f;
     
 	EXPECT_EQ( *testVal, 4.f );
 }
 
-TEST( frnnTensor, CanCreateArrayFromTensor ) {
-	frnn::Tensor4<float> testTensor( X, Y, Z, W );
+TEST(frnnTensor, CanCreateArrayFromTensor) {
+	frnn::Tensor4<float> testTensor(X, Y, Z, W);
 
 	// Set elements
-	for ( size_t i = 0; i < testTensor.x(); i++ ) {
-		testTensor( i, 0, 0, 0 ) = float ( i );
+	for (size_t i = 0; i < testTensor.x(); i++) {
+		testTensor(i, 0, 0, 0) = float(i);
 	}
 
 	float* testPointer;
-	testPointer = &testTensor( 0, 0, 0, 0 );
+	testPointer = &testTensor(0, 0, 0, 0);
 
-	for ( int i = 0; i < X; i++ ) {
-		EXPECT_EQ( float( i ), testPointer[ i ] );
+	for (int i = 0; i < X; i++) {
+		EXPECT_EQ( float(i), testPointer[i] );
 	}
 }
 
-TEST( frnnTensor, CanMoveTensorDataCorrectly ) {
-    frnn::Tensor4<float> t1( 2, 2, 1, 1 );
-    frnn::Tensor4<float> t2( 2, 2, 1, 1 );
+TEST(frnnTensor, CanMoveTensorDataCorrectly) {
+    frnn::Tensor4<float> t1(2, 2, 1, 1);
+    frnn::Tensor4<float> t2(2, 2, 1, 1);
     
-    for ( int i = 0; i < 2; i++ ) {
-        for ( int j = 0; j < 2; j++ ) {
-            t1( i, j, 0, 0 ) = float( j );
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; j++) {
+            t1(i, j, 0, 0) = float(j);
         }
     }
     
-    t1.moveData( t2 );
+    t1.moveData(t2);
     
-    for ( int i = 0; i < 2; i++ ) {
-        for ( int j = 0; j < 2; j++ ) {
-            EXPECT_EQ( t2( i, j, 0, 0 ), float( j ) );
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; j++) {
+            EXPECT_EQ( t2(i, j, 0, 0), float(j) );
         }
     }
 }

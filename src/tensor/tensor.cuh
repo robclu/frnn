@@ -54,7 +54,7 @@ class Tensor4 {
 		 * ==================================================================================================
 		 */
 		explicit Tensor4() :
-			x_( 0 ), y_( 0 ), z_( 0 ), w_( 0 ) {}
+			x_(0), y_(0), z_(0), w_(0) {}
 
 		/*
 		 * ==================================================================================================
@@ -69,8 +69,8 @@ class Tensor4 {
 		 *					: _w	: Number of elements in the 4th dimension
 		 * ==================================================================================================
 		 */
-		Tensor4( uint _x, uint _y, uint _z, uint _w ) :
-			x_( _x ), y_( _y ), z_( _z ), w_( _w ), data( _x * _y * _z * _w, 0 ) {}
+		Tensor4(uint _x, uint _y, uint _z, uint _w) :
+			x_(_x), y_(_y), z_(_z), w_(_w), data(_x * _y * _z * _w, 0) {}
 
         /*
          * ==================================================================================================
@@ -92,8 +92,8 @@ class Tensor4 {
          * Inputs           : otherTensor   : The tensor from which the data must be moved from
          * ==================================================================================================
          */
-        inline void moveData( Tensor4<dType>& otherTensor ) {
-            otherTensor.getData() = std::move( data );
+        inline void moveData(Tensor4<dType>& otherTensor) {
+            otherTensor.getData() = std::move(data);
         }
          
 		/* ==================================================================================================
@@ -123,12 +123,12 @@ class Tensor4 {
 		 *				: w_new		: New number of elements for 4th dimension
 		 * ==================================================================================================
 		 */
-		__inline__ __device__ __host__ void reshape( int x_new, int y_new, int z_new, int w_new ) {
-			x_ = ( x_new != -1 ) ? static_cast<uint>(x_new) : x_;		
-			y_ = ( y_new != -1 ) ? static_cast<uint>(y_new) : y_;		
-			z_ = ( z_new != -1 ) ? static_cast<uint>(z_new) : z_;		
-			w_ = ( w_new != -1 ) ? static_cast<uint>(w_new) : w_;		
-			data.resize( w_ * x_ * y_ * z_, 0 );
+		__inline__ __device__ __host__ void reshape(int x_new, int y_new, int z_new, int w_new) {
+			x_ = (x_new != -1) ? static_cast<uint>(x_new) : x_;		
+			y_ = (y_new != -1) ? static_cast<uint>(y_new) : y_;		
+			z_ = (z_new != -1) ? static_cast<uint>(z_new) : z_;		
+			w_ = (w_new != -1) ? static_cast<uint>(w_new) : w_;		
+			data.resize(w_ * x_ * y_ * z_, 0);
 		}
 
 		/*
@@ -143,36 +143,36 @@ class Tensor4 {
 		 *				: w_new		: Element position in 4th (w) dimension
 		 * ==================================================================================================
 		 */
-		dType& operator() ( uint x_elem, uint y_elem, uint z_elem, uint w_elem ) {
+		dType& operator() (uint x_elem, uint y_elem, uint z_elem, uint w_elem) {
 			int error = 0;
-			if ( x_elem < 0 || x_elem >= x_ ) error = -1;
-			if ( y_elem < 0 || y_elem >= y_ ) error = -2;
-			if ( z_elem < 0 || z_elem >= z_ ) error = -3;
-			if ( w_elem < 0 || w_elem >= w_ ) error = -4;
+			if (x_elem < 0 || x_elem >= x_) error = -1;
+			if (y_elem < 0 || y_elem >= y_) error = -2;
+			if (z_elem < 0 || z_elem >= z_) error = -3;
+			if (w_elem < 0 || w_elem >= w_) error = -4;
 
-			switch ( error ) {
+			switch (error) {
 				case -1:
 					std::cerr << "Out of Range Error : Element " << x_elem << 
-						         " out of range of dimension 1 for rensor : Returning first element\n";
-					return data[ 0 ];
+						         " out of range of dimension 1 (x) for tensor : Returning first element\n";
+					return data[0];
 				case -2:
 					std::cerr << "Out of Range Error : Element " << y_elem << 
-						         " out of range of dimension 2 for rensor : Returning first element\n";
-					return data[ 0 ];
+						         " out of range of dimension 2 (y) for tensor : Returning first element\n";
+					return data[0];
 				case -3:
 					std::cerr << "Out of Range Error : Element " << z_elem << 
-						         " out of range of dimension 3 for rensor : Returning first element\n";
-					return data[ 0 ];
+						         " out of range of dimension 3 (z) for tensor : Returning first element\n";
+					return data[0];
 				case -4:
 					std::cerr << "Out of Range Error : Element " << w_elem << 
-						         " out of range of dimension 4 for rensor : Returning first element\n";
-					return data[ 0 ];
+						         " out of range of dimension 4 (w) for tensor : Returning first element\n";
+					return data[0];
 			}
 			int offset = x_ * y_ * z_ * w_elem	+			// 4th dimension offset
 				         x_ * y_ * z_elem		+			// 3rd dimension offset
 						 x_ * y_elem			+			// 2nd dimension offset
-						 x_elem;						// 1st dimension offset
-			return 	data[ offset ];
+						 x_elem;						    // 1st dimension offset
+			return 	data[offset];
 		}
 
 		/*
@@ -187,36 +187,36 @@ class Tensor4 {
 		 *				: w_new		: Element position in 4th (w) dimension
 		 * ==================================================================================================
 		 */
-		dType const& operator()( uint x_elem, uint y_elem, uint z_elem, uint w_elem ) const {
+		dType const& operator()(uint x_elem, uint y_elem, uint z_elem, uint w_elem) const {
 			int error = 0;
-			if ( x_elem < 0 || x_elem >= x_ ) error = -1;
-			if ( y_elem < 0 || y_elem >= y_ ) error = -2;
-			if ( z_elem < 0 || z_elem >= z_ ) error = -3;
-			if ( w_elem < 0 || w_elem >= w_ ) error = -4;
+			if (x_elem < 0 || x_elem >= x_) error = -1;
+			if (y_elem < 0 || y_elem >= y_) error = -2;
+			if (z_elem < 0 || z_elem >= z_) error = -3;
+			if (w_elem < 0 || w_elem >= w_) error = -4;
 
-			switch ( error ) {
+			switch (error) {
 				case -1:
 					std::cerr << "Out of Range Error : Element " << x_elem << 
-						         " out of range of dimension 1 for rensor : Returning first element\n";
-					return data[ 0 ];
+						         " out of range of dimension 1 (x) for tensor : Returning first element\n";
+					return data[0];
 				case -2:
 					std::cerr << "Out of Range Error : Element " << y_elem << 
-						         " out of range of dimension 2 for rensor : Returning first element\n";
-					return data[ 0 ];
+						         " out of range of dimension 2 (y) for tensor : Returning first element\n";
+					return data[0];
 				case -3:
 					std::cerr << "Out of Range Error : Element " << z_elem << 
-						         " out of range of dimension 3 for rensor : Returning first element\n";
-					return data[ 0 ];
+						         " out of range of dimension 3 (z) for tensor : Returning first element\n";
+					return data[0];
 				case -4:
 					std::cerr << "Out of Range Error : Element " << w_elem << 
-						         " out of range of dimension 4 for rensor : Returning first element\n";
-					return data[ 0 ];
+						         " out of range of dimension 4 (w) for tensor : Returning first element\n";
+					return data[0];
 			}
 			int offset = x_ * y_ * z_ * w_elem	+			// 4th dimension offset
 				         x_ * y_ * z_elem		+			// 3rd dimension offset
 						 x_ * y_elem			+			// 2nd dimension offset
 						 x_elem;						// 1st dimension offset
-			return data[ offset ];
+			return data[offset];
 		}
 };
 

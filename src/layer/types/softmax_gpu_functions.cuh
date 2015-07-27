@@ -128,7 +128,7 @@ void softmaxForwardGpu( std::vector<dType>& ins       ,
         xpny<<<blocks, threads, sharedMemAmount>>>( results_d, wba.x(), wba.z() );
     }
 
-    // Create pointer to the softmax resulta (node activations)
+    // Create pointer to the softmax results (node activations)
     dType* acts;
     if ( cudaMalloc( (void**)&acts, wba.x() * sizeof( dType ) ) != cudaSuccess ) {
         frnn::err::allocError( error, stringify( acts ) );

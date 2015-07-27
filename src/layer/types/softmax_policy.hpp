@@ -42,10 +42,17 @@ namespace ltype {
  *              : nodes     : The number of nodes for the layer
  *              : inputs    : The number of inputs to the layer
  *              : depth     : The number of different inputs in the layer (almost always 1 for softmax)
+ *              
+ * Note         : A note on the storage of the weights, biases, and activations.
+ *                A Tensor4 class is used to store the weights, biases, and activations (termed wba), the
+ *                first two dimensions make a matrix for the wba from the previous layer to this one, so
+ *                
+ *                | W_01 W_02 ... ... ... W_0N |        N = Number of nodes 
+ *                | W_11 W_12 ... ... ... W_1N |        The weight 
  * ==========================================================================================================
  */
 template <typename          dType, 
-         frnn::device      dev,
+         frnn::device       dev,
          uint               nodes, 
          uint               inputs, 
          uint               depth>
@@ -70,8 +77,8 @@ class SoftmaxPolicy<dType, frnn::device::GPU, nodes, inputs, depth> {
          * ==================================================================================================
          */
         explicit SoftmaxPolicy() :
-            wba( nodes, inputs + 2, depth, 1 ), num_inputs( inputs ), errors( nodes, 0 ),
-            wba_prev( nodes, inputs + 2, depth, 1 ), num_inputs( inputs ), errors( nodes, 0 ) {}
+            wba(nodes, std::max(inputs, nodes) + 2, depth, 1), num_inputs(inputs), errors(nodes, 0),
+            wba_prev(nodes, std::max(inputs, nodes) + 2, depth, 1) {}
 
         /*
          * ==================================================================================================
@@ -86,7 +93,7 @@ class SoftmaxPolicy<dType, frnn::device::GPU, nodes, inputs, depth> {
          * Outputs      : outs  : The outputs of the layer after performing softmax( W*x + b ) on the inputs.
          * ==================================================================================================
          */
-        void forward( std::vector<dType>& ins, std::vector<dType>& outs );
+        void forward(std::vector<dType>& ins, std::vector<dType>& outs);
 
         /*
          * ==================================================================================================
@@ -102,7 +109,7 @@ class SoftmaxPolicy<dType, frnn::device::GPU, nodes, inputs, depth> {
          * Outputs      : The results are stored in the errors vector
          * ==================================================================================================
          */
-        void backward( std::vector<dType>& outs, std::vector<dType>&targets );
+        void backward(std::vector<dType>& outs, std::vector<dType>& targets);
 
         /* 
          * ==================================================================================================
@@ -113,7 +120,7 @@ class SoftmaxPolicy<dType, frnn::device::GPU, nodes, inputs, depth> {
          * Inputs       : prevLayerActs   : The activations (outputs) of the nodes in the previous layer
          * ==================================================================================================
          */
-        void updateWba( const frnn::Tensor4<dType>& prevLayerActs );
+        void updateWba(const frnn::Tensor4<dType>& prevLayerActs);
         
     protected:
         Tensor4<dType>      wba;             // Tensor for weights, biases, and activations
@@ -141,8 +148,8 @@ class SoftmaxPolicy<dType, frnn::device::CPU, nodes, inputs, depth> {
          * ==================================================================================================
          */
         explicit SoftmaxPolicy() :
-            wba( nodes, inputs + 2, depth, 1 ), num_inputs( inputs ), errors( nodes, 0 ),
-            wba_prev( nodes, inputs + 2, depth, 1 ), num_inputs( inputs ), errors( nodes, 0 ) {}
+            wba(nodes, std::max(inputs, nodes) + 2, depth, 1), num_inputs(inputs), errors(nodes, 0),
+            wba_prev(nodes, std::max(inputs, nodes) + 2, depth, 1) {}
 
         /*
          * ==================================================================================================
@@ -157,7 +164,7 @@ class SoftmaxPolicy<dType, frnn::device::CPU, nodes, inputs, depth> {
          * Outputs      : outs  : The outputs of the layer after performing softmax( W*x + b ) on the inputs.
          * ==================================================================================================
          */
-        void forward( std::vector<dType>& ins, std::vector<dType>& outs );
+        void forward(std::vector<dType>& ins, std::vector<dType>& outs);
 
         /*
          * ==================================================================================================
@@ -173,7 +180,7 @@ class SoftmaxPolicy<dType, frnn::device::CPU, nodes, inputs, depth> {
          * Outputs      : The results are stored in the errors vector
          * ==================================================================================================
          */
-        void backward( std::vector<dType>& outs, std::vector<dType>&targets );
+        void backward(std::vector<dType>& outs, std::vector<dType>&targets);
 
         /* 
          * ==================================================================================================
@@ -184,7 +191,7 @@ class SoftmaxPolicy<dType, frnn::device::CPU, nodes, inputs, depth> {
          * Inputs       : prevLayerActs   : The activations (outputs) of the nodes in the previous layer
          * ==================================================================================================
          */
-        void updateWba( const frnn::Tensor4<dType>& prevLayerActs );
+        void updateWba(const frnn::Tensor4<dType>& prevLayerActs);
         
     protected:
         Tensor4<dType>      wba;             // Tensor for weights, biases, and activations
@@ -197,23 +204,23 @@ class SoftmaxPolicy<dType, frnn::device::CPU, nodes, inputs, depth> {
 
 template <typename dType, uint nds, uint ipts, uint dth>
 void SoftmaxPolicy<dType, device::GPU, nds, ipts, dth>::forward (
-        std::vector<dType>& ins, std::vector<dType>& outs ) {
+        std::vector<dType>& ins, std::vector<dType>& outs) {
     // Call softmax forward gpu version 
-    softmaxForwardGpu( ins, wba, num_inputs, outs );
+    softmaxForwardGpu(ins, wba, num_inputs, outs);
 }
 
 template <typename dType, uint nds, uint ipts, uint dth>
 void SoftmaxPolicy<dType, device::GPU, nds, ipts, dth>::backward(
-        std::vector<dType>& outs, std::vector<dType>& targets ) {
+        std::vector<dType>& outs, std::vector<dType>& targets) {
     // Even though this is the GPU version, 
     // the CPU version is faster, so use that
-    softmaxBackwardCpu( outs, targets, errors );
+    softmaxBackwardCpu(outs, targets, errors);
 }
 
 // NOT DONE
 template <typename dType, uint nds, uint ipts, uint dth>
 void SoftmaxPolicy<dType, device::GPU, nds, ipts, dth>::updateWba( 
-        const frnn::Tensor4<dType>& prev_layer_acts ) {
+        const frnn::Tensor4<dType>& prev_layer_acts) {
 }
 
 /* ======================================= CPU IMPLEMENTATIONS  =========================================== */
@@ -221,25 +228,24 @@ void SoftmaxPolicy<dType, device::GPU, nds, ipts, dth>::updateWba(
 // NOT DONE
 template <typename dType, uint nds, uint ipts, uint dth>
 void SoftmaxPolicy<dType, device::CPU, nds, ipts, dth>::forward( 
-        std::vector<dType>& ins, std::vector<dType>& outs ) {
+        std::vector<dType>& ins, std::vector<dType>& outs) {
     // CPU implementation not done yet, use gpu
-    softmaxForwardGpu( ins, wba, num_inputs, outs );
+    softmaxForwardGpu(ins, wba, num_inputs, outs);
 }
 
 template <typename dType, uint nds, uint ipts, uint dth>
 void SoftmaxPolicy<dType, device::CPU, nds, ipts, dth>::backward( 
-        std::vector<dType>& outs, std::vector<dType>& targets ) {
+        std::vector<dType>& outs, std::vector<dType>& targets) {
     // Call softmax backward cpu kernel
-    softmaxBackwardCpu( outs, targets, errors );
+    softmaxBackwardCpu(outs, targets, errors);
 }
 
 // NOT DONE
 template <typename dType, uint nds, uint ipts, uint dth>
 void SoftmaxPolicy<dType, device::CPU, nds, ipts, dth>::updateWba( 
-        const frnn::Tensor4<dType>& prev_layer_acts ) {
-    
+        const frnn::Tensor4<dType>& prev_layer_acts) {
 }
 
-}   // Namepsace lloss
+}   // Namepsace ltype
 }   // Namepsace frnn
 #endif 

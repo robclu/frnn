@@ -39,7 +39,7 @@ namespace frnn {
  *              : _nodes        : The number of nodes in the layer
  *              : _inputs       : The number of inputs to the layer
  *              : _depth        : The number of timesteps back or forward that have inputs to this layer
- *              : typePolicy    : The type of layer
+ *              : TypePolicy    : The type of layer
  * ==========================================================================================================
  */
 template <typename                          dType,
@@ -62,44 +62,33 @@ class Layer : public TypePolicy<dType, dev, _nodes, _inputs, _depth> {
          * ==================================================================================================
          * Function     : layer 
          *
-         * Description  : Defines the size of the layer parameters. The wights are stores as pages where each
-         *                page is the weights between the inputs or a previous iteration of a hidden layer. 
-         *                Each page has the following format :
-         *                
-         *                | Woo Wo1 ... WoN | N = nodes
-         *                | W1o W11 ... W1N |
-         *                |  .   .  .    .  |
-         *                |  .   .    .  .  | 
-         *                | WM0 WM1     WMN | M = max( inputs, nodes )
-         *                | boP b1P ... bNP | b = bias, P = page = inputs, hidden_-1, hidden_-2 etc
-         *                | aoP a1P ... aNP | a = activation, from Wx + b from its page
-         *
+         * Description  : Defines the size of the layer and the layer parameters. 
          * ==================================================================================================
          */
         explicit Layer() :
-            num_nodes( _nodes ), num_inputs( _inputs ), depth( _depth ), outputs( _nodes, 0 ) {}
+            num_nodes(_nodes), num_inputs(_inputs), depth(_depth), outputs(_nodes, 0) {}
 
         /*
          * ==================================================================================================
          * Function     : initializeWeights
          * 
          * Description  : Initialzes the weights between a certain range (by default the weights are
-         *                initialized to 0 during construction.
+         *                initialized to 0 during construction).
          *
          * Inputs       : min   : The minimum value for the weights
          *              : max   : The maximum value for the weights
          * ==================================================================================================
          */
-        inline void initializeWeights( dType min, dType max ) {
+        inline void initializeWeights(dType min, dType max) {
             // For each page in the tensor, use a thread to initialize the weights
-            #pragma omp parallel num_threads ( depth )
+            #pragma omp parallel num_threads (depth)
             {
                 int thread_id       = omp_get_thread_num();
-                dType* weight_start = &this->wba( 0, 0, thread_id, 0 );
-                size_t num_elements = num_nodes * std::max( num_nodes, num_inputs );
+                dType* weight_start = &this->wba(0, 0, thread_id, 0);
+                size_t num_elements = num_nodes * std::max(num_nodes, num_inputs);
                 
-                // CPU version is a lot faster at the moment due to PCU-GPU transfer, so use CPU
-                frnn::math<dType, frnn::device::CPU>::rand( weight_start, num_elements, min, max );
+                // CPU version is a lot faster at the moment due to CPU-GPU transfer, so use CPU
+                frnn::math<dType, frnn::device::CPU>::rand(weight_start, num_elements, min, max);
             }
         }
         
@@ -127,7 +116,7 @@ class Layer : public TypePolicy<dType, dev, _nodes, _inputs, _depth> {
          * ==================================================================================================
          */
         inline const dType* getOutputs() const {
-            return &outputs[ 0 ]; 
+            return &outputs[0]; 
         }
         
         /*
@@ -141,7 +130,7 @@ class Layer : public TypePolicy<dType, dev, _nodes, _inputs, _depth> {
          */
         inline const dType* getErrors() const {
             // Errors vector in typepolicy base
-            return &(this->errors[ 0 ]); 
+            return &(this->errors[0]); 
         }
 };
 
