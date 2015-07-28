@@ -22,18 +22,22 @@
 #include <iostream>
 
 #include "new_tensor.h"
+#include "accessor.h"
 
 using namespace frnn;
+
+TEST(frnnAccessor, CanDoCompileTimeSum) {
+
+    Accessor acc1 = {1, 2, 3};
+    Accessor acc2({4, 5, 6});
+    Accessor acc3 = acc1 * acc2;
+    
+    EXPECT_EQ( 32, acc3.sum() );
+}
 
 TEST(frnnNewTensor, CanCreateTensor) {
     frnn::Tensor<float, 3> testTensor;
     EXPECT_EQ( testTensor.size(), 0 );
-    
-    //Test counter function
-    std::vector<4> temp = {2, 4, 6, 8};
-    
-    int off = frnn::offset( temp, 0, 1, 2, 3, 4);
-    std::cout << off << std::endl;
 }
 
 TEST(frnnNewTensor, CanSpecifyTensorDimensionsInConstructor) {

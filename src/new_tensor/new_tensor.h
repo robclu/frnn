@@ -34,13 +34,6 @@ inline int product(std::initializer_list<int>& list) {
     return elementProduct;
 }
 
-int offset() { return 0; }
-
-template <typename... D>
-int offset(std::vector<int>& dimVect, int counter, int first, D... dims) {
-    return first * dimVect[counter] + offset(dimVect, counter + 1, dims...);
-}       
-
 template <typename T, typename E>
 class TensorExpression {
 public:
@@ -76,7 +69,7 @@ class Tensor : public TensorExpression<T, Tensor<T, R>> {
         // Construct Tensor for a given rank
         Tensor(std::initializer_list<int> dimensions) 
             : data_(product(dimensions)) {   
-                 assert(dimensions.size() == R ); 
+                 assert(dimensions.size() == R); 
                 for (auto& element : dimensions) dimensions_.push_back(element);
             }
         
