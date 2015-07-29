@@ -25,18 +25,20 @@
 
 using namespace frnn;
 
-
-TEST(frnnNewTensor, CanCreateTensor) {
+TEST( frnnTensor, CanCreateTensorWithDefaultConstructor ) 
+{
     frnn::Tensor<float, 3> testTensor;
     EXPECT_EQ( testTensor.size(), 0 );
 }
 
-TEST(frnnNewTensor, CanSpecifyTensorDimensionsInConstructor) {
+TEST( frnnTensor, CanSpecifyTensorDimensionsWithList ) 
+{
     frnn::Tensor<float, 2> testTensor = {4, 3};
     EXPECT_EQ( testTensor.size(), 12 );
 }
 
-TEST(frnnNewTensor, CanSubtractTwoTensors) {
+TEST( frnnTensor, CanSubtractTwoTensors ) 
+{
     Tensor<float, 3> tensor1 = {1, 2, 3};
     Tensor<float, 3> tensor2 = {1, 2, 3};
     
@@ -45,7 +47,8 @@ TEST(frnnNewTensor, CanSubtractTwoTensors) {
     EXPECT_EQ( newTensor.size(), tensor1.size() );
 }
 
-TEST(frnnNewTensor, CanSubtractThreeTensors) {
+TEST( frnnTensor, CanSubtractThreeTensors ) 
+{
     Tensor<float, 3> tensor1 = {1, 2, 3};
     Tensor<float, 3> tensor2 = {1, 2, 3};
     Tensor<float, 3> tensor3 = {1, 2, 3};
@@ -55,8 +58,8 @@ TEST(frnnNewTensor, CanSubtractThreeTensors) {
     EXPECT_EQ( newTensor.size(), tensor1.size() );
 }
 
-// Change when initialization is finished
-TEST(frnnNewTensor, CanAccessElementOfTensor) {
+TEST( frnnTensor, CanAccessElementOfTensor ) 
+{
     Tensor<float, 3> tensor = {2, 5, 4};
     
     float element = tensor(1, 3, 3);
@@ -64,7 +67,8 @@ TEST(frnnNewTensor, CanAccessElementOfTensor) {
     EXPECT_EQ( element, 0.f );
 }
 
-TEST(frnnNewTensor, ThrowsErrorForInvalidAccessOperatorArguments) {
+TEST( frnnTensor, ThrowsErrorForInvalidAccessOperatorArguments) 
+{
     Tensor<double, 4> tensor = {4, 5, 3, 3};
     
     // Provide invalid number of arguments, 
@@ -74,7 +78,8 @@ TEST(frnnNewTensor, ThrowsErrorForInvalidAccessOperatorArguments) {
     EXPECT_EQ( element, 0.0 );
 } 
 
-TEST(frnnNewTensor, ThrowsErrorForOutOfRangeElementAccess) {
+TEST( frnnTensor, ThrowsErrorForOutOfRangeElementAccess) 
+{
     Tensor<int, 3> tensor = {3, 3, 3};
     
     // Access element 3 of dimension with size 3
