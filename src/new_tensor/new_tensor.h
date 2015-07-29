@@ -21,6 +21,7 @@
 #ifndef _FRNN_NEW_TENSOR_
 #define _FRNN_NEW_TENSOR_
 
+#include "tensor_exception.h"
 #include "../util/errors.h"
 
 #include <vector>
