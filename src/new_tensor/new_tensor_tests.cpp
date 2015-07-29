@@ -22,18 +22,9 @@
 #include <iostream>
 
 #include "new_tensor.h"
-#include "accessor.h"
 
 using namespace frnn;
 
-TEST(frnnAccessor, CanDoCompileTimeSum) {
-
-    Accessor acc1 = {1, 2, 3};
-    Accessor acc2({4, 5, 6});
-    Accessor acc3 = acc1 * acc2;
-    
-    EXPECT_EQ( 32, acc3.sum() );
-}
 
 TEST(frnnNewTensor, CanCreateTensor) {
     frnn::Tensor<float, 3> testTensor;
@@ -63,3 +54,12 @@ TEST(frnnNewTensor, CanSubtractThreeTensors) {
     
     EXPECT_EQ( newTensor.size(), tensor1.size() );
 }
+
+TEST(frnnNewTensor, CanAccessElementOfTensor) {
+    Tensor<float, 3> tensor = {2, 5, 4};
+    
+    int element = tensor(1, 3, 3, 4);
+    
+    EXPECT_EQ( 37, element );
+}
+

@@ -29,6 +29,15 @@
 #define stringify( name ) varname( #name )
 inline const char* varname( const char* name ) { return name; }
 
+// General assertation macro
+#define ASSERT(left, operator, right) {                                                 \
+    if(!((left) operator (right))) {                                                    \
+        std::cerr << "ASSERT FAILED: " << #left << " " <<  #operator << " " << #right   \
+        << " in " << __FILE__ << ":" << __LINE__ << " : " <<                            \
+        #left << " = " << (left) << ", " << #right << " = " << (right) << std::endl;    \
+    }                                                                                   \
+}
+
 namespace currn {
 namespace err {
 

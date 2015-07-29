@@ -21,19 +21,16 @@
 #ifndef _FRNN_NEW_TENSOR_
 #define _FRNN_NEW_TENSOR_
 
+#include "../util/errors.h"
+
 #include <vector>
 #include <iostream>
 #include <cassert>
 #include <initializer_list>
+#include <numeric>
 
 namespace frnn {
-    
-inline int product(std::initializer_list<int>& list) {
-    int elementProduct = 1;
-    for (auto& element : list ) elementProduct *= element;
-    return elementProduct;
-}
-
+  
 template <typename T, typename E>
 class TensorExpression {
 public:
@@ -59,23 +56,26 @@ class Tensor : public TensorExpression<T, Tensor<T, R>> {
     private:
         container_type      data_;
         std::vector<int>    dimensions_;
+        int                 counter_;
+        int                 offset_;
     public:
         reference   operator[](size_type i)         { return data_[i]; }
         value_type  operator[](size_type i) const   { return data_[i]; }
         size_type   size()                  const   { return data_.size(); }
 
-        Tensor() : data_(0), dimensions_(0) {}
+        Tensor() : data_(0), dimensions_(0), counter_(0) {}
         
         // Construct Tensor for a given rank
         Tensor(std::initializer_list<int> dimensions) 
-            : data_(product(dimensions)) {   
-                 assert(dimensions.size() == R); 
-                for (auto& element : dimensions) dimensions_.push_back(element);
+            : data_(std::accumulate(dimensions.begin(), dimensions.end(), 1, std::multiplies<int>())),
+              counter_(0) {
+                  assert(dimensions.size() == R); 
+                  for (auto& element : dimensions) dimensions_.push_back(element);
             }
         
-        // Consstructor from and expression
+        // Consstructor from an expression
         template <typename E>
-        Tensor(TensorExpression<T,E> const& tensor) {
+        Tensor(TensorExpression<T,E> const& tensor) : counter_(0) {
             E const& t = tensor;
             data_.resize(t.size());
             for (size_type i = 0; i != t.size(); ++i) {
@@ -83,9 +83,31 @@ class Tensor : public TensorExpression<T, Tensor<T, R>> {
             }
         }
         
-        template <typename... D>
-        T& operator() (D... dims) {}
-            
+        template <typename Index>
+        int operator() (Index idx) {
+            assert(idx < dimensions_[counter_]);                            // Check in range
+            offset_ += std::accumulate(dimensions_.begin()      , 
+                                       dimensions_.end() - 1    ,           // Multiply all elements exepct last
+                                       1                        ,           // Starting value for multiplication
+                                       std::multiplies<int>()   ) * idx;    // Add offset due to idx for this dimension
+            counter_ = 0;
+            return offset_;
+        }
+        
+        template <typename Index, typename... Indecies>
+        int operator()(Index idx, Indecies... indecies) {
+            int num_args = sizeof...(Indecies);
+            if (counter_++ == 0) {  
+                ASSERT(num_args + 1, ==,  R);
+                offset_ = idx;
+            } else {
+                offset_ += std::accumulate(dimensions_.begin()              , 
+                                           dimensions_.end() - num_args - 1 ,
+                                           1                                , 
+                                           std::multiplies<int>()           ) * idx;
+            }
+            return this->operator()(indecies...);
+        }   
 };
 
 template <typename T, typename E1, typename E2>
