@@ -21,7 +21,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
-#include "new_tensor.h"
+#include "tensor.h"
 
 using namespace frnn;
 
@@ -37,6 +37,16 @@ TEST( frnnTensor, CanSpecifyTensorDimensionsWithList )
     EXPECT_EQ( testTensor.size(), 12 );
 }
 
+TEST( frnnTensor, CanGetReferenceToTensorData ) 
+{
+    Tensor<float, 3> tensor1 = {1, 2, 3};
+    
+    const std::vector<float>& tensorData = tensor1.data();
+    
+    EXPECT_EQ( tensorData.size(), 6 );
+    EXPECT_EQ( tensorData[0], 0.f );
+}
+    
 TEST( frnnTensor, CanSubtractTwoTensors ) 
 {
     Tensor<float, 3> tensor1 = {1, 2, 3};
@@ -58,13 +68,30 @@ TEST( frnnTensor, CanSubtractThreeTensors )
     EXPECT_EQ( newTensor.size(), tensor1.size() );
 }
 
-TEST( frnnTensor, CanAccessElementOfTensor ) 
+TEST( frnnTensor, CanGetElementOfTensor ) 
 {
     Tensor<float, 3> tensor = {2, 5, 4};
     
     float element = tensor(1, 3, 3);
     
     EXPECT_EQ( element, 0.f );
+}
+
+TEST( frnnTensor, CanSetElementOfTensor ) 
+{
+    Tensor<int, 3> tensor = {3, 3, 3};
+    
+    // Set 2nd element 
+    tensor(1, 0, 0) = 4;
+
+    int x = tensor(1, 0, 0);
+    x = 12;
+    
+    // Get data 
+    const std::vector<int>& tensorData = tensor.data();
+    
+    EXPECT_EQ( tensorData[1], 4 );
+    EXPECT_EQ( tensor(1, 0, 0), 4 );
 }
 
 TEST( frnnTensor, ThrowsErrorForInvalidAccessOperatorArguments) 

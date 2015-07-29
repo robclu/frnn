@@ -1,5 +1,5 @@
 /*
- *  Header file for fastRNN *NEW* tensor class.
+ *  Header file for fastRNN tensor class.
  *
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
@@ -81,8 +81,8 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
          * ==================================================================================================
          */
         Tensor(std::initializer_list<int> dimensions) 
-            : data_(std::accumulate(dimensions.begin(), dimensions.end(), 1, std::multiplies<int>())),
-              counter_(0), offset_(0)
+        : data_(std::accumulate(dimensions.begin(), dimensions.end(), 1, std::multiplies<int>())),
+          counter_(0), offset_(0)
         {   
             ASSERT(dimensions.size(), ==, R); 
             for (auto& element : dimensions) dimensions_.push_back(element);
@@ -145,21 +145,32 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
          * ==================================================================================================
          */
         size_type size() const { return data_.size(); }
+       
+       /*
+        *  ==================================================================================================
+        *  Function     : data 
+        *  
+        *  Description  : Returns a constant reference to the data 
+        *  
+        *  Outputs      : A counstant reference to the tensor data
+        *  ==================================================================================================
+        */
+        const container_type& data() const { return data_; }
         
         /*
          * ==================================================================================================
-         * Function     : operator()
+         * Function     : operator() (for setting)
          * 
          * Description  : Last case of operator(), for when there is only a single element
          * 
          * Inputs       : idx       : The index of the element in the last dimension (the variadic version 
          *                            would have been called fist for the other dimensions
          *                        
-         * Params       : Index     : The type of the idx argument
+         * Params       : I         : The type of the idx argument
          * ==================================================================================================
          */
-        template <typename Index>
-        T& operator() (Index idx) 
+        template <typename I>
+        T& operator() (I idx) 
         {
             try {                                                           // Check in range
                 if (idx >= dimensions_[counter_]) {                         // counter +1 in next line for
@@ -186,7 +197,7 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
         
         /* 
          * ==================================================================================================
-         * Function     : operator()
+         * Function     : operator() (for setting)
          * 
          * Description  : Variadic case of operator() so that the offset is determined for any rank tensor
          * 
@@ -194,14 +205,14 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
          *                            dimension can be added
          *              : indecies  : The rest of the indecies for the other dimensions
          *                        
-         * Params       : Index     : The type of the idx argument
-         *              : Indecies  : The rest of the types for the remaining indecies
+         * Params       : I         : The type of the idx argument
+         *              : Is        : The types for the remaining indecies
          * ==================================================================================================
          */
-        template <typename Index, typename... Indecies>
-        int operator()(Index idx, Indecies... indecies) 
+        template <typename I, typename... Is>
+        T& operator()(I idx, Is... indecies) 
         {
-            int num_args = sizeof...(Indecies);
+            const int num_args = sizeof...(Is);
             try {                                                           // Check index in range
                 if (idx >= dimensions_[counter_]) {                         // counter + 1 int next line for
                     throw TensorOutOfRange(counter_ + 1, dimensions_[counter_], idx);   // 0 indexing offset
@@ -226,7 +237,89 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
                                            std::multiplies<int>()           ) * idx;
             }
             return this->operator()(indecies...);
-        }   
+        }  
+       
+        /*
+         * ==================================================================================================
+         * Function     : operator() (for getting)
+         * 
+         * Description  : Last case of operator(), for when there is only a single element
+         * 
+         * Inputs       : idx       : The index of the element in the last dimension (the variadic version 
+         *                            would have been called fist for the other dimensions
+         *                        
+         * Params       : I         : The type of the idx argument
+         * ==================================================================================================
+         */
+        template <typename I>
+        const T& operator()(I idx) const 
+        {
+            try {                                                           // Check in range
+                if (idx >= dimensions_[counter_]) {                         // counter +1 in next line for
+                    throw TensorOutOfRange(counter_ + 1, dimensions_[counter_], idx);   // 0 indexing offset
+                }
+            } catch (TensorOutOfRange& e) {
+                std::cerr << e.what() << std::endl;
+                counter_ = 0;
+                return data_[0];
+            }
+            try {                                                           // Make sure variadic version 
+                if (counter_ == 0) throw TensorInvalidArguments(1, R);      // has been called already
+            } catch (TensorInvalidArguments& e) {
+                std::cerr << e.what() << std::endl;
+            }
+            // If there are no errors
+            offset_ += std::accumulate(dimensions_.begin()      , 
+                                       dimensions_.end() - 1    ,           // Mult all elements exepct last
+                                       1                        ,           // Start val for multiplication
+                                       std::multiplies<int>()   ) * idx;    // Add offset due to idx for dim
+            counter_ = 0;                                                   // Reset counter for next iter
+            return data_[offset_]; 
+        }
+        
+        /* 
+         * ==================================================================================================
+         * Function     : operator() (for getting)
+         * 
+         * Description  : Variadic case of operator() so that the offset is determined for any rank tensor
+         * 
+         * Inputs       : idx       : The index for the current dimension so that the offset for the 
+         *                            dimension can be added
+         *              : indecies  : The rest of the indecies for the other dimensions
+         *                        
+         * Params       : I         : The type of the idx argument
+         *              : Is        : The types for the remaining indecies
+         * ==================================================================================================
+         */
+        template <typename I, typename... Is>
+        const T& operator()(I idx, Is... indecies) const
+        {
+            const int num_args = sizeof...(Is);
+            try {                                                           // Check index in range
+                if (idx >= dimensions_[counter_]) {                         // counter + 1 int next line for
+                    throw TensorOutOfRange(counter_ + 1, dimensions_[counter_], idx);   // 0 indexing offset
+                }
+            } catch (TensorOutOfRange& e ) {
+                std::cout << e.what() << std::endl;
+                counter_ = 0;
+                return data_[0];
+            }   
+            if (const_cast<int&>(counter_)++ == 0) {                                          // Case for first index
+                try {                                                       // Check correct number of arguments
+                    if (num_args + 1 !=  R) throw TensorInvalidArguments(num_args + 1, R);
+                    offset_ = idx;
+                } catch (TensorInvalidArguments& e) {
+                    std::cerr << e.what() << std::endl;
+                    return data_[0];
+                }  
+            } else {                                                        // Case for all other indecies
+                offset_ += std::accumulate(dimensions_.begin()              , 
+                                           dimensions_.end() - num_args - 1 ,
+                                           1                                , 
+                                           std::multiplies<int>()           ) * idx;
+            }
+            return this->operator()(indecies...);
+        }  
 };
 
 }   // End namespace frnn
