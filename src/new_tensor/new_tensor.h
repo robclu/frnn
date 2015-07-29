@@ -31,22 +31,86 @@
 #include <numeric>
 
 namespace frnn {
-  
+
+/*
+ * ==========================================================================================================
+ * Class        : TensorExpression 
+ * 
+ * Description  : Class used to define a tesnor expression, for example addition, subtraction ... which can
+ *                then be used by the respective overloaded operator to provide fast operation on tensors 
+ *                with elegant syntax
+ *                
+ * Params       : T     : The tpye to use for the expression
+ *              : E     : The exprssion (TensorAddition etc...)
+ * ==========================================================================================================
+ */
 template <typename T, typename E>
 class TensorExpression {
 public:
+    /* =========================================== Typedefs =============================================== */
     typedef std::vector<T>                      container_type;
     typedef typename container_type::size_type  size_type;
     typedef typename container_type::value_type value_type;
     typedef typename container_type::reference  reference;
+    /* ==================================================================================================== */
     
-    size_type   size()                  const { return static_cast<E const&>(*this).size(); }
-    value_type  operator[](size_type i) const { return static_cast<E const&>(*this)[i];     }
+    /*
+     * ======================================================================================================
+     * Function     : size
+     * 
+     * Description  : Returns the size of the expression
+     * 
+     * Outputs      : The size of the tensor expression
+     * ======================================================================================================
+     */
+    size_type size() const { return static_cast<E const&>(*this).size(); }
     
-    operator E&()               { return static_cast<       E&>(*this); }
+    /*
+     * ======================================================================================================
+     * Function     : operator[]
+     * 
+     * Description  : Operloaded access operator for getting an element of a tensor expression
+     * 
+     * Inputs       : i     : The element which must be accessed
+     * 
+     * Outputs      : The value of the element at position i
+     * ======================================================================================================
+     */
+    value_type operator[](size_type i) const { return static_cast<E const&>(*this)[i]; }
+
+    /*
+     * ======================================================================================================
+     * Function     : operator()
+     * 
+     * Description  : Returns a reference to the expression E
+     * 
+     * Outputs      : A (mutable) reference to the expression E, which is passed as a template to the class
+     * ======================================================================================================
+     */
+    operator E&() { return static_cast<E&>(*this); }
+
+    /*
+     * ======================================================================================================
+     * Function     : oeprator()
+     * 
+     * Description  : Returns a constant reference to the expression E
+     * 
+     * Outptus      : A constant (immutable) reference to the expression E, which is passed as a template to
+     *                the class
+     * ======================================================================================================
+     */
     operator E const&() const   { return static_cast<const  E&>(*this); }
 };
 
+/*
+ * ==========================================================================================================
+ * Class        : Tensor
+ * 
+ * Description  : Tensor class for the fastRNN library. The class allows for a tensor of any dimension, thus
+ *                providing great flexibility. For example, a 1D tensor is a vector or array, and a 2D tensor i
+ *                is a matrix. 
+ * ==========================================================================================================
+ */
 template <typename T, int R>
 class Tensor : public TensorExpression<T, Tensor<T, R>> {
     using typename TensorExpression<T, Tensor<T,R>>::container_type;
