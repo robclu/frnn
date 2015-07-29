@@ -85,22 +85,44 @@ class Tensor : public TensorExpression<T, Tensor<T, R>> {
         }
         
         template <typename Index>
-        int operator() (Index idx) {
-            assert(idx < dimensions_[counter_]);                            // Check in range
+        T& operator() (Index idx) {
+            try {                                                           // Check in range
+                if (idx >= dimensions_[counter_]) {                         // counter +1 for 0 index offset 
+                    throw TensorOutOfRange(counter_ + 1, dimensions_[counter_], idx);   // in this line
+                }
+            } catch (TensorOutOfRange& e) {
+                std::cerr << e.what() << std::endl;
+                counter_ = 0;
+                return data_[0];
+            }
             offset_ += std::accumulate(dimensions_.begin()      , 
                                        dimensions_.end() - 1    ,           // Multiply all elements exepct last
                                        1                        ,           // Starting value for multiplication
                                        std::multiplies<int>()   ) * idx;    // Add offset due to idx for this dimension
             counter_ = 0;
-            return offset_;
+            return data_[offset_];
         }
         
         template <typename Index, typename... Indecies>
         int operator()(Index idx, Indecies... indecies) {
             int num_args = sizeof...(Indecies);
-            if (counter_++ == 0) {  
-                ASSERT(num_args + 1, ==,  R);
-                offset_ = idx;
+            try {                                                           // Check index in range
+                if (idx >= dimensions_[counter_]) {                         // counter + 1 for 0 index offset    
+                    throw TensorOutOfRange(counter_ + 1, dimensions_[counter_], idx);   // in this line
+                }
+            } catch (TensorOutOfRange& e ) {
+                std::cout << e.what() << std::endl;
+                counter_ = 0;
+                return data_[0];
+            }   
+            if (counter_++ == 0) {                                          // Case for first index
+                try {                                                       // Check correct number of arguments
+                    if (num_args + 1 !=  R) throw TensorInvalidArguments(num_args + 1, R);
+                    offset_ = idx;
+                } catch (TensorInvalidArguments& e) {
+                    std::cerr << e.what() << std::endl;
+                    return data_[0];
+                }  
             } else {
                 offset_ += std::accumulate(dimensions_.begin()              , 
                                            dimensions_.end() - num_args - 1 ,

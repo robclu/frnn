@@ -55,11 +55,35 @@ TEST(frnnNewTensor, CanSubtractThreeTensors) {
     EXPECT_EQ( newTensor.size(), tensor1.size() );
 }
 
+// Change when initialization is finished
 TEST(frnnNewTensor, CanAccessElementOfTensor) {
     Tensor<float, 3> tensor = {2, 5, 4};
     
-    int element = tensor(1, 3, 3, 4);
+    float element = tensor(1, 3, 3);
     
-    EXPECT_EQ( 37, element );
+    EXPECT_EQ( element, 0.f );
 }
 
+TEST(frnnNewTensor, ThrowsErrorForInvalidAccessOperatorArguments) {
+    Tensor<double, 4> tensor = {4, 5, 3, 3};
+    
+    // Provide invalid number of arguments, 
+    // should throw error and return 0
+    double element = tensor(1, 1, 1, 1, 1);
+    
+    EXPECT_EQ( element, 0.0 );
+} 
+
+TEST(frnnNewTensor, ThrowsErrorForOutOfRangeElementAccess) {
+    Tensor<int, 3> tensor = {3, 3, 3};
+    
+    // Access element 3 of dimension with size 3
+    // (Tensor indexing is 0 based)
+    int element1 = tensor(1, 3, 2);
+    int element2 = tensor(4, 1, 1);
+    int element3 = tensor(1, 1, 5);
+    
+    EXPECT_EQ( element1, 0 );
+    EXPECT_EQ( element2, 0 );
+    EXPECT_EQ( element3, 0 );
+}
