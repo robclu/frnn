@@ -101,7 +101,8 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
          * ==================================================================================================
          */
         template <typename E>
-        Tensor(TensorExpression<T,E> const& tensor) : counter_(0), dimensions_(tensor.dimSizes())
+        Tensor(TensorExpression<T,E> const& tensor) 
+        : dimensions_(tensor.dimSizes()), counter_(0), offset_(0)
         {
             E const& t = tensor;
             data_.resize(t.size());
@@ -109,33 +110,25 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
                 data_[i] = t[i];
             }
         }
-        
+       
         /* 
          * ==================================================================================================
-         * Function     : operator[]
+         * Function     : Tensor 
          * 
-         * Description  : Overloaded access operator to a reference to an element from the tensor data
-         * 
-         * Inputs       : i     : The index of the element to access 
-         * 
-         * Outputs      : A reference to the element
+         * Description  : Move constructor for the tensor class, using vectors for the data and dimensions
          * ==================================================================================================
          */
-        reference operator[](size_type i) { return data_[i]; }
-        
-        /* 
-         * ==================================================================================================
-         * Function     : operator[]
-         * 
-         * Description  : Overloaded access operator to get an element from the tensor data
-         * 
-         * Inputs       : i     : The index of the element to access
-         * 
-         * Outputs      : An element of the tensor data
-         * ==================================================================================================
-         */
-        value_type operator[](size_type i) const { return data_[i]; }
-        
+        Tensor(std::vector<size_type>& dimensions, container_type& data) 
+        : dimensions_(std::move(dimensions)), data_(std::move(data)), counter_(0), offset_(0) 
+        {
+            ASSERT(dimensions_.size(), ==, R);           // Check num dimensions is equal to rank
+            ASSERT(data_.size(), ==,                     // Check total data size is consistent with dim sizes
+                   std::accumulate(dimensions_.begin()          , 
+                                   dimensions_.end()            , 
+                                   1                            , 
+                                   std::multiplies<size_type>() ));
+        }
+      
         /* 
          * ==================================================================================================
          * Function     : size
@@ -201,6 +194,44 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
          *  =================================================================================================
          */
         const container_type& data() const { return data_; }
+
+        /* 
+         * ==================================================================================================
+         * Function     : operator[]
+         * 
+         * Description  : Overloaded access operator to a reference to an element from the tensor data
+         * 
+         * Inputs       : i     : The index of the element to access 
+         * 
+         * Outputs      : A reference to the element
+         * ==================================================================================================
+         */
+        reference operator[](size_type i) { return data_[i]; }
+        
+        /* 
+         * ==================================================================================================
+         * Function     : operator[]
+         * 
+         * Description  : Overloaded access operator to get an element from the tensor data
+         * 
+         * Inputs       : i     : The index of the element to access
+         * 
+         * Outputs      : An element of the tensor data
+         * ==================================================================================================
+         */
+        value_type operator[](size_type i) const { return data_[i]; }
+
+        /*
+         * ==================================================================================================
+         * Function     : operator[] (for slicing)
+         * 
+         * Description  : Base case for the variadic operator[] function to slice a tensor
+         * 
+         * Inputs       : idx       : The index of the last dimension to slice
+         * 
+         * Params       : I         : The type of the idx argument 
+         * ==================================================================================================
+         */
         
         /*
          * ==================================================================================================

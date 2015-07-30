@@ -35,7 +35,20 @@ TEST( frnnTensor, CanSpecifyTensorDimensionsWithList )
     EXPECT_EQ( testTensor.size(), 12 );
 }
 
-TEST ( frnnTensor, CanGetRankOfTensor ) 
+TEST( frnnTensor, CanCreateTensorFromDimensionSizesAdnData )
+{
+    std::vector<size_t> dimensionSizes = {2, 3};
+    std::vector<float> data = {1.f, 2.f, 
+                               3.f, 4.f,
+                               5.f, 6.f};
+    frnn::Tensor<float, 2> tensor(dimensionSizes, data);
+    
+    const std::vector<float>& tensorData = tensor.data();
+    
+    EXPECT_EQ( tensorData[1], 2.f );
+}
+
+TEST( frnnTensor, CanGetRankOfTensor ) 
 {
     frnn::Tensor<float, 3> tensor = {1, 4, 4};
     
