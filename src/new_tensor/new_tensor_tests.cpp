@@ -23,8 +23,6 @@
 
 #include "tensor.h"
 
-using namespace frnn;
-
 TEST( frnnTensor, CanCreateTensorWithDefaultConstructor ) 
 {
     frnn::Tensor<float, 3> testTensor;
@@ -39,7 +37,7 @@ TEST( frnnTensor, CanSpecifyTensorDimensionsWithList )
 
 TEST( frnnTensor, CanGetReferenceToTensorData ) 
 {
-    Tensor<float, 3> tensor1 = {1, 2, 3};
+    frnn::Tensor<float, 3> tensor1 = {1, 2, 3};
     
     const std::vector<float>& tensorData = tensor1.data();
     
@@ -49,28 +47,28 @@ TEST( frnnTensor, CanGetReferenceToTensorData )
     
 TEST( frnnTensor, CanSubtractTwoTensors ) 
 {
-    Tensor<float, 3> tensor1 = {1, 2, 3};
-    Tensor<float, 3> tensor2 = {1, 2, 3};
+    frnn::Tensor<float, 3> tensor1 = {1, 2, 3};
+    frnn::Tensor<float, 3> tensor2 = {1, 2, 3};
     
-    Tensor<float, 3> newTensor = tensor1 - tensor2;
+    frnn::Tensor<float, 3> newTensor = tensor1 - tensor2;
     
     EXPECT_EQ( newTensor.size(), tensor1.size() );
 }
 
 TEST( frnnTensor, CanSubtractThreeTensors ) 
 {
-    Tensor<float, 3> tensor1 = {1, 2, 3};
-    Tensor<float, 3> tensor2 = {1, 2, 3};
-    Tensor<float, 3> tensor3 = {1, 2, 3};
+    frnn::Tensor<float, 3> tensor1 = {1, 2, 3};
+    frnn::Tensor<float, 3> tensor2 = {1, 2, 3};
+    frnn::Tensor<float, 3> tensor3 = {1, 2, 3};
     
-    Tensor<float, 3> newTensor = tensor1 - tensor2 - tensor3;
+    frnn::Tensor<float, 3> newTensor = tensor1 - tensor2 - tensor3;
     
     EXPECT_EQ( newTensor.size(), tensor1.size() );
 }
 
 TEST( frnnTensor, CanGetElementOfTensor ) 
 {
-    Tensor<float, 3> tensor = {2, 5, 4};
+    frnn::Tensor<float, 3> tensor = {2, 5, 4};
     
     float element = tensor(1, 3, 3);
     
@@ -79,7 +77,7 @@ TEST( frnnTensor, CanGetElementOfTensor )
 
 TEST( frnnTensor, CanSetElementOfTensor ) 
 {
-    Tensor<int, 3> tensor = {3, 3, 3};
+    frnn::Tensor<int, 3> tensor = {3, 3, 3};
     
     // Set 2nd element 
     tensor(1, 0, 0) = 4;
@@ -96,7 +94,7 @@ TEST( frnnTensor, CanSetElementOfTensor )
 
 TEST( frnnTensor, ThrowsErrorForInvalidAccessOperatorArguments) 
 {
-    Tensor<double, 4> tensor = {4, 5, 3, 3};
+    frnn::Tensor<double, 4> tensor = {4, 5, 3, 3};
     
     // Provide invalid number of arguments, 
     // should throw error and return 0
@@ -107,7 +105,7 @@ TEST( frnnTensor, ThrowsErrorForInvalidAccessOperatorArguments)
 
 TEST( frnnTensor, ThrowsErrorForOutOfRangeElementAccess) 
 {
-    Tensor<int, 3> tensor = {3, 3, 3};
+    frnn::Tensor<int, 3> tensor = {3, 3, 3};
     
     // Access element 3 of dimension with size 3
     // (Tensor indexing is 0 based)

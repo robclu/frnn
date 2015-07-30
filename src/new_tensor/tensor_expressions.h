@@ -161,8 +161,12 @@ class TensorDifference : public TensorExpression<T, TensorDifference<T,E1,E2>>
         value_type operator[](size_type i) const { return x_[i] - y_[i]; }
 };      
 
-/* ==================================== Operator Overloads ================================================ */
+} // End namespace frnn
 
+/* =========================== Global Operator Overloads using Tensor Expressions ========================= */
+
+namespace {
+    
 /*
  * ==========================================================================================================
  * Function     : operator-
@@ -182,10 +186,12 @@ class TensorDifference : public TensorExpression<T, TensorDifference<T,E1,E2>>
  * ==========================================================================================================
  */
 template <typename T, typename E1, typename E2>
-TensorDifference<T,E1,E2> const operator-(TensorExpression<T,E1> const& x, TensorExpression<T,E2> const& y) 
+frnn::TensorDifference<T,E1,E2> const operator-(frnn::TensorExpression<T,E1> const& x, 
+                                                frnn::TensorExpression<T,E2> const& y)    
 {
-    return TensorDifference<T,E1,E2>(x, y);
+    return frnn::TensorDifference<T,E1,E2>(x, y);
 }
 
-}
+} // End global namespace
+
 #endif
