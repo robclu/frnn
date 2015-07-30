@@ -51,14 +51,31 @@ class TensorOutOfRange : public std::exception {
          *              : index         : The index of the element which is trying to be accessed
          * ==================================================================================================
          */
-        TensorOutOfRange(const int dimension, const int dimensionSize, const int index) :
-           message_("Error : Out of range : Attempted to access invalid tensor element "    + 
-                     std::to_string(index)                                                  + 
-                     " of dimension "                                                       +
-                     std::to_string(dimension)                                              +
-                     " which has size "                                                     +
-                     std::to_string(dimensionSize)                                          +
-                     " : Note : tensors are 0 indexed"                                      ) {} 
+        TensorOutOfRange(const int dimension, const int dimensionSize, const int index) 
+        : message_("Error : Out of range : Attempted to access invalid tensor element "    + 
+                    std::to_string(index)                                                  + 
+                    " of dimension "                                                       +
+                    std::to_string(dimension)                                              +
+                    " which has size "                                                     +
+                    std::to_string(dimensionSize)                                          +
+                    " : Note : tensors are 0 indexed"                                      ) {} 
+       
+        /*
+         * ==================================================================================================
+         * Function     : TensorOutOfRange
+         * 
+         * Description  : Constructor for the TensorOutOfRange class. Sets the error message using the inputs
+         * 
+         * Inputs       : dimension     : The dimension which is trying to be accessed
+         *              : rank          : The rank of the tensor
+         * ==================================================================================================
+         */
+        TensorOutOfRange(const int dimension, const int rank) 
+        : message_("Error : Out of range : Attempted to access invalid dimension "  +   
+                    std::to_string(dimension)                                       + 
+                    " of tensor with rank "                                         +
+                    std::to_string(rank)                                            +
+                    " returning value of 0"                                         ) {}
         
         /*
          * ==================================================================================================
@@ -96,12 +113,13 @@ class TensorInvalidArguments : public std::exception {
          *              : numArgsRequired   : The number of arguments required by the function
          * ==================================================================================================
          */ 
-        TensorInvalidArguments(const int numArgsSpecified, const int numArgsRequired) :
-            message_("Error : Invalid Arguments for tensor : "      +
-                     std::to_string(numArgsRequired)                +
-                     " arguments required, "                        +
-                     std::to_string(numArgsSpecified)               +
-                     " given"                                       ) {}
+        TensorInvalidArguments(const int numArgsSpecified, const int numArgsRequired) 
+        : message_("Error : Invalid Arguments for tensor : "    +
+                    std::to_string(numArgsRequired)             +
+                    " arguments required, "                     +
+                    std::to_string(numArgsSpecified)            +
+                    " given"                                    ) {}
+        
         /*
          * ==================================================================================================
          * Function     : what 

@@ -60,6 +60,17 @@ class TensorExpression
          * ==================================================================================================
          */
         size_type size() const { return static_cast<E const&>(*this).size(); }
+
+        /*
+         * ==================================================================================================
+         * Function     : dimSizes
+         * 
+         * Description  : Gets the sizes of the dimensions of the expression E
+         * 
+         * Output       : A constant reference to the dimension size vector of the expression 
+         * ==================================================================================================
+         */
+        const std::vector<size_type>& dimSizes() const { return static_cast<E const&>(*this).dimSizes(); }
         
         /*
          * ==================================================================================================
@@ -135,8 +146,16 @@ class TensorDifference : public TensorExpression<T, TensorDifference<T,E1,E2>>
          */
         TensorDifference(TensorExpression<T,E1> const& x, TensorExpression<T,E2> const& y) : x_(x), y_(y) 
         { 
-            ASSERT(x.size(), ==, y.size());
+            ASSERT(x.size(), ==, y.size());                         // Check total sizes
+            for (int i = 0; i < x.dimSizes().size(); i++) {        // Check each dimension size
+                ASSERT(x.dimSizes()[i], ==, y.dimSizes()[i]);
+            }
         }
+       
+       /*
+        * ===================================================================================================
+        */
+        const std::vector<size_type>& dimSizes() const { return x_.dimSizes(); }
         
         /*
          * ==================================================================================================

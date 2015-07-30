@@ -22,7 +22,8 @@
 #define _FRNN_NEW_TENSOR_
 
 #include "tensor_expressions.h"
-#include "tensor_exception.h"
+#include "tensor_exceptions.h"
+#include "tensor_indices.h"
 
 #include <iostream>
 #include <cassert>
@@ -43,7 +44,7 @@ namespace frnn {
  *              : R     : The rank of the tensor 
  * ==========================================================================================================
  */
-template <typename T, int R>
+template <typename T, const size_t R>
 class Tensor : public TensorExpression<T, Tensor<T, R>> 
 {
     public:
@@ -54,10 +55,10 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
         using typename TensorExpression<T, Tensor<T,R>>::reference;
         /* ================================================================================================ */
     private:
-        container_type      data_;                  // Data for tensor
-        std::vector<int>    dimensions_;            // Sizes of the dimensions
-        int                 counter_;               // Used for calculating the offset for operator()
-        int                 offset_;                // For accessing elements with operator()
+        container_type          data_;                  // Data for tensor
+        std::vector<size_type>  dimensions_;            // Sizes of the dimensions
+        int                     counter_;               // Used for calculating the offset for operator()
+        int                     offset_;                // For accessing elements with operator()
     public:
         /*
          * ==================================================================================================
@@ -66,7 +67,7 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
          * Description  : Default constructor for the tensor class 
          * ==================================================================================================
          */
-        Tensor() : data_(0), dimensions_(0), counter_(0), offset_(0) {}
+        Tensor() : data_(0), dimensions_(R), counter_(0), offset_(0) {}
         
         /*
          * ==================================================================================================
@@ -100,7 +101,7 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
          * ==================================================================================================
          */
         template <typename E>
-        Tensor(TensorExpression<T,E> const& tensor) : counter_(0) 
+        Tensor(TensorExpression<T,E> const& tensor) : counter_(0), dimensions_(tensor.dimSizes())
         {
             E const& t = tensor;
             data_.resize(t.size());
@@ -108,7 +109,7 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
                 data_[i] = t[i];
             }
         }
-       
+        
         /* 
          * ==================================================================================================
          * Function     : operator[]
@@ -145,16 +146,60 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
          * ==================================================================================================
          */
         size_type size() const { return data_.size(); }
-       
-       /*
-        *  ==================================================================================================
-        *  Function     : data 
-        *  
-        *  Description  : Returns a constant reference to the data 
-        *  
-        *  Outputs      : A counstant reference to the tensor data
-        *  ==================================================================================================
-        */
+
+        /* 
+         * ==================================================================================================
+         * Function     : size
+         *  
+         * Description  : Overloaded size function to return the size of a specified dimension 
+         * 
+         * Inputs       : dim   : The dimension for which the size must be returned
+         * 
+         * Outputs      : The size of the dimension dim
+         * ==================================================================================================
+         */
+        size_type size(const int dim) const 
+        {
+            try {
+                if (dim >= R) throw TensorOutOfRange(dim, R);
+                return dimensions_[dim];
+            } catch (TensorOutOfRange& e) {
+                std::cout << e.what() << std::endl;
+                return 0;
+            }
+        }
+        
+        /*
+         * ==================================================================================================
+         * Function     : rank
+         * 
+         * Description  : Returns the rank (number of dimensions) of the tensor
+         * 
+         * Outputs      : The rank of the tensor
+         * ==================================================================================================
+         */
+        size_type rank() const { return R; }
+
+        /*
+         * ==================================================================================================
+         * Function     : dimSizes
+         * 
+         * Description  : Gets the sizes of the dimensions of the tensor
+         * 
+         * Outputs      : A constant reference to the dimension sizes of the tensor
+         * ==================================================================================================
+         */
+        const std::vector<size_type>& dimSizes() const { return dimensions_; }
+         
+        /*
+         *  =================================================================================================
+         *  Function    : data 
+         *  
+         *  Description : Returns a constant reference to the data 
+         *  
+         *  Outputs     : A counstant reference to the tensor data
+         *  =================================================================================================
+         */
         const container_type& data() const { return data_; }
         
         /*
@@ -203,14 +248,14 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
          * 
          * Inputs       : idx       : The index for the current dimension so that the offset for the 
          *                            dimension can be added
-         *              : indecies  : The rest of the indecies for the other dimensions
+         *              : indices   : The rest of the indecies for the other dimensions
          *                        
          * Params       : I         : The type of the idx argument
          *              : Is        : The types for the remaining indecies
          * ==================================================================================================
          */
         template <typename I, typename... Is>
-        T& operator()(I idx, Is... indecies) 
+        T& operator()(I idx, Is... indices) 
         {
             const int num_args = sizeof...(Is);
             try {                                                           // Check index in range
@@ -236,7 +281,7 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
                                            1                                , 
                                            std::multiplies<int>()           ) * idx;
             }
-            return this->operator()(indecies...);
+            return this->operator()(indices...);
         }  
        
         /*

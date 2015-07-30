@@ -35,6 +35,58 @@ TEST( frnnTensor, CanSpecifyTensorDimensionsWithList )
     EXPECT_EQ( testTensor.size(), 12 );
 }
 
+TEST ( frnnTensor, CanGetRankOfTensor ) 
+{
+    frnn::Tensor<float, 3> tensor = {1, 4, 4};
+    
+    int rank = tensor.rank();
+    
+    EXPECT_EQ( rank, 3 );
+}
+
+TEST( frnnTensor, CanGetTensorDimensions )
+{
+    frnn::Tensor<int, 3> tensor = {2, 1, 3};
+    
+    std::vector<size_t> dims = tensor.dimSizes();
+    
+    EXPECT_EQ( dims[0], 2 );
+    EXPECT_EQ( dims[1], 1 );
+    EXPECT_EQ( dims[2], 3 );
+}
+
+TEST( frnnTensor, CanGetSizeOfTensor ) 
+{
+    frnn::Tensor<double, 4> tensor = {2, 3, 2, 4};
+    
+    int size = tensor.size();
+    
+    EXPECT_EQ( size, 48 );
+}
+
+TEST( frnnTensor, CanGetSizeOfASpecificDimensionOfTensor ) 
+{
+    frnn::Tensor<float, 3> tensor = {1, 2, 3};
+    
+    int dim0Size = tensor.size(0);
+    int dim2Size = tensor.size(2);
+    
+    EXPECT_EQ( dim0Size, 1 );
+    EXPECT_EQ( dim2Size, 3 );
+}
+
+TEST( frnnTensor, CanHandleOutOfRangeIndexForSizeFunction ) 
+{
+    frnn::Tensor<int, 8> tensor = {1, 2, 4, 5, 3, 1, 1, 8};
+    
+    // Wrong due to 0 indexing
+    int dimSize8  = tensor.size(8);
+    int dimSize10 = tensor.size(10);
+    
+    EXPECT_EQ( dimSize8 , 0 );
+    EXPECT_EQ( dimSize10, 0 );
+}
+
 TEST( frnnTensor, CanGetReferenceToTensorData ) 
 {
     frnn::Tensor<float, 3> tensor1 = {1, 2, 3};
@@ -64,6 +116,31 @@ TEST( frnnTensor, CanSubtractThreeTensors )
     frnn::Tensor<float, 3> newTensor = tensor1 - tensor2 - tensor3;
     
     EXPECT_EQ( newTensor.size(), tensor1.size() );
+}
+
+TEST( frnnTensor, CanGetTensorRankAfterOperation )
+{
+    frnn::Tensor<int, 4> tensor1 = {1, 2, 1, 1};
+    frnn::Tensor<int, 4> tensor2 = {1, 2, 1, 1};
+    
+    frnn::Tensor<int, 4> tensor3 = tensor1 - tensor2;
+    
+    int rank = tensor3.rank();
+    EXPECT_EQ( rank, 4 );
+}
+
+TEST( frnnTensor, CanGetDimensionSizesAfterOperation ) 
+{
+    frnn::Tensor<int, 4> tensor1 = {1, 2, 1, 1};
+    frnn::Tensor<int, 4> tensor2 = {1, 2, 1, 1};
+    
+    frnn::Tensor<int, 4> tensor3 = tensor1 - tensor2;
+    
+    std::vector<size_t> dims = tensor3.dimSizes();
+    EXPECT_EQ( dims[ 0 ], 1 );
+    EXPECT_EQ( dims[ 1 ], 2 );
+    EXPECT_EQ( dims[ 2 ], 1 );
+    EXPECT_EQ( dims[ 3 ], 1 );
 }
 
 TEST( frnnTensor, CanGetElementOfTensor ) 
