@@ -213,14 +213,16 @@ TEST( frnnTensor, CanMapIndexWhenSlicing )
     frnn::Tensor<int, 3> tensor = {3, 3, 2};
     
     // Set an element 
-    tensor(1, 0, 1) = 7;
+    tensor(2, 2, 0) = 7;
     
     frnn::TensorSlicer<int, frnn::Tensor<int, 3>> slicer(tensor);
     
     // Check if mapped correctly 
-    size_t idx = slicer.mapIndex<3>(frnn::tensor::dim::k, 
+    size_t idx = slicer.mapIndex<16>(frnn::tensor::dim::k, 
                                     frnn::tensor::dim::i,
                                     frnn::tensor::dim::j);
+
+    int val = tensor.data()[idx];
     
-    EXPECT_EQ( idx, 10 );
+    EXPECT_EQ( val, 7 );
 }

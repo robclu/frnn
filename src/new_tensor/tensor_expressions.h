@@ -22,9 +22,7 @@
 #define _FRNN_TENSOR_EXPRESSIONS_
 
 #include "../util/errors.h"
-
-#include <vector>
-#include <numeric>
+#include "tensor_utils.h"
 
 namespace frnn {
 
@@ -208,16 +206,15 @@ class TensorSlicer : public TensorExpression<T, TensorSlicer<T, E>>
         /* ================================================================================================ */ 
     private:
         E const&                x_;                 // Reference to expression
-        std::vector<size_type>  prevDimSizes_;      // Size of previoud dimension for mapIndex function
-        int                     counter_;           // Counter for the iteration of the index mapper
-        int                     index_;             // Index of an element determined by mapIndex
-        int                     offset_;            // Offset due to the first dimension
+        std::vector<size_type>  prevDimSizes_;      // Size of previous dimension for mapIndex function
+        size_type               index_;             // Index of an element determined by mapIndex
+        size_type               offset_;            // Offset due to the first dimension
     public:
         /*
          * ==================================================================================================
          * ==================================================================================================
          */
-        TensorSlicer(TensorExpression<T, E> const& x) : x_(x), counter_(0), index_(0) {}
+        TensorSlicer(TensorExpression<T, E> const& x) : x_(x), index_(0) {}
        
         /*
          * ==================================================================================================
@@ -230,33 +227,54 @@ class TensorSlicer : public TensorExpression<T, TensorSlicer<T, E>>
          * Params       :
          * ==================================================================================================
          */
-        template <size_t idx, typename D>
+        template <size_t idx, bool isFirst = true, typename D>
         size_type mapIndex(D dim) 
         {
-            int dimOffset = std::accumulate(x_.dimSizes().begin()                        ,
-                                            x_.dimSizes().end() - (x_.rank() - (dim + 1)) ,
-                                            1                                            ,
-                                            std::multiplies<size_type>()                 ); 
-            int mappedDim = idx / std::accumulate(prevDimSizes_.begin()         ,
-                                                  prevDimSizes_.end()           ,
-                                                  1                             ,
-                                                  std::multiplies<size_type>()  );
-            dim != 0 ? index_ += dimOffset * mappedDim
-                     : offset_ = mappedDim;
+            // Offset of element in original tensors memory for this dimension
+            size_type dimOffset = std::accumulate(x_.dimSizes().begin()                         ,
+                                                  x_.dimSizes().end() - (x_.rank() - (dim + 1)) ,
+                                                  1                                             ,
+                                                  std::multiplies<size_type>()                  );
+            
+            // This dimension mapped to the other old tensor
+            tensor::DimensionMapper<idx, isFirst>  mapper;
+            
+            size_type mappedDim = mapper(x_.dimSizes()[dim], prevDimSizes_);
+            
+            dim == 0 ? index_  = mappedDim              
+                     : offset_ += dimOffset * mappedDim;
+            
+            index_ += offset_;              // Add offset due to other dimensions to the current index 
+                                            // which is only for dimension 0 of the orig tensor
+            
+            // Last iteration, so reset all vars
             prevDimSizes_.clear();
-            counter_ = 0;
-            offset_ += index_;
-            index_ = 0;
-            return offset_;
+            offset_ = 0;
+            
+            return index_;          
         }
             
-        template<size_t idx, typename D, typename... Ds>
+        template<size_t idx, bool isFirst = true, typename D, typename... Ds>
         size_type mapIndex(D dim, Ds... dims) 
         {
-            int dimOffset = std::accumulate(x_.dimSizes().begin()                        ,
-                                            x_.dimSizes().end() - (x_.rank() - (dim + 1)) ,
-                                            1                                            ,
-                                            std::multiplies<size_type>()                 );
+            // Offset of element in original tensors memory for this dimension
+            size_type dimOffset = std::accumulate(x_.dimSizes().begin()                           ,
+                                                  x_.dimSizes().end() - (x_.rank() - (dim + 1))   ,
+                                                  1                                               ,
+                                                  std::multiplies<size_type>()                    );
+            
+            // This dimension mapped to the old tensor
+            tensor::DimensionMapper<idx, isFirst> mapper;
+            
+            size_type mappedDim = mapper(x_.dimSizes()[dim], prevDimSizes_);
+            
+            dim == 0 ? index_   = mappedDim
+                     : offset_ += dimOffset * mappedDim;
+            
+            prevDimSizes_.push_back(dim);
+            return mapIndex<idx, false>(dims...);          // Call until er run out of dimensions
+            
+            /*
             if (counter_ == 0) {
                 int mappedDim = idx % x_.size(dim);
                 dim != 0 ? index_ += dimOffset * mappedDim
@@ -272,6 +290,7 @@ class TensorSlicer : public TensorExpression<T, TensorSlicer<T, E>>
             }
             counter_++; prevDimSizes_.push_back(dim);
             return mapIndex<idx>(dims...);
+            */
         }
 };
 
