@@ -24,28 +24,9 @@
 #include "../util/errors.h"
 
 #include <vector>
+#include <numeric>
 
 namespace frnn {
-   
-namespace tensor {
-/*
- * ==========================================================================================================
- * Function     : mapIndex
- * 
- * Description  : Takes the index of an element in a tensor which is a slice of another tensor, and maps the
- *                index of the element in the new, sliced tensor, to the index in the tensor which is being
- *                sliced.
- *                
- * Params       :
- * ==========================================================================================================
- */
-template <typename D, typename... Ds>
-void mapIndex(D dim, Ds... dims) 
-{
-    
-}
-
-}   // End namespace tnesor
 
 /*
  * ==========================================================================================================
@@ -226,14 +207,72 @@ class TensorSlicer : public TensorExpression<T, TensorSlicer<T, E>>
         using typename TensorExpression<T, TensorSlicer<T,E>>::value_type;
         /* ================================================================================================ */ 
     private:
-        E const& x_;        // Reference to expression
+        E const&                x_;                 // Reference to expression
+        std::vector<size_type>  prevDimSizes_;      // Size of previoud dimension for mapIndex function
+        int                     counter_;           // Counter for the iteration of the index mapper
+        int                     index_;             // Index of an element determined by mapIndex
+        int                     offset_;            // Offset due to the first dimension
     public:
         /*
          * ==================================================================================================
          * ==================================================================================================
          */
-        TensorSlicer(TensorExpression<T, E> const& x) : x_(x) {}
-        
+        TensorSlicer(TensorExpression<T, E> const& x) : x_(x), counter_(0), index_(0) {}
+       
+        /*
+         * ==================================================================================================
+         * Function     : mapIndex
+         * 
+         * Description  : Takes the index of an element in a tensor which is a slice of another tensor, and 
+         *                maps the index of the element in the new, sliced tensor, to the index in the tensor 
+         *                which is being sliced.
+         *                
+         * Params       :
+         * ==================================================================================================
+         */
+        template <size_t idx, typename D>
+        size_type mapIndex(D dim) 
+        {
+            int dimOffset = std::accumulate(x_.dimSizes().begin()                        ,
+                                            x_.dimSizes().end() - (x_.rank() - (dim + 1)) ,
+                                            1                                            ,
+                                            std::multiplies<size_type>()                 ); 
+            int mappedDim = idx / std::accumulate(prevDimSizes_.begin()         ,
+                                                  prevDimSizes_.end()           ,
+                                                  1                             ,
+                                                  std::multiplies<size_type>()  );
+            dim != 0 ? index_ += dimOffset * mappedDim
+                     : offset_ = mappedDim;
+            prevDimSizes_.clear();
+            counter_ = 0;
+            offset_ += index_;
+            index_ = 0;
+            return offset_;
+        }
+            
+        template<size_t idx, typename D, typename... Ds>
+        size_type mapIndex(D dim, Ds... dims) 
+        {
+            int dimOffset = std::accumulate(x_.dimSizes().begin()                        ,
+                                            x_.dimSizes().end() - (x_.rank() - (dim + 1)) ,
+                                            1                                            ,
+                                            std::multiplies<size_type>()                 );
+            if (counter_ == 0) {
+                int mappedDim = idx % x_.size(dim);
+                dim != 0 ? index_ += dimOffset * mappedDim
+                         : offset_ = mappedDim;
+            } else if (counter_ == 1) {
+                int mappedDim = (idx % (x_.dimSizes()[dim] * prevDimSizes_.back())) / prevDimSizes_.back();
+                dim != 0 ? index_ += dimOffset * mappedDim 
+                         : offset_ = mappedDim;
+            } else if (counter_ == 2) {
+                int mappedDim = idx / prevDimSizes_[0] * prevDimSizes_[1];
+                dim != 0 ? index_ += dimOffset * mappedDim
+                         : offset_ = mappedDim;
+            }
+            counter_++; prevDimSizes_.push_back(dim);
+            return mapIndex<idx>(dims...);
+        }
 };
 
 } // End namespace frnn
