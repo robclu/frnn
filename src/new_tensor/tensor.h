@@ -56,6 +56,7 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
         /* ================================================================================================ */
     private:
         container_type          data_;                  // Data for tensor
+        container_type          slice_data_;            // Data for creating slices
         std::vector<size_type>  dimensions_;            // Sizes of the dimensions
         int                     counter_;               // Used for calculating the offset for operator()
         int                     offset_;                // For accessing elements with operator()
@@ -232,6 +233,10 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
          * Params       : I         : The type of the idx argument 
          * ==================================================================================================
          */
+        template <typename I, const size_t RN>
+        Tensor<T,RN> operator[](I idx)
+        {
+        }
         
         /*
          * ==================================================================================================

@@ -27,6 +27,26 @@
 
 namespace frnn {
    
+namespace tensor {
+/*
+ * ==========================================================================================================
+ * Function     : mapIndex
+ * 
+ * Description  : Takes the index of an element in a tensor which is a slice of another tensor, and maps the
+ *                index of the element in the new, sliced tensor, to the index in the tensor which is being
+ *                sliced.
+ *                
+ * Params       :
+ * ==========================================================================================================
+ */
+template <typename D, typename... Ds>
+void mapIndex(D dim, Ds... dims) 
+{
+    
+}
+
+}   // End namespace tnesor
+
 /*
  * ==========================================================================================================
  * Class        : TensorExpression 
@@ -154,6 +174,12 @@ class TensorDifference : public TensorExpression<T, TensorDifference<T,E1,E2>>
        
        /*
         * ===================================================================================================
+        * Function      : dimSizes
+        * 
+        * Description   : Returns the sizes of the dimensions of the expressions
+        * 
+        * Output        : A constant reference to the dimension sizes vector of the expression
+        * ===================================================================================================
         */
         const std::vector<size_type>& dimSizes() const { return x_.dimSizes(); }
         
@@ -179,6 +205,36 @@ class TensorDifference : public TensorExpression<T, TensorDifference<T,E1,E2>>
          */
         value_type operator[](size_type i) const { return x_[i] - y_[i]; }
 };      
+
+/*
+ * ==========================================================================================================
+ * Class        : TensorSlicer
+ * 
+ * Description  : Class used to detrmine the mapping for slicing tensors
+ * 
+ * Params       : T     : The type of data used by the tensor
+ *              : E     : The type of the expression to slice
+ * ==========================================================================================================
+ */
+template <typename T, typename E>
+class TensorSlicer : public TensorExpression<T, TensorSlicer<T, E>>
+{
+    public:
+        /* ==================================== Typedefs ================================================== */
+        using typename TensorExpression<T, TensorSlicer<T,E>>::container_type;
+        using typename TensorExpression<T, TensorSlicer<T,E>>::size_type;
+        using typename TensorExpression<T, TensorSlicer<T,E>>::value_type;
+        /* ================================================================================================ */ 
+    private:
+        E const& x_;        // Reference to expression
+    public:
+        /*
+         * ==================================================================================================
+         * ==================================================================================================
+         */
+        TensorSlicer(TensorExpression<T, E> const& x) : x_(x) {}
+        
+};
 
 } // End namespace frnn
 
