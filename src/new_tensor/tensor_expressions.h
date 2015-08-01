@@ -195,103 +195,139 @@ class TensorDifference : public TensorExpression<T, TensorDifference<T,E1,E2>>
  *              : E     : The type of the expression to slice
  * ==========================================================================================================
  */
-template <typename T, typename E>
-class TensorSlicer : public TensorExpression<T, TensorSlicer<T, E>>
+template <typename T, typename E, typename... Ds>
+class TensorSlicer : public TensorExpression<T, TensorSlicer<T, E, Ds...>>
 {
     public:
         /* ==================================== Typedefs ================================================== */
-        using typename TensorExpression<T, TensorSlicer<T,E>>::container_type;
-        using typename TensorExpression<T, TensorSlicer<T,E>>::size_type;
-        using typename TensorExpression<T, TensorSlicer<T,E>>::value_type;
+        using typename TensorExpression<T, TensorSlicer<T,E,Ds...>>::container_type;
+        using typename TensorExpression<T, TensorSlicer<T,E,Ds...>>::size_type;
+        using typename TensorExpression<T, TensorSlicer<T,E,Ds...>>::value_type;
         /* ================================================================================================ */ 
     private:
         E const&                x_;                 // Reference to expression
         std::vector<size_type>  prevDimSizes_;      // Size of previous dimension for mapIndex function
+        std::vector<size_type>  mapping_;           // Vector of new dimension mapping
         size_type               index_;             // Index of an element determined by mapIndex
         size_type               offset_;            // Offset due to the first dimension
     public:
         /*
          * ==================================================================================================
+         * Function         : Construct for the TensorSlicer class
+         * 
+         * Description      : Initializes member variables and build the mapping for the new tensor from the
+         *                    tensor which is being sliced
+         *                    
+         * Inputs           : x         : The TensorExpression which is being sliced
+         *                  : dims      : The dimension of x which are being sliced 
          * ==================================================================================================
          */
-        TensorSlicer(TensorExpression<T, E> const& x) : x_(x), index_(0) {}
+        TensorSlicer(TensorExpression<T, E> const& x, Ds... dims) 
+        : x_(x), index_(0), offset_(0), mapping_(0), prevDimSizes_(0) 
+        {
+            buildMapping(dims...);
+        }
        
         /*
          * ==================================================================================================
-         * Function     : mapIndex
+         * Function         : buildMapping
+         * 
+         * Description      : Base case for creating a vector of dimension for slicing a tensor
+         * 
+         * Inputs           : dim       : The dimension to add to the mapping
+         * 
+         * Params           : D         : The type for the dim variable
+         * ==================================================================================================
+         */
+        template <typename D>
+        void buildMapping(D dim) { mapping_.push_back(dim); }
+        
+        /*
+         * ==================================================================================================
+         * Function         : buildMapping
+         * 
+         * Description      : all other cases for creating a vector of dimension for slicing a tensor
+         * 
+         * Inputs           : dim       : The dimension to add to the mapping
+         *                  : dims      : The rest of the dims which must still be added to the mapping
+         * 
+         * Params           : D         : The type for the dim variable
+         *                  : Dz        : The types for the rest of the dimensions
+         * ==================================================================================================
+         */ 
+        template <typename D, typename... Dz>
+        void buildMapping(D dim, Dz... dims) 
+        {
+            mapping_.push_back(dim);            // Add this dimension to the list
+            buildMapping(dims...);              // Recurse until no dimensions left
+        }
+          
+        /*
+         * ==================================================================================================
+         * Function     : mapIndex (non terminating cases)
          * 
          * Description  : Takes the index of an element in a tensor which is a slice of another tensor, and 
          *                maps the index of the element in the new, sliced tensor, to the index in the tensor 
          *                which is being sliced.
          *                
-         * Params       :
+         * Inputs       : idx       : The index of the element in the new, sliced tensor to map to the old
+         *                            tensor
+         *                            
+         * Outputs      : The value of the dimension dim in the old tesnor for index and the slice mapping
+         *                given to the constructor. For example, if the mapping is from a Tensor[i,j,k] to a 
+         *                Tensor[k,j], then if dim = j, for the element at index idx in the new tensor, the 
+         *                mapping retuns the index in the j dimension of the original tensor
          * ==================================================================================================
          */
-        template <size_t idx, bool isFirst = true, typename D>
-        size_type mapIndex(D dim) 
+        size_type mapIndex(size_type idx) 
         {
-            // Offset of element in original tensors memory for this dimension
-            size_type dimOffset = std::accumulate(x_.dimSizes().begin()                         ,
-                                                  x_.dimSizes().end() - (x_.rank() - (dim + 1)) ,
-                                                  1                                             ,
-                                                  std::multiplies<size_type>()                  );
+            size_type dim, mappedDim, dimOffset;
+            for (int i = 0; i < mapping_.size(); i++) {
+                dim = mapping_[i];
             
-            // This dimension mapped to the other old tensor
-            tensor::DimensionMapper<idx, isFirst>  mapper;
+                // Offset of element in original tensors memory for this dimension
+                dimOffset = std::accumulate(x_.dimSizes().begin()         ,
+                                            x_.dimSizes().begin() + dim   ,
+                                            1                             ,
+                                            std::multiplies<size_type>()  );
             
-            size_type mappedDim = mapper(x_.dimSizes()[dim], prevDimSizes_);
+                if (i == 0) {
+                    tensor::DimensionMapper<true> mapper;
+                    mappedDim = mapper(idx, x_.dimSizes()[dim], prevDimSizes_);
+                } else {
+                    tensor::DimensionMapper<false> mapper;
+                    mappedDim = mapper(idx, x_.dimSizes()[dim], prevDimSizes_);
+                }
+                    
+                dim == 0 ? index_   = mappedDim
+                         : offset_ += dimOffset * mappedDim;
             
-            dim == 0 ? index_  = mappedDim              
-                     : offset_ += dimOffset * mappedDim;
-            
+                prevDimSizes_.push_back(x_.dimSizes()[dim]);
+            }
+           
             index_ += offset_;              // Add offset due to other dimensions to the current index 
                                             // which is only for dimension 0 of the orig tensor
             
             // Last iteration, so reset all vars
-            prevDimSizes_.clear();
+            prevDimSizes_.clear(); mapping_.clear();
             offset_ = 0;
             
-            return index_;          
+            return index_;  
         }
-            
-        template<size_t idx, bool isFirst = true, typename D, typename... Ds>
-        size_type mapIndex(D dim, Ds... dims) 
-        {
-            // Offset of element in original tensors memory for this dimension
-            size_type dimOffset = std::accumulate(x_.dimSizes().begin()                           ,
-                                                  x_.dimSizes().end() - (x_.rank() - (dim + 1))   ,
-                                                  1                                               ,
-                                                  std::multiplies<size_type>()                    );
-            
-            // This dimension mapped to the old tensor
-            tensor::DimensionMapper<idx, isFirst> mapper;
-            
-            size_type mappedDim = mapper(x_.dimSizes()[dim], prevDimSizes_);
-            
-            dim == 0 ? index_   = mappedDim
-                     : offset_ += dimOffset * mappedDim;
-            
-            prevDimSizes_.push_back(dim);
-            return mapIndex<idx, false>(dims...);          // Call until er run out of dimensions
-            
-            /*
-            if (counter_ == 0) {
-                int mappedDim = idx % x_.size(dim);
-                dim != 0 ? index_ += dimOffset * mappedDim
-                         : offset_ = mappedDim;
-            } else if (counter_ == 1) {
-                int mappedDim = (idx % (x_.dimSizes()[dim] * prevDimSizes_.back())) / prevDimSizes_.back();
-                dim != 0 ? index_ += dimOffset * mappedDim 
-                         : offset_ = mappedDim;
-            } else if (counter_ == 2) {
-                int mappedDim = idx / prevDimSizes_[0] * prevDimSizes_[1];
-                dim != 0 ? index_ += dimOffset * mappedDim
-                         : offset_ = mappedDim;
-            }
-            counter_++; prevDimSizes_.push_back(dim);
-            return mapIndex<idx>(dims...);
-            */
-        }
+        
+        /*
+         * ==================================================================================================
+         * Function     : operator[]
+         * 
+         * Description  : Overloaded access operator to return an element of the new tensor, using the mapping
+         *                to get the value from the old tensor 
+         * 
+         * Inputs       : i     : The index of the element to get
+         * 
+         * Outputs      : The tensor element at the specified index
+         * ==================================================================================================
+         */
+        value_type operator[](size_type i) { return x_[mapIndex(i)]; }
 };
 
 } // End namespace frnn

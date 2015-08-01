@@ -34,17 +34,31 @@ namespace tensor {
  * Description  : Takes an index of an element in a new tensor and determines the index in each of the
  *                dimension of the old tensor which return the corresponding element in the new tensor
  *                
- * Params       : idx       : The index in the new tensor for which the mapping to the old tensor must be
- *                            determined
- *              : first     : If this is the first iteration, in which case the functor operation is different
+ * Params       : isFirst     : If this is the first iteration, in which case the functor operation is 
+ *                              different
  * ==========================================================================================================
  */
-template <size_t idx, bool first> struct DimensionMapper;
+template <bool first> struct DimensionMapper;
 
-template <size_t idx> struct DimensionMapper<idx, false>
+template<> struct DimensionMapper<false>
 {
     public:
-        size_t operator()(const size_t dimSize, std::vector<size_t>& prevDimensionSizes) const 
+        /*
+         * ==================================================================================================
+         * Function         : operator()
+         * 
+         * Description      : Determines the index of a dimension in a tensor being sliced, for the index in
+         *                    the new tensor (which is being created from the slice)
+         * 
+         * Inputs           : idx                   : The index of the element in the new tensor
+         *                  : dimSize               : The size of the dimension in the original tensor for
+         *                                            which the index must be determined
+         *                  : prevDimensionSizes    : The sizes of the previous dimensions for which the 
+         *                                            indices have been determined
+         * ==================================================================================================
+         */             
+        size_t operator()(const size_t idx, const size_t dimSize, 
+                          std::vector<size_t>& prevDimensionSizes) const 
         {
             size_t prevDimensionSizesProduct = std::accumulate(prevDimensionSizes.begin()   ,
                                                                prevDimensionSizes.end()     ,
@@ -54,12 +68,25 @@ template <size_t idx> struct DimensionMapper<idx, false>
         }
 };
 
-// Specialization for all other cases
-template<size_t idx> struct DimensionMapper<idx, true> 
+template<> struct DimensionMapper<true> 
 {
     public:
-        // Note : arguments are for consistancy
-        size_t operator()(const size_t dimSize, const std::vector<size_t>& prevDimensionSizes) const 
+        /*
+         * ==================================================================================================
+         * Function         : operator()
+         * 
+         * Description      : Determines the index of a dimension in a tensor being sliced, for the index in
+         *                    the new tensor (which is being created from the slice)
+         * 
+         * Inputs           : idx                   : The index of the element in the new tensor
+         *                  : dimSize               : The size of the dimension in the original tensor for
+         *                                            which the index must be determined
+         *                  : prevDimensionSizes    : The sizes of the previous dimensions for which the 
+         *                                            indices have been determined
+         * ==================================================================================================
+         */      
+        size_t operator()(const size_t idx, const size_t dimSize, 
+                          const std::vector<size_t>& prevDimensionSizes) const 
         {
             return idx % dimSize;
         }
