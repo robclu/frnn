@@ -56,7 +56,6 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
         /* ================================================================================================ */
     private:
         container_type          data_;                  // Data for tensor
-        container_type          slice_data_;            // Data for creating slices
         std::vector<size_type>  dimensions_;            // Sizes of the dimensions
         int                     counter_;               // Used for calculating the offset for operator()
         int                     offset_;                // For accessing elements with operator()
@@ -116,7 +115,7 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
          * ==================================================================================================
          * Function     : Tensor 
          * 
-         * Description  : Move constructor for the tensor class, using vectors for the data and dimensions
+         * Description  : Constructor using vectors for the data and dimensions
          * ==================================================================================================
          */
         Tensor(std::vector<size_type>& dimensions, container_type& data) 
@@ -233,9 +232,14 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
          * Params       : I         : The type of the idx argument 
          * ==================================================================================================
          */
-        template <typename I, const size_t RN>
-        Tensor<T,RN> operator[](I idx)
+        template <typename... Ds>
+        TensorSlice<T, Tensor<T,R>> const operator()(Ds... dims) const 
         {
+            VariadicVector<size_t> test(dims...);
+            std::cout << test.size() << " TATTT " << test[0] << std::endl;
+            TensorSlice<T, Tensor<T,R>> slice(static_cast<Tensor<T,R> const&>(*this), 
+                                              VariadicVector<size_t>(std::forward<Ds>(dims)...));
+            return slice;
         }
         
         /*

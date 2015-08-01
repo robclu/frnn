@@ -187,33 +187,32 @@ class TensorDifference : public TensorExpression<T, TensorDifference<T,E1,E2>>
 
 /*
  * ==========================================================================================================
- * Class        : TensorSlicer
+ * Class        : TensorSlice
  * 
- * Description  : Class used to detrmine the mapping for slicing tensors
+ * Description  : Class used to get a slice of a tensor
  * 
  * Params       : T     : The type of data used by the tensor
  *              : E     : The type of the expression to slice
+ *              : Ds    : The dimensions of the expression E which must be sliced to make this tensor
  * ==========================================================================================================
  */
-template <typename T, typename E, typename... Ds>
-class TensorSlicer : public TensorExpression<T, TensorSlicer<T, E, Ds...>>
+template <typename T, typename E>
+class TensorSlice : public TensorExpression<T, TensorSlice<T, E>>
 {
     public:
         /* ==================================== Typedefs ================================================== */
-        using typename TensorExpression<T, TensorSlicer<T,E,Ds...>>::container_type;
-        using typename TensorExpression<T, TensorSlicer<T,E,Ds...>>::size_type;
-        using typename TensorExpression<T, TensorSlicer<T,E,Ds...>>::value_type;
+        using typename TensorExpression<T, TensorSlice<T,E>>::container_type;
+        using typename TensorExpression<T, TensorSlice<T,E>>::size_type;
+        using typename TensorExpression<T, TensorSlice<T,E>>::value_type;
         /* ================================================================================================ */ 
     private:
         E const&                x_;                 // Reference to expression
-        std::vector<size_type>  prevDimSizes_;      // Size of previous dimension for mapIndex function
         std::vector<size_type>  mapping_;           // Vector of new dimension mapping
-        size_type               index_;             // Index of an element determined by mapIndex
-        size_type               offset_;            // Offset due to the first dimension
-    public:
+        VariadicVector<size_type> maps;
+    public:        
         /*
          * ==================================================================================================
-         * Function         : Construct for the TensorSlicer class
+         * Function         : Construct for the TensorSlice class
          * 
          * Description      : Initializes member variables and build the mapping for the new tensor from the
          *                    tensor which is being sliced
@@ -222,11 +221,22 @@ class TensorSlicer : public TensorExpression<T, TensorSlicer<T, E, Ds...>>
          *                  : dims      : The dimension of x which are being sliced 
          * ==================================================================================================
          */
-        TensorSlicer(TensorExpression<T, E> const& x, Ds... dims) 
-        : x_(x), index_(0), offset_(0), mapping_(0), prevDimSizes_(0) 
+        TensorSlice(TensorExpression<T, E> const& x, VariadicVector<size_t>&& dims)
+        : x_(x), mapping_(0), maps(std::move(dims))
         {
-            buildMapping(dims...);
+            std::cout << "SIZE : " << maps.size() << " " << maps[0] << std::endl;
         }
+        
+       /*
+        * ===================================================================================================
+        * Function      : dimSizes
+        * 
+        * Description   : Returns the sizes of the dimensions of the expressions
+        * 
+        * Output        : A constant reference to the dimension sizes vector of the expression
+        * ===================================================================================================
+        */
+        const std::vector<size_type>& dimSizes() const { return x_.dimSizes(); }
        
         /*
          * ==================================================================================================
@@ -279,9 +289,11 @@ class TensorSlicer : public TensorExpression<T, TensorSlicer<T, E, Ds...>>
          *                mapping retuns the index in the j dimension of the original tensor
          * ==================================================================================================
          */
-        size_type mapIndex(size_type idx) 
+        size_type mapIndex(size_type idx) const 
         {
-            size_type dim, mappedDim, dimOffset;
+            size_type index = 0, offset = 0, dim = 0, mappedDim = 0, dimOffset = 0;
+            std::vector<size_type> prevDimSizes;
+            
             for (int i = 0; i < mapping_.size(); i++) {
                 dim = mapping_[i];
             
@@ -293,26 +305,21 @@ class TensorSlicer : public TensorExpression<T, TensorSlicer<T, E, Ds...>>
             
                 if (i == 0) {
                     tensor::DimensionMapper<true> mapper;
-                    mappedDim = mapper(idx, x_.dimSizes()[dim], prevDimSizes_);
+                    mappedDim = mapper(idx, x_.dimSizes()[dim], prevDimSizes);
                 } else {
                     tensor::DimensionMapper<false> mapper;
-                    mappedDim = mapper(idx, x_.dimSizes()[dim], prevDimSizes_);
+                    mappedDim = mapper(idx, x_.dimSizes()[dim], prevDimSizes);
                 }
                     
-                dim == 0 ? index_   = mappedDim
-                         : offset_ += dimOffset * mappedDim;
+                dim == 0 ? index   = mappedDim
+                         : offset += dimOffset * mappedDim;
             
-                prevDimSizes_.push_back(x_.dimSizes()[dim]);
+                prevDimSizes.push_back(x_.dimSizes()[dim]);
             }
            
-            index_ += offset_;              // Add offset due to other dimensions to the current index 
-                                            // which is only for dimension 0 of the orig tensor
-            
-            // Last iteration, so reset all vars
-            prevDimSizes_.clear(); mapping_.clear();
-            offset_ = 0;
-            
-            return index_;  
+            // Add offset due to all dimensions but the first, 
+            // to the index in the first dimension
+            return (index + offset);  
         }
         
         /*
@@ -327,7 +334,7 @@ class TensorSlicer : public TensorExpression<T, TensorSlicer<T, E, Ds...>>
          * Outputs      : The tensor element at the specified index
          * ==================================================================================================
          */
-        value_type operator[](size_type i) { return x_[mapIndex(i)]; }
+        value_type operator[](size_type i) const { return x_[mapIndex(i)]; }
 };
 
 } // End namespace frnn

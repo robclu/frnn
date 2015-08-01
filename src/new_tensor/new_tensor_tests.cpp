@@ -214,11 +214,16 @@ TEST( frnnTensor, CanMapIndexWhenSlicing )
     
     // Set an element 
     tensor(1, 1, 1) = 7;
+   
+    // Create a new  
+    frnn::Tensor<int, 3> slice = tensor(2, 0, 1);
+  
+    frnn::VariadicVector<int> vvect(1, 3, 4, 5);
     
-    frnn::TensorSlicer<int, frnn::Tensor<int, 3>, int, int, int> slicer(tensor, 2, 0, 1);
+    int t = vvect[1];
     
     // Check if mapped correctly 
-    int mappedVal = slicer[9];
+    //int mappedVal = slice.data()[9];
 
-    EXPECT_EQ( mappedVal, 7 );
+    EXPECT_EQ( t, 3 );
 }
