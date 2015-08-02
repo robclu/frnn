@@ -208,22 +208,13 @@ TEST( frnnTensor, ThrowsErrorForOutOfRangeElementAccess)
     EXPECT_EQ( element3, 0 );
 }
 
-TEST( frnnTensor, CanMapIndexWhenSlicing ) 
+TEST( frnnIndexList, CanMapIndexWhenSlicing ) 
 {
-    frnn::Tensor<int, 3> tensor = {3, 3, 2};
+    using namespace frnn;
     
-    // Set an element 
-    tensor(1, 1, 1) = 7;
-   
-    // Create a new  
-    frnn::Tensor<int, 3> slice = tensor(2, 0, 1);
-  
-    frnn::VariadicVector<int> vvect(1, 3, 4, 5);
+    Tensor<int, 3> t = {3, 3, 3};
     
-    int t = vvect[1];
+    Tuple<tensor::Index, tensor::Index> tt = t(tensor::dim::j, tensor::dim::i);
     
-    // Check if mapped correctly 
-    //int mappedVal = slice.data()[9];
-
-    EXPECT_EQ( t, 3 );
+    EXPECT_EQ( 1, 1 );
 }

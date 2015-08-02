@@ -21,8 +21,9 @@
 #ifndef _FRNN_TENSOR_EXPRESSIONS_
 #define _FRNN_TENSOR_EXPRESSIONS_
 
-#include "../util/errors.h"
 #include "tensor_utils.h"
+#include "../containers/tuple.h"
+#include "../util/errors.h"
 
 namespace frnn {
 
@@ -196,19 +197,19 @@ class TensorDifference : public TensorExpression<T, TensorDifference<T,E1,E2>>
  *              : Ds    : The dimensions of the expression E which must be sliced to make this tensor
  * ==========================================================================================================
  */
-template <typename T, typename E>
-class TensorSlice : public TensorExpression<T, TensorSlice<T, E>>
+template <typename T, typename E, typename... Ts>
+class TensorSlice : public TensorExpression<T, TensorSlice<T, E, Ts...>>
 {
     public:
         /* ==================================== Typedefs ================================================== */
-        using typename TensorExpression<T, TensorSlice<T,E>>::container_type;
-        using typename TensorExpression<T, TensorSlice<T,E>>::size_type;
-        using typename TensorExpression<T, TensorSlice<T,E>>::value_type;
+        using typename TensorExpression<T, TensorSlice<T,E,Ts...>>::container_type;
+        using typename TensorExpression<T, TensorSlice<T,E,Ts...>>::size_type;
+        using typename TensorExpression<T, TensorSlice<T,E,Ts...>>::value_type;
         /* ================================================================================================ */ 
     private:
-        E const&                x_;                 // Reference to expression
-        std::vector<size_type>  mapping_;           // Vector of new dimension mapping
-        VariadicVector<size_type> maps;
+        E const&                        x_;                 // Reference to expression
+        std::vector<size_type>          mapping_;           // Vector of new dimension mapping
+        Tuple<Ts...>                    dimensions_;
     public:        
         /*
          * ==================================================================================================
@@ -221,10 +222,10 @@ class TensorSlice : public TensorExpression<T, TensorSlice<T, E>>
          *                  : dims      : The dimension of x which are being sliced 
          * ==================================================================================================
          */
-        TensorSlice(TensorExpression<T, E> const& x, VariadicVector<size_t>&& dims)
-        : x_(x), mapping_(0), maps(std::move(dims))
+        TensorSlice(TensorExpression<T, E> const& x, Ts... ts)
+        : x_(x), mapping_(0)
         {
-            std::cout << "SIZE : " << maps.size() << " " << maps[0] << std::endl;
+            
         }
         
        /*
@@ -237,41 +238,7 @@ class TensorSlice : public TensorExpression<T, TensorSlice<T, E>>
         * ===================================================================================================
         */
         const std::vector<size_type>& dimSizes() const { return x_.dimSizes(); }
-       
-        /*
-         * ==================================================================================================
-         * Function         : buildMapping
-         * 
-         * Description      : Base case for creating a vector of dimension for slicing a tensor
-         * 
-         * Inputs           : dim       : The dimension to add to the mapping
-         * 
-         * Params           : D         : The type for the dim variable
-         * ==================================================================================================
-         */
-        template <typename D>
-        void buildMapping(D dim) { mapping_.push_back(dim); }
-        
-        /*
-         * ==================================================================================================
-         * Function         : buildMapping
-         * 
-         * Description      : all other cases for creating a vector of dimension for slicing a tensor
-         * 
-         * Inputs           : dim       : The dimension to add to the mapping
-         *                  : dims      : The rest of the dims which must still be added to the mapping
-         * 
-         * Params           : D         : The type for the dim variable
-         *                  : Dz        : The types for the rest of the dimensions
-         * ==================================================================================================
-         */ 
-        template <typename D, typename... Dz>
-        void buildMapping(D dim, Dz... dims) 
-        {
-            mapping_.push_back(dim);            // Add this dimension to the list
-            buildMapping(dims...);              // Recurse until no dimensions left
-        }
-          
+    
         /*
          * ==================================================================================================
          * Function     : mapIndex (non terminating cases)

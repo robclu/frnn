@@ -24,11 +24,13 @@
 #include "tensor_expressions.h"
 #include "tensor_exceptions.h"
 #include "tensor_indices.h"
+#include "../containers/tuple.h"
 
 #include <iostream>
 #include <cassert>
 #include <initializer_list>
 #include <numeric>
+#include <type_traits>
 
 namespace frnn {
 
@@ -232,14 +234,13 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
          * Params       : I         : The type of the idx argument 
          * ==================================================================================================
          */
-        template <typename... Ds>
-        TensorSlice<T, Tensor<T,R>> const operator()(Ds... dims) const 
+        template <typename... Ts>
+        Tuple<Ts...> operator()(Ts... dims) const 
         {
-            VariadicVector<size_t> test(dims...);
-            std::cout << test.size() << " TATTT " << test[0] << std::endl;
-            TensorSlice<T, Tensor<T,R>> slice(static_cast<Tensor<T,R> const&>(*this), 
-                                              VariadicVector<size_t>(std::forward<Ds>(dims)...));
-            return slice;
+            Tuple<Ts...> newDimensionIndices(dims...);
+            //TensorSlice<T, Tensor<T,R>, Ts...> slice(static_cast<Tensor<T,R> const&>(*this),
+            //                                         );          
+            return newDimensionIndices;
         }
         
         /*
@@ -255,7 +256,7 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
          * ==================================================================================================
          */
         template <typename I>
-        T& operator() (I idx) 
+        typename std::enable_if<std::is_arithmetic<I>::value, T&>::type  operator() (I idx) 
         {
             try {                                                           // Check in range
                 if (idx >= dimensions_[counter_]) {                         // counter +1 in next line for
@@ -295,7 +296,7 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
          * ==================================================================================================
          */
         template <typename I, typename... Is>
-        T& operator()(I idx, Is... indices) 
+        typename std::enable_if<std::is_arithmetic<I>::value, T&>::type operator()(I idx, Is... indices) 
         {
             const int num_args = sizeof...(Is);
             try {                                                           // Check index in range
@@ -337,7 +338,7 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
          * ==================================================================================================
          */
         template <typename I>
-        const T& operator()(I idx) const 
+        typename std::enable_if<std::is_arithmetic<I>::value, const T&>::type operator()(I idx) const 
         {
             try {                                                           // Check in range
                 if (idx >= dimensions_[counter_]) {                         // counter +1 in next line for
@@ -377,7 +378,7 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
          * ==================================================================================================
          */
         template <typename I, typename... Is>
-        const T& operator()(I idx, Is... indecies) const
+        typename std::enable_if<std::is_arithmetic<I>::value, const T&>::type operator()(I idx, Is... indecies) const
         {
             const int num_args = sizeof...(Is);
             try {                                                           // Check index in range

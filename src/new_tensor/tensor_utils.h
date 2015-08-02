@@ -25,45 +25,6 @@
 #include <numeric>
 
 namespace frnn {
-
-template <typename T>
-class VariadicVector
-{
-    public:
-        std::vector<T>  data_;
-    public:
-        template <typename... Es>
-        VariadicVector(Es&&... elements) : data_(0) 
-        {
-            fillData(std::forward<Es>(elements)...);
-        }
-        
-        explicit VariadicVector(VariadicVector&& oldVect) noexcept
-        : data_(std::move(oldVect.data_)) {}
-        
-        void operator()(VariadicVector&& oldVect) 
-        {
-            data_(std::move(oldVect.data_));
-        }
-
-        template <typename E>    
-        void fillData(E&& element) 
-        {
-            data_.push_back(element);
-        }
-        
-        template <typename E, typename... Es>
-        void fillData(E&& element, Es&&... elements)
-        {
-            data_.push_back(element);
-            fillData(std::forward<Es>(elements)...);
-        }
-        
-        const T& operator[](size_t i) const { return data_[i]; }
-        
-        const size_t size() const { return data_.size(); }
-};
-
 namespace tensor {
     
 /*

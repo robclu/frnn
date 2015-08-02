@@ -21,17 +21,51 @@
 #ifndef _FRNN_TENSOR_INDICES_
 #define _FRNN_TENSOR_INDICES_
 
+#include <cstdint>
+#include <typeinfo>
+#include <iostream>
+
 namespace frnn      {
 namespace tensor    {
-namespace dim       {
+
+/*
+ * ==========================================================================================================
+ * Function         : Index 
+ * 
+ * Description      : Struct representing an index (dimension) of a tensor, for example 1 would be an index
+ *                    for the second dimension (0 indexing)
+ * 
+ * Params           : idx       : The value of the index of a tensor the struct represents
+ * ==========================================================================================================
+ */
+struct Index
+{
+    public:   
+        size_t idx;
+        Index(size_t i) : idx(i) {}
+        
+        /*
+         * ==================================================================================================
+         * Function     : operator()
+         * 
+         * Description  : Returns the value of the dimension (which dimension the struct represents)
+         * 
+         * Outputs      : The index of the dimension 
+         * ==================================================================================================
+         */
+        size_t operator()() const { return idx; }
+};
+
+/* ================================================ Typedefs ============================================== */
+
+namespace dim {
     
-int i = 0;          // Variable for 0th dimension of tensor
-int j = 1;          // Variable for 1st dimenstion of tensor
-int k = 2;
-int l = 3;
-int m = 5;
+    Index i(0);
+    Index j(1);
+    Index k(2);
 
 }       // End namespace dim
+
 }       // End namespace tensor 
 }       // End namespace frnn
 
