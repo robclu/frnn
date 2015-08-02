@@ -194,7 +194,8 @@ class TensorDifference : public TensorExpression<T, TensorDifference<T,E1,E2>>
  * 
  * Params       : T     : The type of data used by the tensor
  *              : E     : The type of the expression to slice
- *              : Ds    : The dimensions of the expression E which must be sliced to make this tensor
+ *              : Ts    : The types of the variables used to represent the dimensions to slice, this is used
+ *                        to build a Tuple holding the dimensions to slice
  * ==========================================================================================================
  */
 template <typename T, typename E, typename... Ts>
@@ -208,8 +209,10 @@ class TensorSlice : public TensorExpression<T, TensorSlice<T, E, Ts...>>
         /* ================================================================================================ */ 
     private:
         E const&                        x_;                 // Reference to expression
-        std::vector<size_type>          mapping_;           // Vector of new dimension mapping
-        Tuple<Ts...>                    dimensions_;
+        Tuple<Ts...>                    sliceDims_;         // Dimensions for the sliced tensor
+        mutable std::vector<size_type>  prevSliceDims_;     // Previous dimensions used for recursice map index
+        mutable size_type               index_;             // Index of an element in the tensor to be sliced
+        mutable size_type               offset_;            // Offset in the old tensor due to mapping to dimension 0
     public:        
         /*
          * ==================================================================================================
@@ -222,10 +225,10 @@ class TensorSlice : public TensorExpression<T, TensorSlice<T, E, Ts...>>
          *                  : dims      : The dimension of x which are being sliced 
          * ==================================================================================================
          */
-        TensorSlice(TensorExpression<T, E> const& x, Ts... ts)
-        : x_(x), mapping_(0)
+        TensorSlice(TensorExpression<T, E> const& x, Tuple<Ts...> sliceDims)
+        : x_(x), index_(0), offset_(0), prevSliceDims_(0), sliceDims_(sliceDims)
         {
-            
+            std::cout << "SD0 : " << get<0>(sliceDims_)() << std::endl; 
         }
         
        /*
@@ -238,10 +241,10 @@ class TensorSlice : public TensorExpression<T, TensorSlice<T, E, Ts...>>
         * ===================================================================================================
         */
         const std::vector<size_type>& dimSizes() const { return x_.dimSizes(); }
-    
+  
         /*
          * ==================================================================================================
-         * Function     : mapIndex (non terminating cases)
+         * Function     : mapIndex (non terminating case)
          * 
          * Description  : Takes the index of an element in a tensor which is a slice of another tensor, and 
          *                maps the index of the element in the new, sliced tensor, to the index in the tensor 
@@ -250,43 +253,79 @@ class TensorSlice : public TensorExpression<T, TensorSlice<T, E, Ts...>>
          * Inputs       : idx       : The index of the element in the new, sliced tensor to map to the old
          *                            tensor
          *                            
-         * Outputs      : The value of the dimension dim in the old tesnor for index and the slice mapping
-         *                given to the constructor. For example, if the mapping is from a Tensor[i,j,k] to a 
-         *                Tensor[k,j], then if dim = j, for the element at index idx in the new tensor, the 
-         *                mapping retuns the index in the j dimension of the original tensor
+         * Outputs      : Calls itself to determine the mapping of the index to the other dimensions of the
+         *                tensor which is being sliced
+         *                
+         * Params       : i         : The iteration of the function - which number element in the list of slice 
+         *                            dimensions is being mapped to the sliced tensor
+         * ==================================================================================================
+         */ 
+        template <size_type i>
+        typename std::enable_if<i != (sizeof...(Ts) - 1), size_type>::type mapIndex(size_type idx) const 
+        {
+            size_type mappedDim = 0, dim = 0, dimOffset = 0;
+            
+            dim = get<i>(sliceDims_)();
+            
+            // Offset of element in original tensors memory for this dimension
+            dimOffset = std::accumulate(x_.dimSizes().begin()           ,
+                                        x_.dimSizes().begin() + dim     ,
+                                        1                               ,
+                                        std::multiplies<size_type>()    );
+            
+            tensor::DimensionMapper<i> mapper;
+            mappedDim = mapper(idx, x_.dimSizes()[dim], prevSliceDims_);
+                    
+            dim == 0  ? index_   = mappedDim
+                      : offset_ += dimOffset * mappedDim;
+            
+            prevSliceDims_.push_back(dim);
+            return mapIndex<i + 1>(idx);        // Continue until all dimensions finished
+        }
+        
+        /*
+         * ==================================================================================================
+         * Function     : mapIndex (terminating case)
+         * 
+         * Description  : Takes the index of an element in a tensor which is a slice of another tensor, and 
+         *                maps the index of the element in the new, sliced tensor, to the index in the tensor 
+         *                which is being sliced.
+         *                
+         * Inputs       : idx       : The index of the element in the new, sliced tensor to map to the old
+         *                            tensor
+         *                            
+         * Outputs      : The total offset of the index idx in the memory of the tensor to be sliced, so it is
+         *                determining the index of idx in the sliced tensor
+         *                
+         * Params       : i         : The iteration of the function - which number element in the Tuple of 
+         *                            slice dimensions is beig mapped
          * ==================================================================================================
          */
-        size_type mapIndex(size_type idx) const 
+        template <size_type i>
+        typename std::enable_if<i == (sizeof...(Ts) - 1), size_type>::type mapIndex(size_type idx) const 
         {
-            size_type index = 0, offset = 0, dim = 0, mappedDim = 0, dimOffset = 0;
-            std::vector<size_type> prevDimSizes;
+            size_type mappedDim = 0, dim = 0, dimOffset = 0;
             
-            for (int i = 0; i < mapping_.size(); i++) {
-                dim = mapping_[i];
+            dim = get<i>(sliceDims_)();
             
-                // Offset of element in original tensors memory for this dimension
-                dimOffset = std::accumulate(x_.dimSizes().begin()         ,
-                                            x_.dimSizes().begin() + dim   ,
-                                            1                             ,
-                                            std::multiplies<size_type>()  );
+            // Offset of element in original tensors memory for this dimension
+            dimOffset = std::accumulate(x_.dimSizes().begin()           ,
+                                        x_.dimSizes().begin() + dim     ,
+                                        1                               ,
+                                        std::multiplies<size_type>()    );
             
-                if (i == 0) {
-                    tensor::DimensionMapper<true> mapper;
-                    mappedDim = mapper(idx, x_.dimSizes()[dim], prevDimSizes);
-                } else {
-                    tensor::DimensionMapper<false> mapper;
-                    mappedDim = mapper(idx, x_.dimSizes()[dim], prevDimSizes);
-                }
+            tensor::DimensionMapper<i> mapper;
+            mappedDim = mapper(idx, x_.dimSizes()[dim], prevSliceDims_);
                     
-                dim == 0 ? index   = mappedDim
-                         : offset += dimOffset * mappedDim;
+            dim == 0  ? index_   = mappedDim
+                      : offset_ += dimOffset * mappedDim;
             
-                prevDimSizes.push_back(x_.dimSizes()[dim]);
-            }
-           
-            // Add offset due to all dimensions but the first, 
-            // to the index in the first dimension
-            return (index + offset);  
+            // Calculate result and clear all other variables
+            size_type total_offset = index_ + offset_;          
+            prevSliceDims_.clear;
+            index_ = 0; offset_ = 0;
+        
+            return total_offset;
         }
         
         /*
@@ -301,7 +340,7 @@ class TensorSlice : public TensorExpression<T, TensorSlice<T, E, Ts...>>
          * Outputs      : The tensor element at the specified index
          * ==================================================================================================
          */
-        value_type operator[](size_type i) const { return x_[mapIndex(i)]; }
+        value_type operator[](size_type i) const { return x_[mapIndex<0>(i)]; }
 };
 
 } // End namespace frnn

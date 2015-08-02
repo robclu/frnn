@@ -38,9 +38,7 @@ namespace tensor {
  *                              different
  * ==========================================================================================================
  */
-template <bool first> struct DimensionMapper;
-
-template<> struct DimensionMapper<false>
+template <size_t iter> struct DimensionMapper
 {
     public:
         /*
@@ -68,7 +66,7 @@ template<> struct DimensionMapper<false>
         }
 };
 
-template<> struct DimensionMapper<true> 
+template<> struct DimensionMapper<0> 
 {
     public:
         /*

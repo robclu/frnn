@@ -237,10 +237,10 @@ class Tensor : public TensorExpression<T, Tensor<T, R>>
         template <typename... Ts>
         Tuple<Ts...> operator()(Ts... dims) const 
         {
-            Tuple<Ts...> newDimensionIndices(dims...);
-            //TensorSlice<T, Tensor<T,R>, Ts...> slice(static_cast<Tensor<T,R> const&>(*this),
-            //                                         );          
-            return newDimensionIndices;
+            Tuple<Ts...> sliceDims(dims...);
+            TensorSlice<T, Tensor<T,R>, Ts...> slice(static_cast<Tensor<T,R> const&>(*this),
+                                                      Tuple<Ts...>(dims...));          
+            return sliceDims;
         }
         
         /*
