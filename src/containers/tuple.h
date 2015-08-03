@@ -30,60 +30,51 @@ namespace frnn {
 /*
  * ==========================================================================================================
  * Struct       : Tuple 
- * 
  * Description  : Tuple class which can be created using any types and any number of elements
- * 
  * Params       : Ts        : The types of the elements in the Tuple
  * ==========================================================================================================
  */
 template <typename... Ts> struct Tuple {};
 
 template <typename T>
-struct Tuple<T> 
-{
+struct Tuple<T> {
+public:
+    T _back;            // Element of the tuple
+public:
     /*
      * ======================================================================================================
      * Function         : Tuple 
-     * 
      * Description      : Constuctor for a Tuple when there is only one element (base case of recursive
      *                    construction
-     * 
      * Inputs           : element   : The element to add to the tuple
      * ======================================================================================================
      */
-    Tuple(T element) : back_(element) {}
-    
-    T back_;        // The last element of the Tuple
+    Tuple(T element) : _back(element) {}
 };
 
 template <typename T, typename... Ts>
-struct Tuple<T, Ts...> : Tuple<Ts...> 
-{
+struct Tuple<T, Ts...> : Tuple<Ts...> {
+public: 
+    T _back;
+public:
     /*
      * ======================================================================================================
      * Function         : Tuple 
-     * 
      * Description      : Constructor for a Tuple when there is more than one element
-     * 
      * Inputs           : element   : The element to add to the tuple on this iteration of the construction
      *                  : elements  : The rest of the elements to add to the tuple on the remaining iterations 
      *                                of the construction
-     *
      * Params           : T         : The type of the element to add
      *                  : Ts        : The types of the rest of the elemnts to add
      * ======================================================================================================
      */
-    Tuple(T element, Ts... elements) : Tuple<Ts...>(elements...), back_(element) {}
-    
-    T back_;        // The last element at the current iteration of the construction
+    Tuple(T element, Ts... elements) : Tuple<Ts...>(elements...), _back(element) {}
 };
 
 /*
  * ==========================================================================================================
  * Struct       : TupleElementTypeHolder 
- * 
  * Description  : Struct which holds the types of all the elements in a Tuple
- * 
  * Params       : i     : The index of the element for which the type must be stored
  *              : T     : The type of the element
  * ==========================================================================================================
@@ -93,44 +84,35 @@ template <size_t i, typename T> struct TupleElementTypeHolder;
 /*
  * ==========================================================================================================
  * Struct       : TupleElementTypeHolder
- * 
  * Description  : Determines the type of the 0 element in the tuple
- * 
  * Params       : T     : The type of the 0 element in the Tuple
  *              : Ts    : The types of the rest of the elements in the Tuple
  * ==========================================================================================================
  */
 template <typename T, typename... Ts>
-struct TupleElementTypeHolder<0, Tuple<T, Ts...>>
-{ 
-    typedef T type;
+struct TupleElementTypeHolder<0, Tuple<T, Ts...>> {
+    typedef T type;         
 };
 
 /*
  * ==========================================================================================================
  * Struct       : TupleElementTypeHolder
- * 
  * Description  : Determines the types of all elements in the Tuple but the first
- * 
  * Params       : i     : The index of the element in the Tuple to store the tye of 
  *              : T     : The type of the ith element in the Tuple
  *              : Ts    : The types of the rest of the elements in the Tuple
  * ==========================================================================================================
  */
 template <size_t i, typename T, typename... Ts>
-struct TupleElementTypeHolder<i, Tuple<T, Ts...>> 
-{
+struct TupleElementTypeHolder<i, Tuple<T, Ts...>> {
     typedef typename TupleElementTypeHolder<i - 1, Tuple<Ts...>>::type type;  
 };
 
 /*
  * ==========================================================================================================
  * Function     : get
- * 
  * Description  : Gets the 0th element in a Tuple
- * 
  * Inputs       : tuple     :The Tuple to get the 0th element from
- * 
  * Params       : i         : The index of the element in the Tuple to get
  *              : Ts        : The types of the elements in the Tuple
  * ==========================================================================================================
@@ -139,17 +121,14 @@ template <size_t i, typename... Ts>
 typename std::enable_if<i == 0, typename TupleElementTypeHolder<0, Tuple<Ts...>>::type&>::type 
 get(Tuple<Ts...>& tuple) 
 {
-    return tuple.back_;
+    return tuple._back;
 }
 
 /*
  * ==========================================================================================================
  * Function     : get
- *  
  * Description  : Gets the element i of the tuple
- * 
  * Inputs       : tuple     : The Tuple to get the ith element from 
- * 
  * Params       : i         : The index of the element in the Tuple to get
  *              : T         : The type of the element i in the Tuple
  *              : Ts        : The test of the types of the elements in the Tuple
@@ -160,7 +139,7 @@ typename std::enable_if<i != 0, typename TupleElementTypeHolder<i, Tuple<T, Ts..
 get(Tuple<T, Ts...>& tuple) 
 {
     Tuple<Ts...>& tupleBase = tuple;
-    return get<i - 1>(tupleBase);
+    return get<i - 1>(tupleBase);       
 }
 
 }       // End namespace frnn

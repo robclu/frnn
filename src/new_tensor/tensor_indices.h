@@ -30,39 +30,57 @@ namespace tensor    {
 
 /*
  * ==========================================================================================================
- * Function         : Index 
- * 
- * Description      : Struct representing an index (dimension) of a tensor, for example 1 would be an index
- *                    for the second dimension (0 indexing)
- * 
- * Params           : idx       : The value of the index of a tensor the struct represents
+ * Class        : Index 
+ * Description  : Struct representing an index (dimension) of a tensor, for example 1 would be an index for 
+ *                the second dimension (since the tensors use 0 indexing)
  * ==========================================================================================================
  */
-struct Index
-{
-    public:   
-        size_t idx;
-        Index(size_t i) : idx(i) {}
+class Index {
+private:   
+    size_t _idx;         // Value of the dimension
+public:
+    
+    /*
+     * ======================================================================================================
+     * Function         : Index
+     * Description      : Constructor for the index class, which sets the value of the index
+     * Params           : i     : The value of the index
+     * ======================================================================================================
+     */
+    constexpr Index(size_t i) : _idx(i) {}
         
-        /*
-         * ==================================================================================================
-         * Function     : operator()
-         * 
-         * Description  : Returns the value of the dimension (which dimension the struct represents)
-         * 
-         * Outputs      : The index of the dimension 
-         * ==================================================================================================
-         */
-        size_t operator()() const { return idx; }
+    /*
+     * ======================================================================================================
+     * Function         : operator() 
+     * Description      : Returns the value of the Index (which dimension the Index represents)
+     * Outputs          : The index of the dimension 
+     * ======================================================================================================
+     */
+    constexpr size_t operator()() const { return _idx; }
 };
 
 /* ================================================ Typedefs ============================================== */
 
 namespace dim {
     
-    Index i(0);
-    Index j(1);
-    Index k(2);
+Index i(0);
+Index j(1);
+Index k(2);
+Index l(3);
+Index m(4);
+Index n(5);
+Index o(6);
+Index p(7);
+Index q(8);
+Index r(9);
+Index s(10);
+Index t(11);
+Index u(12);
+Index v(13);
+Index w(14);
+Index x(15);
+Index y(16);
+Index z(17);
 
 }       // End namespace dim
 
