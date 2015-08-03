@@ -18,6 +18,10 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */ 
 
+/*
+ *  For an article on this see : http://eli.thegreenplace.net/2014/variadic-templates-in-c/
+ */
+
 #ifndef _FRNN_CONTAINERS_TUPLE_
 #define _FRNN_CONTAINERS_TUPLE_
 

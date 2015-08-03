@@ -214,7 +214,9 @@ TEST( frnnIndexList, CanMapIndexWhenSlicing )
     
     Tensor<int, 3> t = {3, 3, 3};
     
-    Tuple<tensor::Index, tensor::Index> tt = t(tensor::dim::j, tensor::dim::i);
+    Tensor<int, 2> tt = t(tensor::dim::j, tensor::dim::i);
+
+    size_t ttSize = tt.size();
     
-    EXPECT_EQ( 1, 1 );
+    EXPECT_EQ( ttSize, 9 );
 }

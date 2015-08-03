@@ -209,10 +209,11 @@ class TensorSlice : public TensorExpression<T, TensorSlice<T, E, Ts...>>
         /* ================================================================================================ */ 
     private:
         E const&                        x_;                 // Reference to expression
-        Tuple<Ts...>                    sliceDims_;         // Dimensions for the sliced tensor
+        mutable Tuple<Ts...>            sliceDims_;         // Dimensions for the sliced tensor
         mutable std::vector<size_type>  prevSliceDims_;     // Previous dimensions used for recursice map index
         mutable size_type               index_;             // Index of an element in the tensor to be sliced
         mutable size_type               offset_;            // Offset in the old tensor due to mapping to dimension 0
+        size_type                       sliceSize_;         // Size of the data of the slice
     public:        
         /*
          * ==================================================================================================
@@ -226,10 +227,17 @@ class TensorSlice : public TensorExpression<T, TensorSlice<T, E, Ts...>>
          * ==================================================================================================
          */
         TensorSlice(TensorExpression<T, E> const& x, Tuple<Ts...> sliceDims)
-        : x_(x), index_(0), offset_(0), prevSliceDims_(0), sliceDims_(sliceDims)
-        {
-            std::cout << "SD0 : " << get<0>(sliceDims_)() << std::endl; 
-        }
+        : x_(x), index_(0), offset_(0), prevSliceDims_(0), sliceSize_(determineSize()), sliceDims_(sliceDims)
+        {}
+       
+        /*
+         * ==================================================================================================
+         * Function     : size 
+         * 
+         * Description  : Returns the size of sliced tensor
+         * ==================================================================================================
+         */
+        size_type size() const { return sliceSize_; }
         
        /*
         * ===================================================================================================
@@ -241,7 +249,34 @@ class TensorSlice : public TensorExpression<T, TensorSlice<T, E, Ts...>>
         * ===================================================================================================
         */
         const std::vector<size_type>& dimSizes() const { return x_.dimSizes(); }
-  
+ 
+        /*
+         * ==================================================================================================
+         * Function     : operator[]
+         * 
+         * Description  : Overloaded access operator to return an element of the new tensor, using the mapping
+         *                to get the value from the old tensor 
+         * 
+         * Inputs       : i     : The index of the element to get
+         * 
+         * Outputs      : The tensor element at the specified index
+         * ==================================================================================================
+         */
+        value_type operator[](size_type i) const { return x_[mapIndex(i)]; }
+
+        template <size_type i = 0>
+        typename std::enable_if<i != (sizeof...(Ts) - 1), size_type>::type determineSize() const
+        {
+            return (x_.size(get<i>(sliceDims_)())   *       // Get size of dimension i from old tensor
+                    determineSize<i + 1>()          );      // Multiply with remaining dimensions
+        }
+        
+        template <size_type i>
+        typename std::enable_if<i == (sizeof...(Ts) - 1), size_type>::type determineSize() const 
+        {
+            return x_.size(get<i>(sliceDims_)());           // Get size of last dimension old tensor   
+        }
+        
         /*
          * ==================================================================================================
          * Function     : mapIndex (non terminating case)
@@ -260,7 +295,7 @@ class TensorSlice : public TensorExpression<T, TensorSlice<T, E, Ts...>>
          *                            dimensions is being mapped to the sliced tensor
          * ==================================================================================================
          */ 
-        template <size_type i>
+        template <size_type i = 0>
         typename std::enable_if<i != (sizeof...(Ts) - 1), size_type>::type mapIndex(size_type idx) const 
         {
             size_type mappedDim = 0, dim = 0, dimOffset = 0;
@@ -322,25 +357,11 @@ class TensorSlice : public TensorExpression<T, TensorSlice<T, E, Ts...>>
             
             // Calculate result and clear all other variables
             size_type total_offset = index_ + offset_;          
-            prevSliceDims_.clear;
+            prevSliceDims_.clear();
             index_ = 0; offset_ = 0;
         
             return total_offset;
         }
-        
-        /*
-         * ==================================================================================================
-         * Function     : operator[]
-         * 
-         * Description  : Overloaded access operator to return an element of the new tensor, using the mapping
-         *                to get the value from the old tensor 
-         * 
-         * Inputs       : i     : The index of the element to get
-         * 
-         * Outputs      : The tensor element at the specified index
-         * ==================================================================================================
-         */
-        value_type operator[](size_type i) const { return x_[mapIndex<0>(i)]; }
 };
 
 } // End namespace frnn
