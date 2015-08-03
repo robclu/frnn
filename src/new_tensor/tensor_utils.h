@@ -34,8 +34,7 @@ namespace tensor {
  * Description  : Takes an index of an element in a new tensor and determines the index in each of the
  *                dimension of the old tensor which return the corresponding element in the new tensor
  *                
- * Params       : isFirst     : If this is the first iteration, in which case the functor operation is 
- *                              different
+ * Params       : iter     : Which iteration of the index mapping the algorithm is on
  * ==========================================================================================================
  */
 template <size_t iter> struct DimensionMapper
@@ -49,20 +48,19 @@ template <size_t iter> struct DimensionMapper
          *                    the new tensor (which is being created from the slice)
          * 
          * Inputs           : idx                   : The index of the element in the new tensor
-         *                  : dimSize               : The size of the dimension in the original tensor for
+         *                  : dim_size              : The size of the dimension in the original tensor for
          *                                            which the index must be determined
-         *                  : prevDimensionSizes    : The sizes of the previous dimensions for which the 
+         *                  : prev_dim_sizes        : The sizes of the previous dimensions for which the 
          *                                            indices have been determined
          * ==================================================================================================
          */             
-        size_t operator()(const size_t idx, const size_t dimSize, 
-                          std::vector<size_t>& prevDimensionSizes) const 
+        size_t operator()(const size_t idx, const size_t dim_size, std::vector<size_t>& prev_dim_sizes) const 
         {
-            size_t prevDimensionSizesProduct = std::accumulate(prevDimensionSizes.begin()   ,
-                                                               prevDimensionSizes.end()     ,
-                                                               1                            ,
-                                                               std::multiplies<size_t>()    );
-            return ((idx % (prevDimensionSizesProduct * dimSize)) / prevDimensionSizesProduct);
+            size_t prev_dim_sizes_product = std::accumulate(prev_dim_sizes.begin()       ,
+                                                            prev_dim_sizes.end()         ,
+                                                            1                            ,
+                                                            std::multiplies<size_t>()    );
+            return ((idx % (prev_dim_sizes_product * dim_size)) / prev_dim_sizes_product);
         }
 };
 
@@ -77,16 +75,15 @@ template<> struct DimensionMapper<0>
          *                    the new tensor (which is being created from the slice)
          * 
          * Inputs           : idx                   : The index of the element in the new tensor
-         *                  : dimSize               : The size of the dimension in the original tensor for
+         *                  : dim_size              : The size of the dimension in the original tensor for
          *                                            which the index must be determined
-         *                  : prevDimensionSizes    : The sizes of the previous dimensions for which the 
+         *                  : prev_dim_sizes        : The sizes of the previous dimensions for which the 
          *                                            indices have been determined
          * ==================================================================================================
          */      
-        size_t operator()(const size_t idx, const size_t dimSize, 
-                          const std::vector<size_t>& prevDimensionSizes) const 
+        size_t operator()(const size_t idx, const size_t dim_size) const 
         {
-            return idx % dimSize;
+            return idx % dim_size;
         }
 };
 
