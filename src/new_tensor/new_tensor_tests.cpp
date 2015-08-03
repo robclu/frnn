@@ -108,22 +108,33 @@ TEST( frnnTensor, CanGetReferenceToTensorData )
     EXPECT_EQ( tensor_data.size(), 6 );
     EXPECT_EQ( tensor_data[0], 0.f );
 }
-    
-TEST( frnnTensor, CanSubtractTwoTensors ) 
-{
-    frnn::Tensor<float, 3> tensor_1     = {1, 2, 3};
-    frnn::Tensor<float, 3> tensor_2     = {1, 2, 3}; 
-    frnn::Tensor<float, 3> new_tensor   = tensor_1 - tensor_2;
-    
-    EXPECT_EQ( new_tensor.size(), tensor_1.size() );
-}
 
-TEST( frnnTensor, CanSubtractThreeTensors ) 
+TEST( frnnTensor, CanAddTensors ) 
 {
     frnn::Tensor<float, 3> tensor_1     = {1, 2, 3};
     frnn::Tensor<float, 3> tensor_2     = {1, 2, 3};
     frnn::Tensor<float, 3> tensor_3     = {1, 2, 3};
+    frnn::Tensor<float, 3> new_tensor   = tensor_1 + tensor_2 + tensor_3;
+    
+    EXPECT_EQ( new_tensor.size(), tensor_1.size() );
+}
+
+TEST( frnnTensor, CanSubtractTensors ) 
+{
+    frnn::Tensor<float, 3> tensor_1     = {1, 2, 3};
+    frnn::Tensor<float, 3> tensor_2     = {1, 2, 3}; 
+    frnn::Tensor<float, 3> tensor_3     = {1, 2, 3}; 
     frnn::Tensor<float, 3> new_tensor   = tensor_1 - tensor_2 - tensor_3;
+    
+    EXPECT_EQ( new_tensor.size(), tensor_1.size() );
+}
+
+TEST( frnnTensor, CanAddAndSubtractTensors ) 
+{
+    frnn::Tensor<float, 3> tensor_1     = {1, 2, 3};
+    frnn::Tensor<float, 3> tensor_2     = {1, 2, 3};
+    frnn::Tensor<float, 3> tensor_3     = {1, 2, 3};
+    frnn::Tensor<float, 3> new_tensor   = tensor_1 - tensor_2 + tensor_3;
     
     EXPECT_EQ( new_tensor.size(), tensor_1.size() );
 }

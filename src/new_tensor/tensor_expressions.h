@@ -153,12 +153,77 @@ public:
      * ======================================================================================================
      * Function     : operator[]
      * Description  : Overloaded access operator to return an element 
-     * Inputs       : i     : The index of the element to get
-     * Outputs      : The tensor element at the specified index
+     * Inputs       : i     : The index of the elements to subtract
+     * Outputs      : The sum of the tensor elements at the specified index
      * ======================================================================================================
      */
     value_type operator[](size_type i) const { return _x[i] - _y[i]; }
 };      
+
+/*
+ * ==========================================================================================================
+ * Class        : TensorAddition
+ * Description  : Expression class for calculating the addition of two tensors
+ * Params       : T     : The type of the data used by the tesors
+ *              : E1    : The type of the  first expression for the addition
+ *              : E2    : The type of the second expression for the addition
+ * ==========================================================================================================
+ */
+template <typename T, typename E1, typename E2>
+class TensorAddition : public TensorExpression<T, TensorAddition<T,E1,E2>> {
+public:
+    /* ====================================== Typedefs ==================================================== */
+    using typename TensorExpression<T, TensorAddition<T,E1,E2>>::container_type;
+    using typename TensorExpression<T, TensorAddition<T,E1,E2>>::size_type;
+    using typename TensorExpression<T, TensorAddition<T,E1,E2>>::value_type;
+    /* ==================================================================================================== */
+private:
+    E1 const& _x;       // Reference to first expression 
+    E2 const& _y;       // Reference to second expression
+public:
+    /*
+     * ======================================================================================================
+     * Function     : TensorAddition
+     * Description  : Constructor for the TensorAddition class, using the two expressions
+     * Inputs       : x     : The first expression for addition
+     *              : y     : The second expression for addition
+     * ======================================================================================================
+     */
+    TensorAddition(TensorExpression<T,E1> const& x, TensorExpression<T,E2> const& y) : _x(x), _y(y) 
+    { 
+        ASSERT(x.size(), ==, y.size());                         // Check total sizes
+        for (int i = 0; i < x.dimSizes().size(); i++) {         // Check each dimension size
+            ASSERT(x.dimSizes()[i], ==, y.dimSizes()[i]);
+        }
+    }
+   
+   /*
+    * =======================================================================================================
+    * Function      : dimSizes
+    * Description   : Returns the sizes of the dimensions of the expressions
+    * Output        : A constant reference to the dimension sizes vector of the expression
+    * =======================================================================================================
+    */
+    const std::vector<size_type>& dimSizes() const { return _x.dimSizes(); }
+    
+    /*
+     * ======================================================================================================
+     * Function     : size 
+     * Description  : Returns the size of the result of the subtraction expression
+     * ======================================================================================================
+     */
+    size_type size() const { return _x.size(); }
+    
+    /*
+     * ======================================================================================================
+     * Function     : operator[]
+     * Description  : Overloaded access operator to return the addition of an element
+     * Inputs       : i     : The index of the elements to add
+     * Outputs      : The sum of the tensor elements at the specified index
+     * ======================================================================================================
+     */
+    value_type operator[](size_type i) const { return _x[i] + _y[i]; }
+};    
 
 /*
  * ==========================================================================================================
@@ -355,10 +420,31 @@ namespace {
  * ==========================================================================================================
  */
 template <typename T, typename E1, typename E2>
-frnn::TensorDifference<T, E1 ,E2> const operator-(frnn::TensorExpression<T,E1> const& x, 
-                                                  frnn::TensorExpression<T,E2> const& y)    
+frnn::TensorDifference<T, E1 ,E2> const operator-(frnn::TensorExpression<T, E1> const& x, 
+                                                  frnn::TensorExpression<T, E2> const& y)    
 {
-    return frnn::TensorDifference<T,E1,E2>(x, y);
+    return frnn::TensorDifference<T, E1, E2>(x, y);
+}
+
+/*
+ * ==========================================================================================================
+ * Function     : operator+
+ * Description  : Overloaded + operator to add two tensor expressions, which improves readability of the
+ *                addition of two tensors, and improves performance through the expression templates
+ * Inputs       : x     : The first expression for the addition (this could be a tensor addition, a tensor
+ *                        itself etc...)
+ *              : y     : The second expression for the addition
+ * Outputs      : The result of the addition of the expressions
+ * Params       : T     : The type of data used by the expressions
+ *              : E1    : The type of the first expression
+ *              : E2    : The type of the second expression
+ * ==========================================================================================================
+ */
+template <typename T, typename E1, typename E2>
+frnn::TensorAddition<T, E1 ,E2> const operator+(frnn::TensorExpression<T, E1> const& x, 
+                                                frnn::TensorExpression<T, E2> const& y)    
+{
+    return frnn::TensorAddition<T, E1, E2>(x, y);
 }
 
 } // End global namespace

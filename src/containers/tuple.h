@@ -142,6 +142,13 @@ get(Tuple<T, Ts...>& tuple)
     return get<i - 1>(tupleBase);       
 }
 
+namespace tuple {
+    
+template <typename... Ts>
+size_t size(Tuple<Ts...>& tuple) { return sizeof...(Ts); };
+
+}
+
 }       // End namespace frnn
 
 #endif
