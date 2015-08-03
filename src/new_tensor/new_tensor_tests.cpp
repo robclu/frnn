@@ -25,27 +25,27 @@
 
 TEST( frnnTensor, CanCreateTensorWithDefaultConstructor ) 
 {
-    frnn::Tensor<float, 3> testTensor;
-    EXPECT_EQ( testTensor.size(), 0 );
+    frnn::Tensor<float, 3> tensor;
+    EXPECT_EQ( tensor.size(), 0 );
 }
 
 TEST( frnnTensor, CanSpecifyTensorDimensionsWithList ) 
 {
-    frnn::Tensor<float, 2> testTensor = {4, 3};
-    EXPECT_EQ( testTensor.size(), 12 );
+    frnn::Tensor<float, 2> tensor = {4, 3};
+    EXPECT_EQ( tensor.size(), 12 );
 }
 
 TEST( frnnTensor, CanCreateTensorFromDimensionSizesAdnData )
 {
-    std::vector<size_t> dimensionSizes = {2, 3};
-    std::vector<float> data = {1.f, 2.f, 
-                               3.f, 4.f,
-                               5.f, 6.f};
-    frnn::Tensor<float, 2> tensor(dimensionSizes, data);
+    std::vector<size_t> dimension_sizes = {2, 3};
+    std::vector<float>  data            = {1.f, 2.f,       // x0, x1, y0
+                                           3.f, 4.f,       // x0, x1, y1
+                                           5.f, 6.f};      // x0, x1, y2
     
-    const std::vector<float>& tensorData = tensor.data();
+    frnn::Tensor<float, 2> tensor(dimension_sizes, data);
+    const std::vector<float>& tensor_data = tensor.data();
     
-    EXPECT_EQ( tensorData[1], 2.f );
+    EXPECT_EQ( tensor_data[1], 2.f );
 }
 
 TEST( frnnTensor, CanGetRankOfTensor ) 
@@ -81,11 +81,11 @@ TEST( frnnTensor, CanGetSizeOfASpecificDimensionOfTensor )
 {
     frnn::Tensor<float, 3> tensor = {1, 2, 3};
     
-    int dim0Size = tensor.size(0);
-    int dim2Size = tensor.size(2);
+    int dim_size_0 = tensor.size(0);
+    int dim_size_2 = tensor.size(2);
     
-    EXPECT_EQ( dim0Size, 1 );
-    EXPECT_EQ( dim2Size, 3 );
+    EXPECT_EQ( dim_size_0, 1 );
+    EXPECT_EQ( dim_size_2, 3 );
 }
 
 TEST( frnnTensor, CanHandleOutOfRangeIndexForSizeFunction ) 
@@ -93,63 +93,60 @@ TEST( frnnTensor, CanHandleOutOfRangeIndexForSizeFunction )
     frnn::Tensor<int, 8> tensor = {1, 2, 4, 5, 3, 1, 1, 8};
     
     // Wrong due to 0 indexing
-    int dimSize8  = tensor.size(8);
-    int dimSize10 = tensor.size(10);
+    int dim_size_8  = tensor.size(8);
+    int dim_size_10 = tensor.size(10);
     
-    EXPECT_EQ( dimSize8 , 0 );
-    EXPECT_EQ( dimSize10, 0 );
+    EXPECT_EQ( dim_size_8 , 0 );
+    EXPECT_EQ( dim_size_10, 0 );
 }
 
 TEST( frnnTensor, CanGetReferenceToTensorData ) 
 {
-    frnn::Tensor<float, 3> tensor1 = {1, 2, 3};
+    frnn::Tensor<float, 3> tensor_1       = {1, 2, 3};
+    const std::vector<float>& tensor_data = tensor_1.data();
     
-    const std::vector<float>& tensorData = tensor1.data();
-    
-    EXPECT_EQ( tensorData.size(), 6 );
-    EXPECT_EQ( tensorData[0], 0.f );
+    EXPECT_EQ( tensor_data.size(), 6 );
+    EXPECT_EQ( tensor_data[0], 0.f );
 }
     
 TEST( frnnTensor, CanSubtractTwoTensors ) 
 {
-    frnn::Tensor<float, 3> tensor1 = {1, 2, 3};
-    frnn::Tensor<float, 3> tensor2 = {1, 2, 3};
+    frnn::Tensor<float, 3> tensor_1     = {1, 2, 3};
+    frnn::Tensor<float, 3> tensor_2     = {1, 2, 3}; 
+    frnn::Tensor<float, 3> new_tensor   = tensor_1 - tensor_2;
     
-    frnn::Tensor<float, 3> newTensor = tensor1 - tensor2;
-    
-    EXPECT_EQ( newTensor.size(), tensor1.size() );
+    EXPECT_EQ( new_tensor.size(), tensor_1.size() );
 }
 
 TEST( frnnTensor, CanSubtractThreeTensors ) 
 {
-    frnn::Tensor<float, 3> tensor1 = {1, 2, 3};
-    frnn::Tensor<float, 3> tensor2 = {1, 2, 3};
-    frnn::Tensor<float, 3> tensor3 = {1, 2, 3};
+    frnn::Tensor<float, 3> tensor_1     = {1, 2, 3};
+    frnn::Tensor<float, 3> tensor_2     = {1, 2, 3};
+    frnn::Tensor<float, 3> tensor_3     = {1, 2, 3};
+    frnn::Tensor<float, 3> new_tensor   = tensor_1 - tensor_2 - tensor_3;
     
-    frnn::Tensor<float, 3> newTensor = tensor1 - tensor2 - tensor3;
-    
-    EXPECT_EQ( newTensor.size(), tensor1.size() );
+    EXPECT_EQ( new_tensor.size(), tensor_1.size() );
 }
 
 TEST( frnnTensor, CanGetTensorRankAfterOperation )
 {
-    frnn::Tensor<int, 4> tensor1 = {1, 2, 1, 1};
-    frnn::Tensor<int, 4> tensor2 = {1, 2, 1, 1};
+    frnn::Tensor<int, 4> tensor_1 = {1, 2, 1, 1};
+    frnn::Tensor<int, 4> tensor_2 = {1, 2, 1, 1};
+    frnn::Tensor<int, 4> tensor_3 = tensor_1 - tensor_2;
     
-    frnn::Tensor<int, 4> tensor3 = tensor1 - tensor2;
+    int rank = tensor_3.rank();
     
-    int rank = tensor3.rank();
     EXPECT_EQ( rank, 4 );
 }
 
 TEST( frnnTensor, CanGetDimensionSizesAfterOperation ) 
 {
-    frnn::Tensor<int, 4> tensor1 = {1, 2, 1, 1};
-    frnn::Tensor<int, 4> tensor2 = {1, 2, 1, 1};
+    frnn::Tensor<int, 4> tensor_1 = {1, 2, 1, 1};
+    frnn::Tensor<int, 4> tensor_2 = {1, 2, 1, 1};
     
-    frnn::Tensor<int, 4> tensor3 = tensor1 - tensor2;
+    frnn::Tensor<int, 4> tensor_3   = tensor_1 - tensor_2;
+    std::vector<size_t>  dims       = tensor_3.dimSizes();
     
-    std::vector<size_t> dims = tensor3.dimSizes();
     EXPECT_EQ( dims[ 0 ], 1 );
     EXPECT_EQ( dims[ 1 ], 2 );
     EXPECT_EQ( dims[ 2 ], 1 );
@@ -171,14 +168,11 @@ TEST( frnnTensor, CanSetElementOfTensor )
     
     // Set 2nd element 
     tensor(1, 0, 0) = 4;
-
-    int x = tensor(1, 0, 0);
-    x = 12;
     
     // Get data 
-    const std::vector<int>& tensorData = tensor.data();
+    const std::vector<int>& tensor_data = tensor.data();
     
-    EXPECT_EQ( tensorData[1], 4 );
+    EXPECT_EQ( tensor_data[1], 4 );
     EXPECT_EQ( tensor(1, 0, 0), 4 );
 }
 
@@ -199,24 +193,25 @@ TEST( frnnTensor, ThrowsErrorForOutOfRangeElementAccess)
     
     // Access element 3 of dimension with size 3
     // (Tensor indexing is 0 based)
-    int element1 = tensor(1, 3, 2);
-    int element2 = tensor(4, 1, 1);
-    int element3 = tensor(1, 1, 5);
+    int element_1 = tensor(1, 3, 2);
+    int element_2 = tensor(4, 1, 1);
+    int element_3 = tensor(1, 1, 5);
     
-    EXPECT_EQ( element1, 0 );
-    EXPECT_EQ( element2, 0 );
-    EXPECT_EQ( element3, 0 );
+    EXPECT_EQ( element_1, 0 );
+    EXPECT_EQ( element_2, 0 );
+    EXPECT_EQ( element_3, 0 );
 }
 
-TEST( frnnIndexList, CanMapIndexWhenSlicing ) 
+TEST( frnnTensor, CanCreateNewTensorFromSlice ) 
 {
-    using namespace frnn;
+    using namespace frnn::tensor::dim;
+    frnn::Tensor<int, 3> tensor         = {3, 2, 3};
+    frnn::Tensor<int, 2> sliced_tensor  = tensor(j, i);
     
-    Tensor<int, 3> t = {3, 3, 3};
+    // Check that dimensions were correctly swapped
+    size_t slice_dim_size_i = sliced_tensor.size(0);    
+    size_t slice_dim_size_j = sliced_tensor.size(1);
     
-    Tensor<int, 2> tt = t(tensor::dim::j, tensor::dim::i);
-
-    size_t ttSize = tt.size();
-    
-    EXPECT_EQ( ttSize, 9 );
+    EXPECT_EQ( slice_dim_size_i, tensor.size(1) );
+    EXPECT_EQ( slice_dim_size_j, tensor.size(0) );
 }
