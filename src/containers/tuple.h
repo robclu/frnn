@@ -1,6 +1,12 @@
+// ==========================================================================================================
+//! @file tuple.h
+//!       Header file for the fastRNN Tuple class to hold and number of elements of any type. 
+//!       A good tutorial on using variadic templates for this type of implementation is given at:
+//!       http://eli.thegreenplace.net/2014/variadic-templates-in-c/
+// ==========================================================================================================
+
 /*
- *  Header file for fastRNN tuple container.
- *
+ * ==========================================================================================================
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -16,58 +22,58 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program; if not, write to the Free Software Foundation,
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *  =========================================================================================================
  */ 
-
-/*
- *  For an article on this see : http://eli.thegreenplace.net/2014/variadic-templates-in-c/
- */
 
 #ifndef _FRNN_CONTAINERS_TUPLE_
 #define _FRNN_CONTAINERS_TUPLE_
 
 namespace frnn {
 
-/*
- * ==========================================================================================================
- * Struct       : Tuple 
- * Description  : Tuple class which can be created using any types and any number of elements
- * Params       : Ts        : The types of the elements in the Tuple
- * ==========================================================================================================
- */
+// ==========================================================================================================
+//! @struct  Tuple 
+//! @brief   Holds any number of elements of any type.
+//! @details Usage : Tuple<type1, type2, ...> tuple(elem1 of type1, elem2 of type2, ...)
+//! @tparam  Ts Types of all elements held in the Tuple.  
+// ==========================================================================================================
 template <typename... Ts> struct Tuple {};
 
+// ==========================================================================================================
+//! @struct  Tuple 
+//! @tparam  T Type of the element to add to the Tuple. 
+// ==========================================================================================================
 template <typename T>
 struct Tuple<T> {
 public:
-    T _back;            // Element of the tuple
+    T _back;            //!< Element of the Tuple
 public:
-    /*
-     * ======================================================================================================
-     * Function         : Tuple 
-     * Description      : Constuctor for a Tuple when there is only one element (base case of recursive
-     *                    construction
-     * Inputs           : element   : The element to add to the tuple
-     * ======================================================================================================
-     */
+    // ======================================================================================================
+    //! @fn         Tuple
+    //! @brief      Constuctor for a Tuple when there is only one element (base case of recursive 
+    //!             construction).
+    //! @param[in]  element The element of type T to add to the Tuple.
+    // ======================================================================================================
     Tuple(T element) : _back(element) {}
 };
 
+// ==========================================================================================================
+//! @struct  Tuple 
+//! @tparam  T  Type of the element to add to the Tuple. 
+//! @tparam  Ts The types of the elements to add to the Tuple on the following iterations of the recursive 
+//!             construction.
+// ==========================================================================================================
 template <typename T, typename... Ts>
 struct Tuple<T, Ts...> : Tuple<Ts...> {
 public: 
-    T _back;
+    T _back;            //!< Element of the Tuple
 public:
-    /*
-     * ======================================================================================================
-     * Function         : Tuple 
-     * Description      : Constructor for a Tuple when there is more than one element
-     * Inputs           : element   : The element to add to the tuple on this iteration of the construction
-     *                  : elements  : The rest of the elements to add to the tuple on the remaining iterations 
-     *                                of the construction
-     * Params           : T         : The type of the element to add
-     *                  : Ts        : The types of the rest of the elemnts to add
-     * ======================================================================================================
-     */
+     // =====================================================================================================
+     //! @fn    Tuple 
+     //! @brief Constructor for a Tuple when there is more than one element.
+     //! @param[in] element     The element to add to the Tuple on this iteration of the recursive 
+     //!                        construction.
+     //! @param[in] elements    The rest of the elements to add to the Tuple on the remaining iterations.
+     //  ====================================================================================================
     Tuple(T element, Ts... elements) : Tuple<Ts...>(elements...), _back(element) {}
 };
 
