@@ -1,6 +1,9 @@
+// ==========================================================================================================
+//! @file   Header file for fastRNN tensor exception classes.
+// ==========================================================================================================
+
 /*
- *  Header file for fastRNN tensor exception class.
- *
+ * ==========================================================================================================
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -16,6 +19,7 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program; if not, write to the Free Software Foundation,
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * ==========================================================================================================
  */ 
 
 #ifndef _FRNN_TENSOR_EXCEPTION_
@@ -27,27 +31,20 @@
 
 namespace frnn {
 
-/*
- * ==========================================================================================================
- * Class        : TensorOutOfRange
- * Description  : Class which provides the exception for when an element of a dimension of a tensor which 
- *                is out of the range of the dimension (accessing element 3 of dimension 2 if dimension 2 has
- *                a size of 1)
- * ==========================================================================================================
- */
+// ==========================================================================================================
+//! @class  TensorOutOfRange
+//! @brief  Provides exceptions for when a range error occurs for a Tensor.
+// ==========================================================================================================
 class TensorOutOfRange : public std::exception {
 public:
-    std::string _message;           // Error message for exception
+    std::string _message;           //!< Error message for exception.
 public:
-    /*
-     * ======================================================================================================
-     * Function     : TensorOutOfRange
-     * Description  : Constructor for the TensorOutOfRange class. Sets the error message using the inputs
-     * Inputs       : dimension         : The dimension from which the element is being accessed
-     *              : dimension_size    : The size of the dimension
-     *              : index             : The index of the element which is trying to be accessed
-     * ======================================================================================================
-     */
+    // ======================================================================================================
+    //! @brief      Sets the error message.
+    //! @param[in]  dimension       The dimension of a Tensor from which element access was attempted.
+    //! @param[in]  dimension_size  The size of the dimension.
+    //! @param[in]  index           The index of the element for which access was attempted.
+    // ======================================================================================================
     TensorOutOfRange(const int dimension, const int dimension_size, const int index) 
     : _message("Error : Out of range : Attempted to access invalid tensor element "    + 
                 std::to_string(index)                                                  + 
@@ -57,14 +54,11 @@ public:
                 std::to_string(dimension_size)                                         +
                 " : Note : tensors are 0 indexed"                                      ) {} 
    
-    /*
-     * ======================================================================================================
-     * Function     : TensorOutOfRange
-     * Description  : Constructor for the TensorOutOfRange class. Sets the error message using the inputs
-     * Inputs       : dimension     : The dimension which is trying to be accessed
-     *              : rank          : The rank of the tensor
-     * ======================================================================================================
-     */
+    // ======================================================================================================
+    //! @brief      Sets the error message.
+    //! @param[in]  dimension   The dimension of the Tensor for which access was attempted.
+    //! @param[in]  rank        The rank of the Tensor.
+    // ======================================================================================================
     TensorOutOfRange(const int dimension, const int rank) 
     : _message("Error : Out of range : Attempted to access invalid dimension "  +   
                 std::to_string(dimension)                                       + 
@@ -72,36 +66,27 @@ public:
                 std::to_string(rank)                                            +
                 " returning value of 0"                                         ) {}
     
-    /*
-     * ======================================================================================================
-     * Function     : what 
-     * Description  : Function for specifying the error message for out of range tensor acccess
-     * Outputs      : The error message
-     * ======================================================================================================
-     */
+    // ======================================================================================================
+    //! @brief      Specifying the error message for out of range access on a Tensor.
+    //! @return     The error message.
+    // ======================================================================================================
     const char* what() const throw() { return _message.c_str(); }
 };
 
-/*
- * ==========================================================================================================
- * Class        : TensorInvalidArguments
- * Description  : Class which provides the exception for when an invalid number of arguments are provided to a
- *                tensor function, and can be used for any of the variadic functions where the number of 
- *                arguments is known
- * ==========================================================================================================
- */
+// ==========================================================================================================
+//! @class      TensorInvalidArguments
+//! @brief      Provides the exception for when an invalid number of arguments are provided to a Tensor
+//!             function, since many of the functions are variadic, this is a possibility.
+// ==========================================================================================================
 class TensorInvalidArguments : public std::exception {
 public:
     std::string _message;
 public:
-    /*
-     * ======================================================================================================
-     * Function     : TensorInvalidArguments
-     * Description  : Constructor which sets the error message
-     * Inputs       : num_args_specified    : The number of arguments given to the function
-     *              : num_args_required     : The number of arguments required by the function
-     * ======================================================================================================
-     */ 
+    // ======================================================================================================
+    //! @brief      Sets the error message
+    //! @param[in]  num_args_specified  The number of arguments given to the function.
+    //! @param[in]  num_args_required   The number of arguments required by the function
+    // ====================================================================================================== 
     TensorInvalidArguments(const int num_args_specified, const int num_args_required) 
     : _message("Error : Invalid Arguments for tensor : "    +
                 std::to_string(num_args_required)           +
@@ -109,13 +94,10 @@ public:
                 std::to_string(num_args_specified)          +
                 " given"                                    ) {}
     
-    /*
-     * ======================================================================================================
-     * Function     : what 
-     * Description  : Function for specifying the error message for invalid arguments for tensor functions
-     * Outputs      : The error message
-     * ======================================================================================================
-     */    
+    // ======================================================================================================
+    //! @brief      Specifying the error message for invalid arguments for a Tensor function.
+    //! @return     The error message.
+    // ======================================================================================================
     const char* what() const throw() { return _message.c_str(); }
 };
 

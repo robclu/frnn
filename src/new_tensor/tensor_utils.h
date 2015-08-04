@@ -33,11 +33,11 @@ namespace tensor {
     
 // ==========================================================================================================
 //! @struct     DimensionMapper 
-//! @brief      Takes an index of an element in a new tensor A which is a slice of an old tensor B, and 
-//!             determines the index in a dimension of the old tensor A which can be used to fetch the 
+//! @brief      Takes an index of an element in a new Tensor A which is a slice of an old Tensor B, and 
+//!             determines the index in a dimension of the old Tensor A which can be used to fetch the 
 //!             corresponding element for idx in B.                                                          \n
 //!                                                                                                          \n
-//!             Say A is a 2D tensor with dimensions {2, 3}, so x = 2, y = 3, which is :                     \n
+//!             Say A is a 2D Tensor with dimensions {2, 3}, so x = 2, y = 3, which is :                     \n
 //!                                                                                                          \n
 //!             A = [ x00 x01 ;                                                                              \n
 //!                   x10 x11 ;                                                                              \n
@@ -56,18 +56,17 @@ namespace tensor {
 // ==========================================================================================================
 template <size_t iter> struct DimensionMapper{
 public:
-    /*
-     * ======================================================================================================
-     * Function         : operator()
-     * Description      : Determines the index of a dimension in a tensor which can be used to fetch the
-     *                    element in that tensor corresponding to idx in this tensor
-     * Inputs           : idx                   : The index of the element in the new tensor
-     *                  : dim_size              : The size of the dimension in the original tensor for
-     *                                            which the index must be determined
-     *                  : prev_dim_sizes        : The sizes of the previous dimensions for which the 
-     *                                            indices have been determined
-     * ======================================================================================================
-     */             
+     //======================================================================================================
+     //! @brief     Determines the index of a dimension in a tensor which can be used to fetch the
+     //!            element in that tensor corresponding to element idx in the calling Tensor.
+     //! @param[in] idx             The index of the element to map in the calling Tensor.
+     //! @param[in] dim_size        The size of the dimension in the original tensor for which the index
+     //!            must be mapped.
+     //! @param[in] prev_dim_size   The sizes of the dimensions for which the mappings have already been 
+     //!                            determined.
+     //! @return    A value of a dimension in a Tensor being mapped from which can be used to get the element
+     //!            for position idx in the new Tensor.
+     // =====================================================================================================
     size_t operator()(const size_t idx, const size_t dim_size, std::vector<size_t>& prev_dim_sizes) const 
     {
         // Computes the product of the previous dimensions sizes which were used by 
@@ -84,18 +83,17 @@ public:
 
 template<> struct DimensionMapper<0> {
 public:
-    /*
-     * ======================================================================================================
-     * Function         : operator()
-     * Description      : Determines the index of a dimension in a tensor which can be used to fetch the
-     *                    element in that tensor corresponding to idx in this tensor
-     * Inputs           : idx                   : The index of the element in the new tensor
-     *                  : dim_size              : The size of the dimension in the original tensor for
-     *                                            which the index must be determined
-     *                  : prev_dim_sizes        : The sizes of the previous dimensions for which the 
-     *                                            indices have been determined
-     * ======================================================================================================
-     */      
+     //======================================================================================================
+     //! @brief     Determines the index of a dimension in a tensor which can be used to fetch the
+     //!            element in that tensor corresponding to element idx in the calling Tensor, this is 
+     //!            for the partially specialized instance of the DimensionMapper functor for the first 
+     //!            iteration of the algorithm.
+     //! @param[in] idx             The index of the element to map in the calling Tensor.
+     //! @param[in] dim_size        The size of the dimension in the original tensor for which the index
+     //!            must be mapped.
+     //! @return    A value of a dimension in a Tensor being mapped from which can be used to get the element
+     //!            for position idx in the new Tensor.
+     // =====================================================================================================
     size_t operator()(const size_t idx, const size_t dim_size) const 
     {
         return idx % dim_size;
