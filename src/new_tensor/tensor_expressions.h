@@ -1,6 +1,9 @@
+// ==========================================================================================================
+//! @file   Header file for fastRNN tensor expression classes.
+// ==========================================================================================================
+
 /*
- *  Header file for fastRNN tensor expression classes.
- *
+ * ==========================================================================================================
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -16,6 +19,7 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program; if not, write to the Free Software Foundation,
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * ==========================================================================================================
  */ 
 
 #ifndef _FRNN_TENSOR_EXPRESSIONS_
@@ -27,16 +31,13 @@
 
 namespace frnn {
 
-/*
- * ==========================================================================================================
- * Class        : TensorExpression 
- * Description  : Class used to define a tesnor expression, for example addition, subtraction ... which can
- *                then be used by the respective overloaded operator to provide fast operation on tensors 
- *                with elegant syntax
- * Params       : T     : The tpye to use for the expression
- *              : E     : The type of exprssion (Tensor, TensorAddition etc...)
- * ==========================================================================================================
- */
+// ==========================================================================================================
+//! @class      TensorExpression 
+//! @brief      Define a Tesnor expression, for example a Tensor itself, addition, subtraction ... which can
+//!             then be used by operators to make operations on Tensors look mathematic.
+//! @tparam     T   The type of data the expression uses
+//! @tparam     E   The type of exprssion (Tensor, TensorAddition etc...)
+// ==========================================================================================================
 template <typename T, typename E>
 class TensorExpression {
 public:
@@ -47,63 +48,45 @@ public:
     typedef typename container_type::reference  reference;
     /* ==================================================================================================== */
     
-    /*
-     * ======================================================================================================
-     * Function     : size
-     * Description  : Returns the size of the expression
-     * Outputs      : The size of the tensor expression
-     * ==================================================================================================
-     */
+    // ======================================================================================================
+    //! @brief     Returns the size of the expression
+    //! @return    The size of the TensorExpression
+    // ======================================================================================================
     size_type size() const { return static_cast<E const&>(*this).size(); }
 
-    /*
-     * ==================================================================================================
-     * Function     : dimSizes
-     * Description  : Gets the sizes of the dimensions of the expression E
-     * Output       : A constant reference to the dimension size vector of the expression 
-     * ==================================================================================================
-     */
+    // ======================================================================================================
+    //! @brief     Gets the sizes of the all the dimensions of the expression.
+    //! @return    A constant reference to the dimension size vector of the expression 
+    // ======================================================================================================
     const std::vector<size_type>& dimSizes() const { return static_cast<E const&>(*this).dimSizes(); }
     
-    /*
-     * ======================================================================================================
-     * Function     : operator[]
-     * Description  : Operloaded access operator for getting an element of a tensor expression
-     * Inputs       : i     : The element which must be accessed
-     * Outputs      : The value of the element at position i
-     * ======================================================================================================
-     */
+    // ======================================================================================================
+    //! @brief     Gets and element from the Tensor expression data.
+    //! @param[in] i   The element in the expression which must be fetched.
+    //! @return    The value of the element at position i of the expression data.
+    // ======================================================================================================
     value_type operator[](size_type i) const { return static_cast<E const&>(*this)[i]; }
 
-    /*
-     * === ==================================================================================================
-     * Function     : operator()
-     * Description  : Returns a reference to the expression E
-     * Outputs      : A (mutable) reference to the expression E, which is passed as a template to the class 
-     * ======================================================================================================
-     */
+    // ======================================================================================================
+    //! @brief     Gets a reference to the Tensor expression.
+    //! @return    A reference to the Tensor expression E.
+    // ======================================================================================================
     operator E&() { return static_cast<E&>(*this); }
 
-    /*
-     * ======================================================================================================
-     * Function     : oeprator()
-     * Description  : Returns a constant reference to the expression E
-     * Outptus      : A constant (immutable) reference to the expression E, which is passed as a 
-     *                template to the class
-     * ======================================================================================================
-     */
+    // ======================================================================================================
+    //! @brief     Gets a constant reference to the Tensor expression.
+    //! @return    A constant reference to the Tensror expression E.
+    // ======================================================================================================
     operator E const&() const   { return static_cast<const  E&>(*this); }
 };
 
-/*
- * ==========================================================================================================
- * Class        : TensorDifference
- * Description  : Expression class for calculating the difference of two tensors
- * Params       : T     : The type of the data used by the tesors
- *              : E1    : The type of the  first expression for subtraction
- *              : E2    : The type of the second expression for subtraction
- * ==========================================================================================================
- */
+// ==========================================================================================================
+//! @class      TensorDifference
+//! @brief      Expression class for calculating the difference of two tensors.
+//! @tparam     T       The type of the data used by the tensors.
+//! @tparam     E1      The type of the  first expression for subtraction.
+//! @tparam     E2      The type of the second expression for subtractio.n
+// ==========================================================================================================
 template <typename T, typename E1, typename E2>
 class TensorDifference : public TensorExpression<T, TensorDifference<T,E1,E2>> {
 public:
@@ -113,17 +96,14 @@ public:
     using typename TensorExpression<T, TensorDifference<T,E1,E2>>::value_type;
     /* ==================================================================================================== */
 private:
-    E1 const& _x;       // Reference to first expression 
-    E2 const& _y;       // Reference to second expression
+    E1 const& _x;       //!< Reference to the first expression for subtraction
+    E2 const& _y;       //!< Reference to the second expression for subtraction
 public:
-    /*
-     * ======================================================================================================
-     * Function     : TensorDifference 
-     * Description  : Constructor for the TensorDifference class, using the two expressions
-     * Inputs       : x     : The first expression for subtraction
-     *              : y     : The second expression for subtraction
-     * ======================================================================================================
-     */
+     // =====================================================================================================
+     //! @brief         Constructs a TensorDifference class from the inputs.
+     //! @tparam[in]    x   The first expression for subtraction
+     //! @tparam[in]    y   The second expression for subtraction
+     // =====================================================================================================
     TensorDifference(TensorExpression<T,E1> const& x, TensorExpression<T,E2> const& y) : _x(x), _y(y) 
     { 
         ASSERT(x.size(), ==, y.size());                         // Check total sizes
@@ -131,32 +111,26 @@ public:
             ASSERT(x.dimSizes()[i], ==, y.dimSizes()[i]);
         }
     }
-   
-   /*
-    * =======================================================================================================
-    * Function      : dimSizes
-    * Description   : Returns the sizes of the dimensions of the expressions
-    * Output        : A constant reference to the dimension sizes vector of the expression
-    * =======================================================================================================
-    */
+
+       
+    // =====================================================================================================
+    //! @brief     Gets the sizes of the all the dimensions of the expression.
+    //! @return    A constant reference to the dimension size vector of the expression 
+    // =====================================================================================================
     const std::vector<size_type>& dimSizes() const { return _x.dimSizes(); }
-    
-    /*
-     * ======================================================================================================
-     * Function     : size 
-     * Description  : Returns the size of the result of the subtraction expression
-     * ======================================================================================================
-     */
+   
+    // ======================================================================================================
+    //! @brief     Gets and element from the Tensor expression data.
+    //! @param[in] i   The element in the expression which must be fetched.
+    //! @return    The value of the element at position i of the expression data.
+    // ======================================================================================================
     size_type size() const { return _x.size(); }
-    
-    /*
-     * ======================================================================================================
-     * Function     : operator[]
-     * Description  : Overloaded access operator to return an element 
-     * Inputs       : i     : The index of the elements to subtract
-     * Outputs      : The sum of the tensor elements at the specified index
-     * ======================================================================================================
-     */
+   
+    // ======================================================================================================
+    //! @brief     Subtracts two elements (one from each Tensor) from the Tensor expression data.
+    //! @param[in] i   The element in the expression which must be fetched.
+    //! @return    The result of the subtraction of the Tensors.
+    // ======================================================================================================
     value_type operator[](size_type i) const { return _x[i] - _y[i]; }
 };      
 
