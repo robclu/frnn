@@ -1,6 +1,9 @@
+// ==========================================================================================================
+//! @file   Header file for fastRNN tensor util functions.
+// ==========================================================================================================
+
 /*
- *  Header file for fastRNN tensor util functions.
- *
+ * ==========================================================================================================
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -16,6 +19,7 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program; if not, write to the Free Software Foundation,
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * ==========================================================================================================
  */ 
 
 #ifndef _FRNN_TENSOR_UTILS_
@@ -27,31 +31,29 @@
 namespace frnn {
 namespace tensor {
     
-/*
- * ==========================================================================================================
- * Struct       : DimensionMapper 
- * Description  : Takes an index, idx say 1, of an element in a new tensor, say B, which is a slice of an old 
- *                tensor, say A, and determines the index in a dimension of the old tensor A which can be used
- *                to fetch the corresponding element in A for idx in B.
- *                
- *                Say A is a 2D tensor with dimensions x = 2, y = 3, which is :
- *                
- *                A = [ x00 x01 ; 
- *                      x10 x11 ; 
- *                      x20 x21 ]     
- *                
- *                Then say that B = A[j, i] (in this case the transpose of A), then B will look like
- *                
- *                B = [ x00 x10 x20 ;  = [ idx0 idx1 idx2 idx3 idx4 idx5 ] (in memory)
- *                      x01 x11 x21 ]
- *                      
- *                then the DimensionMapper functor, for a given idx, say idx2, determines the offset in a
- *                dimension (i, or j in this case) of the element in A's memory which corresponds to idx2. In
- *                this case it would be x20 from A, so the functor would get 0 for dimension i, and 2 for
- *                dimension j.
- * Params       : iter     : Which iteration of the index mapping the algorithm is on
- * ==========================================================================================================
- */
+// ==========================================================================================================
+//! @struct     DimensionMapper 
+//! @brief      Takes an index of an element in a new tensor A which is a slice of an old tensor B, and 
+//!             determines the index in a dimension of the old tensor A which can be used to fetch the 
+//!             corresponding element for idx in B.                                                          \n
+//!                                                                                                          \n
+//!             Say A is a 2D tensor with dimensions {2, 3}, so x = 2, y = 3, which is :                     \n
+//!                                                                                                          \n
+//!             A = [ x00 x01 ;                                                                              \n
+//!                   x10 x11 ;                                                                              \n
+//!                   x20 x21 ]                                                                              \n
+//!                                                                                                          \n
+//!             Then say that B = A(j, i) (in this case the transpose of A), then B will look like           \n
+//!                                                                                                          \n
+//!             B = [ x00 x10 x20 ;  = [ idx0 idx1 idx2 idx3 idx4 idx5 ] (in memory)                         \n
+//!                   x01 x11 x21 ]                                                                          \n
+//!                                                                                                          \n
+//!             then the DimensionMapper functor, for a given idx, say idx2, determines the offset in a      \n
+//!             dimension (i, or j in this case) of the element in A's memory which corresponds to idx2,     \n
+//!             which in this case would be x20 from A, so the functor would get 0 for dimension i, and 2    \n
+//!             for dimension j.
+//! @tparam     iter    Which iteration of the index mapping the algorithm is on.
+// ==========================================================================================================
 template <size_t iter> struct DimensionMapper{
 public:
     /*

@@ -1,6 +1,10 @@
+// ==========================================================================================================
+//! @file   Header file for fastRNN tensor Index class and defined variables used to slice tensors by 
+//!         dimension.
+// ==========================================================================================================
+
 /*
- *  Header file for fastRNN tensor dimension index variables.
- *
+ * ==========================================================================================================
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -16,6 +20,7 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program; if not, write to the Free Software Foundation,
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * ==========================================================================================================
  */ 
 
 #ifndef _FRNN_TENSOR_INDICES_
@@ -28,34 +33,35 @@
 namespace frnn      {
 namespace tensor    {
 
-/*
- * ==========================================================================================================
- * Class        : Index 
- * Description  : Struct representing an index (dimension) of a tensor, for example 1 would be an index for 
- *                the second dimension (since the tensors use 0 indexing)
- * ==========================================================================================================
- */
+// ==========================================================================================================
+//! @class      Index 
+//! @brief      Used to represent a dimension of a Tensor. 
+//!       
+//!             By using the namespace: frnn::tensor, an index can then be defined for a tensor, making the 
+//!             code read more like maths.                                                                   \n
+//!                                                                                                          \n
+//!             For example:                                                                                 \n
+//!                                                                                                          \n
+//!             frnn:tensor::Index i(0)                 // Define an Index for the 0th dimension of a Tensor \n
+//!             frnn:tensor::Index j(1)                 // Define an Index for the 1st dimension of a Tensor \n
+//!                                                                                                          \n
+//!             tensor.size(i);                         // Get the size of dimension 0 of a Tensor           \n 
+//!             Tensor<> slicedTensor = tensor(j, i)    // Transpose a 2D Tensor
+// ==========================================================================================================
 class Index {
 private:   
-    size_t _idx;         // Value of the dimension
+    size_t _idx;         //!< Value of the dimension
 public:
-    
-    /*
-     * ======================================================================================================
-     * Function         : Index
-     * Description      : Constructor for the index class, which sets the value of the index
-     * Params           : i     : The value of the index
-     * ======================================================================================================
-     */
+     // =====================================================================================================
+     //! @brief         Sets the value of the Index.
+     //! @param[in] i   The value to set the Index to.
+     // =====================================================================================================
     constexpr Index(size_t i) : _idx(i) {}
         
-    /*
-     * ======================================================================================================
-     * Function         : operator() 
-     * Description      : Returns the value of the Index (which dimension the Index represents)
-     * Outputs          : The index of the dimension 
-     * ======================================================================================================
-     */
+     // =====================================================================================================
+     //! @brief         Returns the value of the Index (which dimension the Index instance represents).
+     //! @return        The dimension which the Index instance is representing.
+     // =====================================================================================================
     constexpr size_t operator()() const { return _idx; }
 };
 
@@ -63,24 +69,19 @@ public:
 
 namespace dim {
     
-Index i(0);
-Index j(1);
-Index k(2);
-Index l(3);
-Index m(4);
-Index n(5);
-Index o(6);
-Index p(7);
-Index q(8);
-Index r(9);
-Index s(10);
-Index t(11);
-Index u(12);
-Index v(13);
-Index w(14);
-Index x(15);
-Index y(16);
-Index z(17);
+Index i(0);         //!< Represents the first dimension of a Tensor
+Index j(1);         //!< Represents the second dimension of a Tensor
+Index k(2);         //!< Represents the third dimension of a Tensor 
+Index l(3);         //!< Represents the fourth dimension of a Tensor 
+Index m(4);         //!< Represents the fifth dimension of a Tensor 
+Index n(5);         //!< Represents the sixth dimension of a Tensor;
+Index o(6);         //!< Represents the seventh dimension of a Tensor 
+Index p(7);         //!< Represents the eighth dimension of a Tensor
+Index q(8);         //!< Represents the ninth dimension of a Tensor 
+Index r(9);         //!< Represents the tenth dimension of a Tensor 
+Index s(10);        //!< Represents the eleventh dimension of a Tensor 
+Index t(11);        //!< Represents the twelvth dimension of a Tensor 
+Index u(12);        //!< Represents the thirteenth dimension of a Tensor 
 
 }       // End namespace dim
 

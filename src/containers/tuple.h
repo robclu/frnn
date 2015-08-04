@@ -34,13 +34,12 @@ namespace frnn {
 //! @struct  Tuple 
 //! @brief   Holds any number of elements of any type.
 //! @details Usage : Tuple<type1, type2, ...> tuple(elem1 of type1, elem2 of type2, ...)
-//! @tparam  Ts Types of all elements held in the Tuple.  
+//! @tparam  Ts     The types of the elements to be stored in teh Tuple.
 // ==========================================================================================================
 template <typename... Ts> struct Tuple {};
 
 // ==========================================================================================================
 //! @struct  Tuple 
-//! @tparam  T Type of the element to add to the Tuple. 
 // ==========================================================================================================
 template <typename T>
 struct Tuple<T> {
@@ -48,19 +47,16 @@ public:
     T _back;            //!< Element of the Tuple
 public:
     // ======================================================================================================
-    //! @fn         Tuple
     //! @brief      Constuctor for a Tuple when there is only one element (base case of recursive 
     //!             construction).
-    //! @param[in]  element The element of type T to add to the Tuple.
+    //! @param[in]  element     The element to add to the Tuple.
+    //! @tparam     T           Type of the element to add to the Tuple.
     // ======================================================================================================
     Tuple(T element) : _back(element) {}
 };
 
 // ==========================================================================================================
 //! @struct  Tuple 
-//! @tparam  T  Type of the element to add to the Tuple. 
-//! @tparam  Ts The types of the elements to add to the Tuple on the following iterations of the recursive 
-//!             construction.
 // ==========================================================================================================
 template <typename T, typename... Ts>
 struct Tuple<T, Ts...> : Tuple<Ts...> {
@@ -68,61 +64,48 @@ public:
     T _back;            //!< Element of the Tuple
 public:
      // =====================================================================================================
-     //! @fn    Tuple 
-     //! @brief Constructor for a Tuple when there is more than one element.
+     //! @brief     Constructor for a Tuple when there is more than one element.
      //! @param[in] element     The element to add to the Tuple on this iteration of the recursive 
-     //!                        construction.
+     //!            construction.
      //! @param[in] elements    The rest of the elements to add to the Tuple on the remaining iterations.
+     //! @tparam    T           Type of the element to add to the Tuple. 
+     //! @tparam    Ts          The types of the elements to add to the Tuple on the following iterations of 
+     //!            the recursive construction.
      //  ====================================================================================================
     Tuple(T element, Ts... elements) : Tuple<Ts...>(elements...), _back(element) {}
 };
 
-/*
- * ==========================================================================================================
- * Struct       : TupleElementTypeHolder 
- * Description  : Struct which holds the types of all the elements in a Tuple
- * Params       : i     : The index of the element for which the type must be stored
- *              : T     : The type of the element
- * ==========================================================================================================
- */
+// ==========================================================================================================
+//! @struct     TupleElementTypeHolder
+// ==========================================================================================================
 template <size_t i, typename T> struct TupleElementTypeHolder;
 
-/*
- * ==========================================================================================================
- * Struct       : TupleElementTypeHolder
- * Description  : Determines the type of the 0 element in the tuple
- * Params       : T     : The type of the 0 element in the Tuple
- *              : Ts    : The types of the rest of the elements in the Tuple
- * ==========================================================================================================
- */
+// ==========================================================================================================
+//! @struct     TupleElementTypeHolder
+// ==========================================================================================================
 template <typename T, typename... Ts>
 struct TupleElementTypeHolder<0, Tuple<T, Ts...>> {
     typedef T type;         
 };
 
-/*
- * ==========================================================================================================
- * Struct       : TupleElementTypeHolder
- * Description  : Determines the types of all elements in the Tuple but the first
- * Params       : i     : The index of the element in the Tuple to store the tye of 
- *              : T     : The type of the ith element in the Tuple
- *              : Ts    : The types of the rest of the elements in the Tuple
- * ==========================================================================================================
- */
+// ==========================================================================================================
+//! @struct     TupleElementTypeHolder
+//! @brief      Defines the types of each of the elements in a Tuple.
+//! @tparam i   Index of the element in the Tuple for which the type must be declared. 
+//! @tparam T   Type of the element at position i in Tuple./
+//! @tparam Ts  Types of the elements at positions != i in the Tuple. 
+// ==========================================================================================================
 template <size_t i, typename T, typename... Ts>
 struct TupleElementTypeHolder<i, Tuple<T, Ts...>> {
     typedef typename TupleElementTypeHolder<i - 1, Tuple<Ts...>>::type type;  
 };
 
-/*
- * ==========================================================================================================
- * Function     : get
- * Description  : Gets the 0th element in a Tuple
- * Inputs       : tuple     :The Tuple to get the 0th element from
- * Params       : i         : The index of the element in the Tuple to get
- *              : Ts        : The types of the elements in the Tuple
- * ==========================================================================================================
- */
+// ==========================================================================================================
+//! @brief      Gets the 0th element in a Tuple. Enabled if i is equal to 0.
+//! @param[in]  tuple   The Tuple to get the element from.
+//! @tparam     i       The index of the element to get.
+//! @tparam     Ts      The types of all elements in the Tuple.
+// ==========================================================================================================
 template <size_t i, typename... Ts>
 typename std::enable_if<i == 0, typename TupleElementTypeHolder<0, Tuple<Ts...>>::type&>::type 
 get(Tuple<Ts...>& tuple) 
@@ -130,16 +113,13 @@ get(Tuple<Ts...>& tuple)
     return tuple._back;
 }
 
-/*
- * ==========================================================================================================
- * Function     : get
- * Description  : Gets the element i of the tuple
- * Inputs       : tuple     : The Tuple to get the ith element from 
- * Params       : i         : The index of the element in the Tuple to get
- *              : T         : The type of the element i in the Tuple
- *              : Ts        : The test of the types of the elements in the Tuple
- * ==========================================================================================================
- */
+// ==========================================================================================================
+//! @brief      Gets the element at position i in the Tuple. Enabled if i is not equal to 0.
+//! @param[in]  tuple   The Tuple to get the element from.
+//! @tparam     i       The index of the element in the Tuple.
+//! @tparam     T       The type of the element at position i.
+//! @tparam     Ts      The types of all the elements in the Tuple.
+// ==========================================================================================================
 template <size_t i, typename T, typename... Ts>
 typename std::enable_if<i != 0, typename TupleElementTypeHolder<i, Tuple<T, Ts...>>::type&>::type
 get(Tuple<T, Ts...>& tuple) 
@@ -150,6 +130,12 @@ get(Tuple<T, Ts...>& tuple)
 
 namespace tuple {
     
+// ==========================================================================================================
+//! @brief      Gets the size of a Tuple
+//! @param[in]  tuple   The Tuple to get the size of.
+//! @tparam     Ts      The types of the elements in the Tuple.
+//! @return     The size of the Tuple tuple.
+// ==========================================================================================================
 template <typename... Ts>
 size_t size(Tuple<Ts...>& tuple) { return sizeof...(Ts); };
 
