@@ -221,7 +221,7 @@ public:
      // =====================================================================================================
     TensorSlice(TensorExpression<T, E> const& x, Tuple<Ts...> slice_dims)
     : _x(x), _index(0), _offset(0), _prev_slice_dims(0), 
-      _slice_size(buildSliceDimDizes()), _slice_dims(slice_dims) 
+      _slice_size(buildSliceDimSizes()), _slice_dims(slice_dims) 
     {}
   
     // ======================================================================================================
