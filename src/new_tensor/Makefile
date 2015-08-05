@@ -23,8 +23,7 @@ INCLUDES 		:= -I/usr/local/cuda-7.0/include -I.
 ########################################################
 
 CUDA_LIBS 		:= -lcuda -lcublas
-TEST_LIBS 		:= -lgtest -lgtest_main \
-				   -lpthread
+TEST_LIBS 		:= -lgtest -lgtest_main -lpthread
 
 LIB_DIR 		:= -L/usr/local/cuda/lib64
 
@@ -45,15 +44,13 @@ CUFLAGS 		:= -arch=sm_30
 
 all: tests 
 
-tests: tests
-
 new_tensor_tests.o: new_tensor_tests.cpp 
 	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -c $<
 
 main.o : main.cpp
 	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -c $<
 
-tests: new_tensor_tests.o main.o
+tests:  new_tensor_tests.o 
 	$(NVCC) $(LDFLAGS) -o $(EXE) $+ $(LIB_DIR) \
 		$(CUDA_LIBS) $(TEST_LIBS)	
 		

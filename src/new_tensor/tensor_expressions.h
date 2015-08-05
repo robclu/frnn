@@ -172,18 +172,67 @@ public:
     const std::vector<size_type>& dimSizes() const { return _x.dimSizes(); }
     
     // ======================================================================================================
-    //! @brief     Returns the size of the expression
-    //! @return    The size of the TensorExpression
+    //! @brief     Returns the size of the expression.
+    //! @return    The size of the TensorAddition.
     // ====================================================================================================== 
     size_type size() const { return _x.size(); }
     
     // ======================================================================================================
-    //! @brief     Subtracts two elements (one from each Tensor) from the Tensor expression data.
+    //! @brief     Adds two elements (one from each Tensor) from the Tensor expression data.
     //! @param[in] i   The element in the expression which must be fetched.
     //! @return    The result of the subtraction of the Tensors.
     // ======================================================================================================
     value_type operator[](size_type i) const { return _x[i] + _y[i]; }
 };      
+
+// ==========================================================================================================
+//! @class      TensorMultiplier
+//! @brief      Expression class for multiplying two Tensors
+//! @tparam     T       Type of the data used by the Tensors.
+//! @tparam     E1      Expression to multiply.
+//! @tparam     E2      Expression to multilpy.
+// ==========================================================================================================
+template <typename T, typename E1, typename E2>
+class TensorMultiplier : public TensorExpression<T, TensorMultiplier<T,E1,E2>> {
+public:
+    /* ====================================== Typedefs ==================================================== */
+    using typename TensorExpression<T, TensorMultiplier<T,E1,E2>>::container_type;
+    using typename TensorExpression<T, TensorMultiplier<T,E1,E2>>::size_type;
+    using typename TensorExpression<T, TensorMultiplier<T,E1,E2>>::value_type;
+    /* ==================================================================================================== */
+private:
+    E1 const& _x;       //!< First expression for multiplication
+    E2 const& _y;       //!< Second expression for multiplication
+public:
+     // =====================================================================================================
+     //! @brief     Sets the expressions for multiplication.
+     //! @param[in] x       The first expression for addition.
+     //! @param[in] y       The second expression for addition
+     // =====================================================================================================
+    TensorAddition(TensorExpression<T,E1> const& x, TensorExpression<T,E2> const& y) : _x(x), _y(y) 
+    { 
+        // Will need to check that the dimension checkout
+    }
+   
+    // ======================================================================================================
+    //! @brief     Gets the sizes of the all the dimensions of the expression.
+    //! @return    A constant reference to the dimension size vector of the expression.
+    // ======================================================================================================
+    const std::vector<size_type>& dimSizes() const { return _x.dimSizes(); }
+    
+    // ======================================================================================================
+    //! @brief     Returns the size of the expression.
+    //! @return    The size of the TensorMultiplier.
+    // ====================================================================================================== 
+    size_type size() const { return _x.size(); }
+    
+    // ======================================================================================================
+    //! @brief     Multiplies two elements (one from each Tensor) from the Tensor expression data.
+    //! @param[in] i   The element in the expression which must be fetched.
+    //! @return    The result of the multiplication of the Tensors.
+    // ======================================================================================================
+    value_type operator[](size_type i) const { return _x[i] + _y[i]; }
+};    
 
 // ==========================================================================================================
 //! @class      TensorSlice
@@ -243,11 +292,12 @@ public:
     // ======================================================================================================
     value_type operator[](size_type i) const { return _x[mapIndex(i)]; }
 
-     // =====================================================================================================
-     //! @brief     Adds the size of a dimension from the Expression to the slice dimension sizes vector so 
-     //!            that all dimension sizes of the slice are known. Case for all iterations but the last.
-     //! @tparam    i   The iteration of the function.
-     // =====================================================================================================
+private:
+    // =====================================================================================================
+    //! @brief     Adds the size of a dimension from the Expression to the slice dimension sizes vector so 
+    //!            that all dimension sizes of the slice are known. Case for all iterations but the last.
+    //! @tparam    i   The iteration of the function.
+    // =====================================================================================================
     template <size_type i = 0>
     typename std::enable_if<i != (sizeof...(Ts) - 1), size_type>::type buildSliceDimSizes() const
     {
@@ -256,11 +306,11 @@ public:
                  buildSliceDimSizes<i + 1>()    );                  // Multiply with the remaining dimensions
     }
 
-     // =====================================================================================================
-     //! @brief     Adds the size of a dimension from the Expression to the slice dimension sizes vector so 
-     //!            that all dimensions sizes of the slice are known. Case for the last iteration.
-     //! @tparam    i   The iteration of the function.
-     // =====================================================================================================
+    // =====================================================================================================
+    //! @brief     Adds the size of a dimension from the Expression to the slice dimension sizes vector so 
+    //!            that all dimensions sizes of the slice are known. Case for the last iteration.
+    //! @tparam    i   The iteration of the function.
+    // =====================================================================================================
     template <size_type i>
     typename std::enable_if<i == (sizeof...(Ts) - 1), size_type>::type buildSliceDimSizes() const 
     {
@@ -268,14 +318,14 @@ public:
         return _x.size(get<i>(_slice_dims)());                  // Get size of last dimension of the Expression
     }
     
-     // =====================================================================================================
-     //! @brief         Takes the index of an element in the slice, and maps the index to and element in the 
-     //!                Expression being sliced. Case for all iterations but the last.
-     //! @param[in]     idx     The index of the element in the slice.
-     //! @return        The index of the element i in the slice, in the Expression's data variable.
-     //! @tparam        i       The iteration of the function, essentially which element (in the vector of
-     //!                slice dimensions) the offset in the Expression's is being determined.
-     // =====================================================================================================
+    // =====================================================================================================
+    //! @brief         Takes the index of an element in the slice, and maps the index to and element in the 
+    //!                Expression being sliced. Case for all iterations but the last.
+    //! @param[in]     idx     The index of the element in the slice.
+    //! @return        The index of the element i in the slice, in the Expression's data variable.
+    //! @tparam        i       The iteration of the function, essentially which element (in the vector of
+    //!                slice dimensions) the offset in the Expression's is being determined.
+    // =====================================================================================================
     template <size_type i = 0>
     typename std::enable_if<i != (sizeof...(Ts) - 1), size_type>::type mapIndex(size_type idx) const 
     {
@@ -297,14 +347,14 @@ public:
         return mapIndex<i + 1>(idx);                                // Continue until all dimensions finished
     }
     
-     // =====================================================================================================
-     //! @brief         Takes the index of an element in the slice, and maps the index to and element in the 
-     //!                Expression being sliced. Case for the last iteration.
-     //! @param[in]     idx     The index of the element in the slice.
-     //! @return        The index of the element i in the slice, in the Expression's data variable.
-     //! @tparam        i       The iteration of the function, essentially which element (in the vector of
-     //!                slice dimensions) the offset in the Expression's is being determined.
-     // =====================================================================================================
+    // =====================================================================================================
+    //! @brief         Takes the index of an element in the slice, and maps the index to and element in the 
+    //!                Expression being sliced. Case for the last iteration.
+    //! @param[in]     idx     The index of the element in the slice.
+    //! @return        The index of the element i in the slice, in the Expression's data variable.
+    //! @tparam        i       The iteration of the function, essentially which element (in the vector of
+    //!                slice dimensions) the offset in the Expression's is being determined.
+    // =====================================================================================================
     template <size_type i>
     typename std::enable_if<i == (sizeof...(Ts) - 1), size_type>::type mapIndex(size_type idx) const 
     {

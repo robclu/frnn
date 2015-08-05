@@ -45,8 +45,6 @@ CUFLAGS 		:= -arch=sm_30
 
 all: tests 
 
-tests: tests
-
 container_tests.o: container_tests.cpp 
 	$(NVCC) -x cu $(INCLUDES) $(CCFLAGS) $(CUFLAGS) -o $@ -c $<
 
