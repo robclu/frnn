@@ -1,6 +1,9 @@
+// ==========================================================================================================
+//! @file   Header file for fastRNN tensor class.
+// ==========================================================================================================
+
 /*
- *  Header file for fastRNN tensor class.
- *
+ * ==========================================================================================================
  *  Copyright (C) 2015 Rob Clucas robclu1818@gmail.com
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -16,6 +19,7 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program; if not, write to the Free Software Foundation,
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * ==========================================================================================================
  */
 
 #ifndef _FRNN_NEW_TENSOR_
@@ -34,37 +38,42 @@
 
 namespace frnn {
 
-/*
- * ==========================================================================================================
- * Class        : Tensor 
- * Description  : Tensor class for the fastRNN library. The class allows for a tensor of any dimension, thus
- *                providing great flexibility. For example, a 1D tensor is a vector or array, and a 2D tensor 
- *                is a matrix.
- * Params       : T     : The type of data used by the tensor
- *              : R     : The rank of the tensor 
- * ==========================================================================================================
- */
+// ==========================================================================================================
+//! @class  Tensor 
+//! @brief  Allows an N dimensional space to be created to store data and operate on the data.               \n
+//!                                                                                                          \n
+//!         Detailed usage of the Tensor class can be found in the unit tests for the class.                 \n
+//!         The basic usage is:                                                                              \n
+//!                                                                                                          \n
+//!         Tensor<int, 3> tensor = {2, 2, 2}           // Create a 3-dimensional (rank 3) Tensor            \n
+//!                                                                                                          \n
+//!         The above Tensor is of int type and each dimension has a size of 2, thus the Tensor is a         \n
+//!         matrix with 2 pages. Operations can be performed such as:                                        \n
+//!                                                                                                          \n
+//!         Tensor<int, 3> new_tensor = tensor + tensor + tensor    // Add 3 Tensors                         \n
+//!         Tensor<int, 2> slice_tensor = tensor(j,i)               // New tensor from dim 1 and 2 of old 
+//!                                                                    tensor                                \n
+//! @tparam T   Type of data used by the Tensor.
+//! @tparam R   Rank of the Tensor (the number of dimensions it has).
+// ==========================================================================================================
 template <typename T, const size_t R>
 class Tensor : public TensorExpression<T, Tensor<T, R>> {
 public:
-    /* ======================================= Typedefs =============================================== */
+    /* =========================================== Typedefs =============================================== */
     using typename TensorExpression<T, Tensor<T,R>>::container_type;
     using typename TensorExpression<T, Tensor<T,R>>::size_type;
     using typename TensorExpression<T, Tensor<T,R>>::value_type;
     using typename TensorExpression<T, Tensor<T,R>>::reference;
-    /* ================================================================================================ */
+    /* ==================================================================================================== */
 private:
-    container_type          _data;                  // Data for tensor
-    std::vector<size_type>  _dimensions;            // Sizes of the dimensions
-    size_type               _counter;               // Used for calculating the offset for operator()
-    size_type               _offset;                // For accessing elements with operator()
+    container_type          _data;                  //!< Container to hold Tensor data elements
+    std::vector<size_type>  _dimensions;            //!< Sizes of each of the Tensor's dimensions
+    size_type               _counter;               //!< Iteration of the elemen offset calculation 
+    size_type               _offset;                //!< For accessing elements with operator()
 public:
-    /*
-     * ======================================================================================================
-     * Function     : Tensor 
-     * Description  : Default constructor for the tensor class 
-     * ======================================================================================================
-     */
+     // =====================================================================================================
+     //! @brief     Sets the member variables to 0, and the number of dimensions to the rank.
+     // =====================================================================================================
     Tensor() : _data(0), _dimensions(R), _counter(0), _offset(0) {}
     
     /*

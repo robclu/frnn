@@ -84,8 +84,8 @@ public:
 //! @class      TensorDifference
 //! @brief      Expression class for calculating the difference of two tensors.
 //! @tparam     T       The type of the data used by the tensors.
-//! @tparam     E1      The type of the  first expression for subtraction.
-//! @tparam     E2      The type of the second expression for subtractio.n
+//! @tparam     E1      Expression to subtract from.
+//! @tparam     E2      Expression to subtract with.
 // ==========================================================================================================
 template <typename T, typename E1, typename E2>
 class TensorDifference : public TensorExpression<T, TensorDifference<T,E1,E2>> {
@@ -96,8 +96,8 @@ public:
     using typename TensorExpression<T, TensorDifference<T,E1,E2>>::value_type;
     /* ==================================================================================================== */
 private:
-    E1 const& _x;       //!< Reference to the first expression for subtraction
-    E2 const& _y;       //!< Reference to the second expression for subtraction
+    E1 const& _x;       //!< First expression for subtraction
+    E2 const& _y;       //!< Second expression for subtraction
 public:
      // =====================================================================================================
      //! @brief         Constructs a TensorDifference class from the inputs.
@@ -111,19 +111,17 @@ public:
             ASSERT(x.dimSizes()[i], ==, y.dimSizes()[i]);
         }
     }
-
        
-    // =====================================================================================================
+    // ======================================================================================================
     //! @brief     Gets the sizes of the all the dimensions of the expression.
     //! @return    A constant reference to the dimension size vector of the expression 
-    // =====================================================================================================
+    // ======================================================================================================
     const std::vector<size_type>& dimSizes() const { return _x.dimSizes(); }
    
     // ======================================================================================================
-    //! @brief     Gets and element from the Tensor expression data.
-    //! @param[in] i   The element in the expression which must be fetched.
-    //! @return    The value of the element at position i of the expression data.
-    // ======================================================================================================
+    //! @brief     Returns the size of the expression
+    //! @return    The size of the TensorExpression
+    // ====================================================================================================== 
     size_type size() const { return _x.size(); }
    
     // ======================================================================================================
@@ -134,15 +132,13 @@ public:
     value_type operator[](size_type i) const { return _x[i] - _y[i]; }
 };      
 
-/*
- * ==========================================================================================================
- * Class        : TensorAddition
- * Description  : Expression class for calculating the addition of two tensors
- * Params       : T     : The type of the data used by the tesors
- *              : E1    : The type of the  first expression for the addition
- *              : E2    : The type of the second expression for the addition
- * ==========================================================================================================
- */
+// ==========================================================================================================
+//! @class      TensorAddition
+//! @brief      Expression class for calculating the addition of two tensors.
+//! @tparam     T       Type of the data used by the tesors
+//! @tparam     E1      Expression to add to.
+//! @tparam     E2      Expression to add with.
+// ==========================================================================================================
 template <typename T, typename E1, typename E2>
 class TensorAddition : public TensorExpression<T, TensorAddition<T,E1,E2>> {
 public:
@@ -152,17 +148,15 @@ public:
     using typename TensorExpression<T, TensorAddition<T,E1,E2>>::value_type;
     /* ==================================================================================================== */
 private:
-    E1 const& _x;       // Reference to first expression 
-    E2 const& _y;       // Reference to second expression
+    E1 const& _x;       //!< First expression for addition
+    E2 const& _y;       //!< Second expression for addition
 public:
-    /*
-     * ======================================================================================================
-     * Function     : TensorAddition
-     * Description  : Constructor for the TensorAddition class, using the two expressions
-     * Inputs       : x     : The first expression for addition
-     *              : y     : The second expression for addition
-     * ======================================================================================================
-     */
+     // =====================================================================================================
+     //! @brief     Sets the expressions for addition and checks that they have the same ranks and dimension
+     //!            sizes.
+     //! @param[in] x       The first expression for addition.
+     //! @param[in] y       The second expression for addition
+     // =====================================================================================================
     TensorAddition(TensorExpression<T,E1> const& x, TensorExpression<T,E2> const& y) : _x(x), _y(y) 
     { 
         ASSERT(x.size(), ==, y.size());                         // Check total sizes
@@ -171,44 +165,33 @@ public:
         }
     }
    
-   /*
-    * =======================================================================================================
-    * Function      : dimSizes
-    * Description   : Returns the sizes of the dimensions of the expressions
-    * Output        : A constant reference to the dimension sizes vector of the expression
-    * =======================================================================================================
-    */
+    // ======================================================================================================
+    //! @brief     Gets the sizes of the all the dimensions of the expression.
+    //! @return    A constant reference to the dimension size vector of the expression 
+    // ======================================================================================================
     const std::vector<size_type>& dimSizes() const { return _x.dimSizes(); }
     
-    /*
-     * ======================================================================================================
-     * Function     : size 
-     * Description  : Returns the size of the result of the subtraction expression
-     * ======================================================================================================
-     */
+    // ======================================================================================================
+    //! @brief     Returns the size of the expression
+    //! @return    The size of the TensorExpression
+    // ====================================================================================================== 
     size_type size() const { return _x.size(); }
     
-    /*
-     * ======================================================================================================
-     * Function     : operator[]
-     * Description  : Overloaded access operator to return the addition of an element
-     * Inputs       : i     : The index of the elements to add
-     * Outputs      : The sum of the tensor elements at the specified index
-     * ======================================================================================================
-     */
+    // ======================================================================================================
+    //! @brief     Subtracts two elements (one from each Tensor) from the Tensor expression data.
+    //! @param[in] i   The element in the expression which must be fetched.
+    //! @return    The result of the subtraction of the Tensors.
+    // ======================================================================================================
     value_type operator[](size_type i) const { return _x[i] + _y[i]; }
-};    
+};      
 
-/*
- * ==========================================================================================================
- * Class        : TensorSlice
- * Description  : Class used to get a slice of a tensor
- * Params       : T     : The type of data used by the tensor
- *              : E     : The type of the expression to slice
- *              : Ts    : The types of the variables used to represent the dimensions to slice, this is used
- *                        to build a Tuple holding the dimensions to slice
- * ==========================================================================================================
- */
+// ==========================================================================================================
+//! @class      TensorSlice
+//! @brief      Expression class used to slice a TensorExpression by dimension.
+//! @tparam     T   The type of data used by the tensor.
+//! @tparam     E   The expression to slice.
+//! @tparam     Ts  The types of the variables used to represent the dimensions to slice.
+// ==========================================================================================================
 template <typename T, typename E, typename... Ts>
 class TensorSlice : public TensorExpression<T, TensorSlice<T, E, Ts...>> {
 public:
@@ -218,155 +201,129 @@ public:
     using typename TensorExpression<T, TensorSlice<T,E,Ts...>>::value_type;
     /* ==================================================================================================== */ 
 private:
-    E const&                        _x;                 // Reference to expression
-    mutable Tuple<Ts...>            _slice_dims;        // Dimensions for the sliced tensor
-    mutable std::vector<size_type>  _prev_slice_dims;   // Previous dimensions used for recursice map index
-    mutable std::vector<size_type>  _slice_dim_sizes;   // Sizes of the dimensions for the slice
-    mutable size_type               _index;             // Index of an element in the tensor to be sliced
-    mutable size_type               _offset;            // Offset in the old tensor due to mapping to dimension 0
-    size_type                       _slice_size;        // Size of the data of the slice
+    // Note : These are mutable because this class is essentially a functor without state an is intended to 
+    //        be used as a functor once. The mutable memebers are really just temporary variables which hold
+    //        state during the dimension mapping computations, thus it is okay to modify them. However, the 
+    //        function which modifies them need to be const to access _x, hence they are mutable.
+    E const&                        _x;                 //!< Expression to slice
+    mutable Tuple<Ts...>            _slice_dims;        //!< Dimensions of the sliced Expression
+    mutable std::vector<size_type>  _prev_slice_dims;   //!< Dimensions used for iterative index mapping
+    mutable std::vector<size_type>  _slice_dim_sizes;   //!< Sizes of the dimensions for the sliced Expression
+    mutable size_type               _index;             //!< Mapped index from the slice to the Expression
+    mutable size_type               _offset;            //!< Offset in the Expression due to its 0 dimension
+    size_type                       _slice_size;        //!< Size (number of elements) of the slice
 public:        
-    /*
-     * ======================================================================================================
-     * Function         : Construct for the TensorSlice class
-     * Description      : Initializes member variables and build the mapping for the new tensor from the
-     *                    tensor which is being sliced
-     * Inputs           : x         : The TensorExpression which is being sliced
-     *                  : dims      : The dimension of x which are being sliced 
-     * ======================================================================================================
-     */
+     // =====================================================================================================
+     //! @brief     Initializes member variables, builds vector of dimensions of the Expression to slice, and 
+     //!            determines the size of the slice.
+     //! @param[in] x           The Expression to slice.
+     //! @param[in] slice_dims  The dimension of Expression which make up the slice.
+     // =====================================================================================================
     TensorSlice(TensorExpression<T, E> const& x, Tuple<Ts...> slice_dims)
     : _x(x), _index(0), _offset(0), _prev_slice_dims(0), 
-      _slice_size(mapDimensions()), _slice_dims(slice_dims)
+      _slice_size(buildSliceDimDizes()), _slice_dims(slice_dims) 
     {}
-   
-    /*
-     * ======================================================================================================
-     * Function     : size 
-     * Description  : Returns the size of sliced tensor
-     *==== ==================================================================================================
-     */
+  
+    // ======================================================================================================
+    //! @brief     Returns the size of the expression
+    //! @return    The size of the TensorExpression
+    // ======================================================================================================   
     size_type size() const { return _slice_size; }
     
-   /*
-    * =======================================================================================================
-    * Function      : dimSizes
-    * Description   : Returns the sizes of the dimensions of the expressions
-    * Output        : A constant reference to the dimension sizes vector of the expression
-    * ----===================================================================================================
-    */
+    // ======================================================================================================
+    //! @brief      Returns the sizes of each of the dimensions of the slice.
+    //! @return     A constant reference to the dimension sizes vector of the slice.
+    // ======================================================================================================
     const std::vector<size_type>& dimSizes() const { return _slice_dim_sizes; }
 
-    /*
-     * ======================================================================================================
-     * Function     : operator[]
-     * Description  : Overloaded access operator to return an element of the new tensor, using the mapping
-     *                to get the value from the old tensor 
-     * Inputs       : i     : The index of the element to get
-     * Outputs      : The tensor element at the specified index
-     * ======================================================================================================
-     */
+    // ======================================================================================================
+    //! @brief     Gets an element from the Expression data which should be in position i of the slice's data.
+    //! @param[in] i   The element in the expression which must be fetched.
+    //! @return    The value of the element at position i of the expression data.
+    // ======================================================================================================
     value_type operator[](size_type i) const { return _x[mapIndex(i)]; }
 
-    /*
-     * ======================================================================================================
-     * Function     : mapDimensions (general case)
-     * Description  : Adds the size of a dimension from an old tensor to the sliced tensor dimension sizes
-     *                vector
-     * Params       : i     : The iteration of the mapping function
-     * ======================================================================================================
-     */
+     // =====================================================================================================
+     //! @brief     Adds the size of a dimension from the Expression to the slice dimension sizes vector so 
+     //!            that all dimension sizes of the slice are known. Case for all iterations but the last.
+     //! @tparam    i   The iteration of the function.
+     // =====================================================================================================
     template <size_type i = 0>
-    typename std::enable_if<i != (sizeof...(Ts) - 1), size_type>::type mapDimensions() const
+    typename std::enable_if<i != (sizeof...(Ts) - 1), size_type>::type buildSliceDimSizes() const
     {
-        _slice_dim_sizes.push_back(_x.size(get<i>(_slice_dims)()));         // Add dimension i size
-        return ( _x.size(get<i>(_slice_dims)())   *         // Get size of dimension i from old tensor
-                 mapDimensions<i + 1>()          );         // Multiply with remaining dimensions
+        _slice_dim_sizes.push_back(_x.size(get<i>(_slice_dims)()));                 // Add dimension i's size
+        return ( _x.size(get<i>(_slice_dims)()) *                   // Get size of dim i from the Expression
+                 buildSliceDimSizes<i + 1>()    );                  // Multiply with the remaining dimensions
     }
 
-    /*
-     * ======================================================================================================
-     * Function     : mapDimensions (terminating case)
-     * Description  : Adds the size of a dimension from an old tensor to the sliced tensor dimension sizes
-     *                vector
-     * Params       : i     : The iteration of the mapping function
-     * ======================================================================================================
-     */
+     // =====================================================================================================
+     //! @brief     Adds the size of a dimension from the Expression to the slice dimension sizes vector so 
+     //!            that all dimensions sizes of the slice are known. Case for the last iteration.
+     //! @tparam    i   The iteration of the function.
+     // =====================================================================================================
     template <size_type i>
-    typename std::enable_if<i == (sizeof...(Ts) - 1), size_type>::type mapDimensions() const 
+    typename std::enable_if<i == (sizeof...(Ts) - 1), size_type>::type buildSliceDimSizes() const 
     {
-        _slice_dim_sizes.push_back(_x.size(get<i>(_slice_dims)()));         // Add last dimension size 
-        return _x.size(get<i>(_slice_dims)());              // Get size of last dimension old tensor   
+        _slice_dim_sizes.push_back(_x.size(get<i>(_slice_dims)()));                 // Add last dimension size 
+        return _x.size(get<i>(_slice_dims)());                  // Get size of last dimension of the Expression
     }
     
-    /*
-     * ======================================================================================================
-     * Function     : mapIndex (non terminating case)
-     * Description  : Takes the index of an element in a tensor which is a slice of another tensor, and 
-     *                maps the index of the element in the new, sliced tensor, to the index in the tensor 
-     *                which is being sliced.
-     * Inputs       : idx       : The index of the element in the new, sliced tensor to map to the old
-     *                            tensor
-     * Outputs      : Calls itself to determine the mapping of the index to the other dimensions of the
-     *                tensor which is being sliced
-     * Params       : i         : The iteration of the function - which number element in the list of slice 
-     *                            dimensions is being mapped to the sliced tensor
-     * ======================================================================================================
-     */ 
+     // =====================================================================================================
+     //! @brief         Takes the index of an element in the slice, and maps the index to and element in the 
+     //!                Expression being sliced. Case for all iterations but the last.
+     //! @param[in]     idx     The index of the element in the slice.
+     //! @return        The index of the element i in the slice, in the Expression's data variable.
+     //! @tparam        i       The iteration of the function, essentially which element (in the vector of
+     //!                slice dimensions) the offset in the Expression's is being determined.
+     // =====================================================================================================
     template <size_type i = 0>
     typename std::enable_if<i != (sizeof...(Ts) - 1), size_type>::type mapIndex(size_type idx) const 
     {
         size_type mapped_dim = 0, dim = 0, dim_offset = 0;
 
-        dim         = get<i>(_slice_dims)();                                // Size of dim i
-        dim_offset  = std::accumulate(_x.dimSizes().begin()           ,     // Index offset of i in 
-                                      _x.dimSizes().begin() + dim     ,     // original tensors memory
+        dim         = get<i>(_slice_dims)();                                        // Size of dim i
+        dim_offset  = std::accumulate(_x.dimSizes().begin()           ,             // Index offset of i in 
+                                      _x.dimSizes().begin() + dim     ,             // original tensors memory
                                       1                               ,
                                       std::multiplies<size_type>()    );
         
-        tensor::DimensionMapper<i> mapper;                                  // Get index in dimension i of
-        mapped_dim = mapper(idx, _x.dimSizes()[dim]);                       // idx in tensor being sliced
+        tensor::DimensionMapper<i> mapper;                                      // Get index in dimension i of
+        mapped_dim = mapper(idx, _x.dimSizes()[dim]);                           // idx in tensor being sliced
                 
         dim == 0  ? _index   = mapped_dim
                   : _offset += dim_offset * mapped_dim;
         
         _prev_slice_dims.push_back(dim);
-        return mapIndex<i + 1>(idx);                        // Continue until all dimensions finished
+        return mapIndex<i + 1>(idx);                                // Continue until all dimensions finished
     }
     
-    /*
-     * ======================================================================================================
-     * Function     : mapIndex (terminating case)
-     * Description  : Takes the index of an element in a tensor which is a slice of another tensor, and 
-     *                maps the index of the element in the new, sliced tensor, to the index in the tensor 
-     *                which is being sliced.
-     * Inputs       : idx       : The index of the element in the new, sliced tensor to map to the old
-     *                            tensor
-     * Outputs      : The total offset of the index idx in the memory of the tensor to be sliced, so it is
-     *                determining the index of idx in the sliced tensor
-     * Params       : i         : The iteration of the function - which number element in the Tuple of 
-     *                            slice dimensions is beig mapped
-     * ======================================================================================================
-     */
+     // =====================================================================================================
+     //! @brief         Takes the index of an element in the slice, and maps the index to and element in the 
+     //!                Expression being sliced. Case for the last iteration.
+     //! @param[in]     idx     The index of the element in the slice.
+     //! @return        The index of the element i in the slice, in the Expression's data variable.
+     //! @tparam        i       The iteration of the function, essentially which element (in the vector of
+     //!                slice dimensions) the offset in the Expression's is being determined.
+     // =====================================================================================================
     template <size_type i>
     typename std::enable_if<i == (sizeof...(Ts) - 1), size_type>::type mapIndex(size_type idx) const 
     {
         size_type mapped_dim = 0, dim = 0, dim_offset = 0;
         
-        dim         = get<i>(_slice_dims)();                                // Size of dim i 
-        dim_offset  = std::accumulate(_x.dimSizes().begin()           ,     // Index offset of i in 
-                                      _x.dimSizes().begin() + dim     ,     // original tensors memory
+        dim         = get<i>(_slice_dims)();                                        // Size of dim i 
+        dim_offset  = std::accumulate(_x.dimSizes().begin()           ,             // Index offset of i in 
+                                      _x.dimSizes().begin() + dim     ,             // original tensors memory
                                       1                               ,
                                       std::multiplies<size_type>()    );
         
-        tensor::DimensionMapper<i> mapper;                                  // Get index of dimension i of
-        mapped_dim = mapper(idx, _x.dimSizes()[dim], _prev_slice_dims);     // idx in tensor being sliced
+        tensor::DimensionMapper<i> mapper;                                      // Get index of dimension i of
+        mapped_dim = mapper(idx, _x.dimSizes()[dim], _prev_slice_dims);         // idx in tensor being sliced
                 
         dim == 0  ? _index   = mapped_dim
                   : _offset += dim_offset * mapped_dim;
         
-        size_type total_offset = _index + _offset;                          // Calculate final offset
-        _prev_slice_dims.clear();                                           // Reset all class vars
+        size_type total_offset = _index + _offset;                                  // Calculate final offset
+        _prev_slice_dims.clear();                                                   // Reset all class vars
         _index = 0; _offset = 0;
     
         return total_offset;
@@ -379,20 +336,17 @@ public:
 
 namespace {
     
-/*
- * ==========================================================================================================
- * Function     : operator-
- * Description  : Overloaded - operator to subtract two tensor expressions, which improves readability of the
- *                subtraction of two tensors, and improves performance through the expression templates
- * Inputs       : x     : The first expression for the subtraction (this could be a tensor addition, a tensor
- *                        itself etc...)
- *              : y     : The second expression for the subtraction
- * Outputs      : The result of the subtraction of the expressions
- * Params       : T     : The type of data used by the expressions
- *              : E1    : The type of the first expression
- *              : E2    : The type of the second expression
- * ==========================================================================================================
- */
+// ==========================================================================================================
+//! @brief      Subtracts two TensorExpressions.
+//!
+//!             The expressions could be any type: Tensor, TensorSubtraction, TensorMultiplication ...
+//! @param[in]  x   The TensorExpression to substract from.
+//! @param[in]  y   The TensorExpression to subtract with. 
+//! @return     The result of the subtraction of the two TensorExpressions.
+//! @tparam     T   Type of data used by the expressions.
+//! @tparam     E1  Type of the expression to subtract from.
+//! @tparam     E2  Type of the expression to subtract with.
+// ==========================================================================================================
 template <typename T, typename E1, typename E2>
 frnn::TensorDifference<T, E1 ,E2> const operator-(frnn::TensorExpression<T, E1> const& x, 
                                                   frnn::TensorExpression<T, E2> const& y)    
@@ -400,20 +354,17 @@ frnn::TensorDifference<T, E1 ,E2> const operator-(frnn::TensorExpression<T, E1> 
     return frnn::TensorDifference<T, E1, E2>(x, y);
 }
 
-/*
- * ==========================================================================================================
- * Function     : operator+
- * Description  : Overloaded + operator to add two tensor expressions, which improves readability of the
- *                addition of two tensors, and improves performance through the expression templates
- * Inputs       : x     : The first expression for the addition (this could be a tensor addition, a tensor
- *                        itself etc...)
- *              : y     : The second expression for the addition
- * Outputs      : The result of the addition of the expressions
- * Params       : T     : The type of data used by the expressions
- *              : E1    : The type of the first expression
- *              : E2    : The type of the second expression
- * ==========================================================================================================
- */
+// ==========================================================================================================
+//! @brief      Adds two TensorExpressions. 
+//!
+//!             The expressions could be any Tensor type: Tensor, TensorAddition, TensorMultiplication ...
+//! @param[in]  x   The TensorExpression to add to.
+//! @param[in]  y   The TensorExpression to add with.
+//! @return     The result of the addition of the two TensorExpressions.
+//! @tparam     T   The type of data used by the expressions.
+//! @tparam     E1  The type of the expression to add to.
+//! @tparam     E2  The type of the expression to add with.
+// ==========================================================================================================
 template <typename T, typename E1, typename E2>
 frnn::TensorAddition<T, E1 ,E2> const operator+(frnn::TensorExpression<T, E1> const& x, 
                                                 frnn::TensorExpression<T, E2> const& y)    
