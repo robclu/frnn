@@ -211,16 +211,17 @@ public:
     }
     
     // ======================================================================================================
-    //! @brief      Terminating case for the calculation of the offset for getting an element.
-    //! @param[in]  idx     The index in the last dimension of the element of the Tensor to get.
+    //! @brief      Terminating case for the calculation of the offset for setting an element of the Tensor.
+    //! @param[in]  idx     The index of the element in the last dimension of the Tensor.
     //! @tparam     I       The type of the idx parameter.
+    //! @return     The element at the location specified by the arguments to the function.
     // ======================================================================================================
     template <typename I>
     typename std::enable_if<std::is_arithmetic<I>::value, T&>::type  operator() (I idx) 
     {
-        try {                                                                           // Check in range
-            if (idx >= _dimensions[_counter]) {                                 // counter +1 in next line for
-                throw TensorOutOfRange(_counter + 1, _dimensions[_counter], idx);       // 0 indexing offset
+        try {                                                                       // Check index in range
+            if (idx >= _dimensions[_counter]) {                                     // counter +1 in next line 
+                throw TensorOutOfRange(_counter + 1, _dimensions[_counter], idx);   // for 0 indexing offset
             }
         } catch (TensorOutOfRange& e) {
             std::cerr << e.what() << std::endl;
@@ -240,39 +241,38 @@ public:
         return _data[_offset];
     }
     
-    /* 
-     * ======================================================================================================
-     * Function     : operator() (for setting)
-     * Description  : Variadic case of operator() so that the offset is determined for any rank tensor
-     * Inputs       : idx       : The index for the current dimension so that the offset for the 
-     *                            dimension can be added
-     *              : indices   : The rest of the indecies for the other dimensions
-     * Params       : I         : The type of the idx argument
-     *              : Is        : The types for the remaining indecies
-     * ======================================================================================================
-     */
+    // ======================================================================================================
+    //! @brief      General case for the calculation of the offset for setting an element of the Tensor. 
+    //! @param[in]  idx     The index of the element in the current dimension used in the calculation.
+    //! @param[in]  indices The indices of the element in the remaining dimensions to use for the 
+    //!             calculation.
+    //! @tparam     I       The type of the idx parameter.
+    //! @tparam     Is      The types of the remaining index parameters.
+    //! @return     Calls the function with the indices parameter as arguments, and does so until the 
+    //!             terminating case is reached.
+    // ======================================================================================================
     template <typename I, typename... Is>
     typename std::enable_if<std::is_arithmetic<I>::value, T&>::type operator()(I idx, Is... indices) 
     {
         const int num_args = sizeof...(Is);
-        try {                                                           // Check index in range
-            if (idx >= _dimensions[_counter]) {                         // counter + 1 int next line for
-                throw TensorOutOfRange(_counter + 1, _dimensions[_counter], idx);   // 0 indexing offset
+        try {                                                                       // Check index in range
+            if (idx >= _dimensions[_counter]) {                                     // counter +1 in next line
+                throw TensorOutOfRange(_counter + 1, _dimensions[_counter], idx);   // for 0 indexing offset
             }
         } catch (TensorOutOfRange& e ) {
             std::cout << e.what() << std::endl;
             _counter = 0;
             return _data[0];
         }   
-        if (_counter++ == 0) {                                          // Case for first index
-            try {                                                       // Check correct number of arguments
+        if (_counter++ == 0) {                                              // Case for the first index
+            try {                                                           // Check correct num arguments
                 if (num_args + 1 !=  R) throw TensorInvalidArguments(num_args + 1, R);
                 _offset = idx;
             } catch (TensorInvalidArguments& e) {
                 std::cerr << e.what() << std::endl;
                 return _data[0];
             }  
-        } else {                                                        // Case for all other indecies
+        } else {                                                            // Case for all the other indices
             _offset += std::accumulate(_dimensions.begin()              , 
                                        _dimensions.end() - num_args - 1 ,
                                        1                                , 
@@ -280,16 +280,13 @@ public:
         }
         return this->operator()(indices...);
     }  
-   
-    /*
-     * ======================================================================================================
-     * Function     : operator() (for getting)
-     * Description  : Terminating case of operator(), for when there is only a single element
-     * Inputs       : idx       : The index of the element in the last dimension (the variadic version 
-     *                            would have been called fist for the other dimensions
-     * Params       : I         : The type of the idx argument
-     * ======================================================================================================
-     */
+  
+    // ======================================================================================================
+    //! @brief      Terminating case for the calculation of the offset for getting an element of the Tensor.
+    //! @param[in]  idx     The index of the element in the last dimension of the Tensor.
+    //! @tparam     I       The type of the idx parameter.
+    //! @return     The element at the location specified by the arguments to the function.
+    // ======================================================================================================
     template <typename I>
     typename std::enable_if<std::is_arithmetic<I>::value, const T&>::type operator()(I idx) const 
     {
@@ -314,18 +311,17 @@ public:
         _counter = 0;                                                   // Reset counter for next iter
         return _data[_offset]; 
     }
-    
-    /* 
-     * ======================================================================================================
-     * Function     : operator() (for getting)
-     * Description  : Variadic case of operator() so that the offset is determined for any rank tensor
-     * Inputs       : idx       : The index for the current dimension so that the offset for the 
-     *                            dimension can be added
-     *              : indecies  : The rest of the indecies for the other dimensions
-     * Params       : I         : The type of the idx argument
-     *              : Is        : The types for the remaining indecies
-     * ======================================================================================================
-     */
+   
+    // ======================================================================================================
+    //! @brief      General case for the calculation of the offset for setting an element of the Tensor. 
+    //! @param[in]  idx     The index of the element in the current dimension used in the calculation.
+    //! @param[in]  indices The indices of the element in the remaining dimensions to use for the 
+    //!             calculation.
+    //! @tparam     I       The type of the idx parameter.
+    //! @tparam     Is      The types of the remaining index parameters.
+    //! @return     Calls the function with the indices parameter as arguments, and does so until the 
+    //!             terminating case is reached.
+    // ======================================================================================================
     template <typename I, typename... Is>
     typename std::enable_if<std::is_arithmetic<I>::value, const T&>::type 
     operator()(I idx, Is... indecies) const
