@@ -70,30 +70,30 @@ public:
     using typename TensorExpression<T, Tensor<T,R>>::reference;
     /* ==================================================================================================== */
 private:
-    container_type          _data;                  //!< Container to hold Tensor data elements
-    std::vector<size_type>  _dimensions;            //!< Sizes of each of the Tensor's dimensions
-    size_type               _counter;               //!< Iteration of the elemen offset calculation 
-    size_type               _offset;                //!< For accessing elements with operator()
+    container_type          _data;                          //!< Container to hold Tensor data elements
+    std::vector<size_type>  _dim_sizes;                     //!< Sizes of each of the Tensor's dimensions
+    size_type               _counter;                       //!< Iteration of the elemen offset calculation 
+    size_type               _offset;                        //!< For accessing elements with operator()
 public:
     // =====================================================================================================
     //! @brief     Default constructor - sets the member variables to 0, and the number of dimensions equal 
     //!            to the rank.
     // =====================================================================================================
-    Tensor() : _data(0), _dimensions(R), _counter(0), _offset(0) {}
+    Tensor() : _data(0), _dim_sizes(R), _counter(0), _offset(0) {}
     
     // =====================================================================================================
     //! @brief     Constructor using an initializer list - sets the size of each of the dimensions to the 
     //!            values in the intializer_list and the total number of elements equal to the product of 
     //!            the dimension sizes.
-    //! @param[in] dimensions  The list of dimensions where the nth element in the list sets the size of the 
-    //!            nth dimension of the Tensor.
+    //! @param[in] dim_sizes    The list of dimension sizes where the nth element in the list sets the size 
+    //!            of the nth dimension of the Tensor.
     // =====================================================================================================
-    Tensor(std::initializer_list<int> dimensions) 
-    : _data(std::accumulate(dimensions.begin(), dimensions.end(), 1, std::multiplies<int>())),
+    Tensor(std::initializer_list<int> dim_sizes) 
+    : _data(std::accumulate(dim_sizes.begin(), dim_sizes.end(), 1, std::multiplies<int>())),
       _counter(0), _offset(0)
     {   
-        ASSERT(dimensions.size(), ==, R); 
-        for (auto& element : dimensions) _dimensions.push_back(element);
+        ASSERT(dim_sizes.size(), ==, R); 
+        for (auto& element : dim_sizes) _dim_sizes.push_back(element);
     }
     
     // =====================================================================================================
@@ -105,7 +105,7 @@ public:
     // =====================================================================================================
     template <typename E>
     Tensor(TensorExpression<T,E> const& expression) 
-    : _dimensions(expression.dimSizes()), _counter(0), _offset(0)
+    : _dim_sizes(expression.dimSizes()), _counter(0), _offset(0)
     {
         E const& expr = expression;
         _data.resize(expr.size());
@@ -116,16 +116,16 @@ public:
    
     // =====================================================================================================
     //! @brief     Constructor using vectors to set the dimension sizes and the data of the Tensor.
-    //! @param     dimensions  The sizes of each of the dimensions for the Tensor.
-    //! @param     data        The data for the Tensor.
+    //! @param     dim_sizes    The sizes of each of the dimensions for the Tensor.
+    //! @param     data         The data for the Tensor.
     // =====================================================================================================
-    Tensor(std::vector<size_type>& dimensions, container_type& data) 
-    : _dimensions(std::move(dimensions)), _data(std::move(data)), _counter(0), _offset(0) 
+    Tensor(std::vector<size_type>& dim_sizes, container_type& data) 
+    : _dim_sizes(std::move(dim_sizes)), _data(std::move(data)), _counter(0), _offset(0) 
     {
-        ASSERT(_dimensions.size(), ==, R);           // Check number of dimensions is equal to the rank
-        ASSERT(_data.size(), ==,                     // Check total data size is consistent with dim sizes
-               std::accumulate(_dimensions.begin()          , 
-                               _dimensions.end()            , 
+        ASSERT(_dim_sizes.size(), ==, R);               // Check number of dimensions is equal to the rank
+        ASSERT(_data.size(), ==,                        // Check total data size is consistent with dim sizes
+               std::accumulate(_dim_sizes.begin()           , 
+                               _dim_sizes.end()             , 
                                1                            , 
                                std::multiplies<size_type>() ));
     }
@@ -148,7 +148,7 @@ public:
     {
         try {
             if (dim >= R) throw TensorOutOfRange(dim, R);
-            return _dimensions[dim];
+            return _dim_sizes[dim];
         } catch (TensorOutOfRange& e) {
             std::cout << e.what() << std::endl;
             return 0;
@@ -165,7 +165,7 @@ public:
     //! @brief      Gets a vector holding the size of each dimension of the Tensor.
     //! @return     A vector holding the size of each dimension of the Tensor.
     // ======================================================================================================
-    const std::vector<size_type>& dimSizes() const { return _dimensions; }
+    const std::vector<size_type>& dimSizes() const { return _dim_sizes; }
      
     // ======================================================================================================
     //! @brief      Gets the Tensor data.
@@ -220,8 +220,8 @@ public:
     typename std::enable_if<std::is_arithmetic<I>::value, T&>::type  operator() (I idx) 
     {
         try {                                                                       // Check index in range
-            if (idx >= _dimensions[_counter]) {                                     // counter +1 in next line 
-                throw TensorOutOfRange(_counter + 1, _dimensions[_counter], idx);   // for 0 indexing offset
+            if (idx >= _dim_sizes[_counter]) {                                     // counter +1 in next line 
+                throw TensorOutOfRange(_counter + 1, _dim_sizes[_counter], idx);   // for 0 indexing offset
             }
         } catch (TensorOutOfRange& e) {
             std::cerr << e.what() << std::endl;
@@ -233,8 +233,8 @@ public:
         } catch (TensorInvalidArguments& e) {
             std::cerr << e.what() << std::endl;
         }
-        _offset += std::accumulate(_dimensions.begin()      , 
-                                   _dimensions.end() - 1    ,               // Mult all elements except last
+        _offset += std::accumulate(_dim_sizes.begin()       , 
+                                   _dim_sizes.end() - 1     ,               // Mult all elements except last
                                    1                        ,               // Start val for multiplication
                                    std::multiplies<int>()   ) * idx;        // Add offset due to idx for dim
         _counter = 0;                                                       // Reset counter for next iter
@@ -256,16 +256,16 @@ public:
     {
         const int num_args = sizeof...(Is);
         try {                                                                       // Check index in range
-            if (idx >= _dimensions[_counter]) {                                     // counter +1 in next line
-                throw TensorOutOfRange(_counter + 1, _dimensions[_counter], idx);   // for 0 indexing offset
+            if (idx >= _dim_sizes[_counter]) {                                      // counter +1 in next line
+                throw TensorOutOfRange(_counter + 1, _dim_sizes[_counter], idx);    // for 0 indexing offset
             }
         } catch (TensorOutOfRange& e ) {
             std::cout << e.what() << std::endl;
             _counter = 0;
             return _data[0];
         }   
-        if (_counter++ == 0) {                                              // Case for the first index
-            try {                                                           // Check correct num arguments
+        if (_counter++ == 0) {                                                  // Case for the first index
+            try {                                                               // Check correct num arguments
                 if (num_args + 1 !=  R) throw TensorInvalidArguments(num_args + 1, R);
                 _offset = idx;
             } catch (TensorInvalidArguments& e) {
@@ -273,10 +273,10 @@ public:
                 return _data[0];
             }  
         } else {                                                            // Case for all the other indices
-            _offset += std::accumulate(_dimensions.begin()              , 
-                                       _dimensions.end() - num_args - 1 ,
+            _offset += std::accumulate(_dim_sizes.begin()               , 
+                                       _dim_sizes.end() - num_args - 1  ,
                                        1                                , 
-                                       std::multiplies<int>()           ) * idx;
+                                       std::multiplies<size_type>()     ) * idx;
         }
         return this->operator()(indices...);
     }  
@@ -290,25 +290,25 @@ public:
     template <typename I>
     typename std::enable_if<std::is_arithmetic<I>::value, const T&>::type operator()(I idx) const 
     {
-        try {                                                           // Check in range
-            if (idx >= _dimensions[_counter]) {                         // counter +1 in next line for
-                throw TensorOutOfRange(_counter + 1, _dimensions[_counter], idx);   // 0 indexing offset
+        try {                                                                       // Check in range
+            if (idx >= _dim_sizes[_counter]) {                                      // counter +1 in next line 
+                throw TensorOutOfRange(_counter + 1, _dim_sizes[_counter], idx);    // for 0 indexing offset
             }
         } catch (TensorOutOfRange& e) {
             std::cerr << e.what() << std::endl;
             _counter = 0;
             return _data[0];
         }
-        try {                                                           // Make sure variadic version 
-            if (_counter == 0) throw TensorInvalidArguments(1, R);      // has been called already
+        try {                                                               // Make sure variadic version 
+            if (_counter == 0) throw TensorInvalidArguments(1, R);          // has been called already
         } catch (TensorInvalidArguments& e) {
             std::cerr << e.what() << std::endl;
         }
-        _offset += std::accumulate(_dimensions.begin()      , 
-                                   _dimensions.end() - 1    ,           // Mult all elements exepct last
-                                   1                        ,           // Start val for multiplication
-                                   std::multiplies<int>()   ) * idx;    // Add offset due to idx for dim
-        _counter = 0;                                                   // Reset counter for next iter
+        _offset += std::accumulate(_dim_sizes.begin()           , 
+                                   _dim_sizes.end() - 1         ,           // Mult all elements exepct last
+                                   1                            ,           // Start val for multiplication
+                                   std::multiplies<size_type>() ) * idx;    // Add offset due to idx for dim
+        _counter = 0;                                                       // Reset counter for next iter
         return _data[_offset]; 
     }
    
@@ -327,28 +327,28 @@ public:
     operator()(I idx, Is... indecies) const
     {
         const int num_args = sizeof...(Is);
-        try {                                                           // Check index in range
-            if (idx >= _dimensions[_counter]) {                         // counter + 1 int next line for
-                throw TensorOutOfRange(_counter + 1, _dimensions[_counter], idx);   // 0 indexing offset
+        try {                                                                       // Check index in range
+            if (idx >= _dim_sizes[_counter]) {                                      // counter +1 in next line 
+                throw TensorOutOfRange(_counter + 1, _dim_sizes[_counter], idx);    // for 0 indexing offset
             }
         } catch (TensorOutOfRange& e ) {
             std::cout << e.what() << std::endl;
             _counter = 0;
             return _data[0];
         }   
-        if (const_cast<int&>(_counter)++ == 0) {                        // Case for first index
-            try {                                                       // Check correct number of arguments
+        if (const_cast<int&>(_counter)++ == 0) {                                // Case for first index
+            try {                                                               // Check correct num arguments
                 if (num_args + 1 !=  R) throw TensorInvalidArguments(num_args + 1, R);
                 _offset = idx;
             } catch (TensorInvalidArguments& e) {
                 std::cerr << e.what() << std::endl;
                 return _data[0];
             }  
-        } else {                                                        // Case for all other indecies
-            _offset += std::accumulate(_dimensions.begin()              , 
-                                       _dimensions.end() - num_args - 1 ,
+        } else {                                                                // Case for all other indecies
+            _offset += std::accumulate(_dim_sizes.begin()               , 
+                                       _dim_sizes.end() - num_args - 1  ,
                                        1                                , 
-                                       std::multiplies<int>()           ) * idx;
+                                       std::multiplies<size_type>()     ) * idx;
         }
         return this->operator()(indecies...);
     }  
