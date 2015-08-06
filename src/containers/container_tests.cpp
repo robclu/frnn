@@ -72,4 +72,12 @@ TEST( frnnVariadicMap, CanIterateOverMap )
     EXPECT_EQ( sum, 18 );
 }
 
-
+TEST( frnnVariadicMap, CanFindElementsInMap ) 
+{
+    frnn::VariadicMap<int> vmap(4, 2, 1, 5, 6);
+    
+    auto element = vmap.find(2);
+    
+    EXPECT_EQ( element->first , 2 );
+    EXPECT_EQ( element->second, 1 );
+}
