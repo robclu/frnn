@@ -22,7 +22,7 @@
 #include <iostream>
 
 #include "tuple.h"
-#include "variadic_map.h"
+#include "ordered_map.h"
 #include <string>
 
 TEST( frnnTuple, CanCreateTupleWithMultipleTypes )
@@ -55,29 +55,54 @@ TEST( frnnTuple, CanSetTupleElement )
     EXPECT_EQ( 4.5, frnn::get<2>(tuple) );
 }
 
-TEST( frnnVariadicMap, CanCreateVariadicMapAndGetSize ) 
+TEST( frnnOrderedMap, CanCreateVariadicMapAndGetSize ) 
 {
-    frnn::VariadicMap<int> vmap(4, 2, 1);
-    EXPECT_EQ( 3, vmap.size() );
+    frnn::OrderedMap<int> omap(4, 2, 1);
+    EXPECT_EQ( 3, omap.size() );
 }
 
-TEST( frnnVariadicMap, CanIterateOverMap ) 
+TEST( frnnOrderedMap, CanIterateOverMap ) 
 {
-    frnn::VariadicMap<int> vmap(4, 2, 1, 5, 6);
+    frnn::OrderedMap<int> omap(4, 2, 1, 5, 6);
     
     int sum = 0;            // Sum of elements
     
-    for (auto& element : vmap ) sum += element.first;
+    for (auto& element : omap ) sum += element.first;
             
     EXPECT_EQ( sum, 18 );
 }
 
-TEST( frnnVariadicMap, CanFindElementsInMap ) 
+TEST( frnnOrderedMap, CanFindElementsInMap ) 
 {
-    frnn::VariadicMap<int> vmap(4, 2, 1, 5, 6);
+    frnn::OrderedMap<int> omap(4, 2, 1, 5, 6);
     
-    auto element = vmap.find(2);
+    auto element = omap.find(2);
     
     EXPECT_EQ( element->first , 2 );
     EXPECT_EQ( element->second, 1 );
 }
+
+TEST( frnnOrderedMap, CanInsertElementIntoMap )
+{
+    frnn::OrderedMap<int> omap(4, 2, 1, 5, 6);
+    int x =10;    
+    
+    omap.insert(9);         // Check r-value ref works
+    omap.insert(x);         // Check l-value ref works
+    
+    auto element = omap.find(9);
+    
+    EXPECT_EQ( element->first , 9 );
+    EXPECT_EQ( element->second, 5 );
+}   
+
+TEST( frnnOrderedMap, CanInsertIteratorIntoMap )
+{
+    frnn::OrderedMap<int> omap_1(4, 2, 1, 5, 6);
+    frnn::OrderedMap<int> omap_2;
+    
+    // Insert into map 2 from map 1
+    omap_2.insert(omap_1.find(2));
+    
+    EXPECT_EQ( omap_2.size(), 1 );
+}    
