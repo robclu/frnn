@@ -22,6 +22,7 @@
 #include <iostream>
 
 #include "tuple.h"
+#include "variadic_map.h"
 #include <string>
 
 TEST( frnnTuple, CanCreateTupleWithMultipleTypes )
@@ -53,3 +54,22 @@ TEST( frnnTuple, CanSetTupleElement )
     
     EXPECT_EQ( 4.5, frnn::get<2>(tuple) );
 }
+
+TEST( frnnVariadicMap, CanCreateVariadicMapAndGetSize ) 
+{
+    frnn::VariadicMap<int> vmap(4, 2, 1);
+    EXPECT_EQ( 3, vmap.size() );
+}
+
+TEST( frnnVariadicMap, CanIterateOverMap ) 
+{
+    frnn::VariadicMap<int> vmap(4, 2, 1, 5, 6);
+    
+    int sum = 0;            // Sum of elements
+    
+    for (auto& element : vmap ) sum += element.first;
+            
+    EXPECT_EQ( sum, 18 );
+}
+
+

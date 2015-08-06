@@ -232,6 +232,15 @@ public:
     //! @return    The result of the multiplication of the Tensors.
     // ======================================================================================================
     value_type operator[](size_type i) const { return _x[i] + _y[i]; }
+
+private:
+    // ======================================================================================================
+    // ======================================================================================================
+    template <typename... Ts>
+    void buildReductionLists(Ts... dims) 
+    {
+        
+    }
 };    
 
 // ==========================================================================================================
@@ -291,7 +300,7 @@ public:
     //! @return    The value of the element at position i of the expression data.
     // ======================================================================================================
     value_type operator[](size_type i) const { return _x[mapIndex(i)]; }
-
+    
 private:
     // =====================================================================================================
     //! @brief     Adds the size of a dimension from the Expression to the slice dimension sizes vector so 

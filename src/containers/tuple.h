@@ -135,9 +135,9 @@ namespace tuple {
 //! @param[in]  tuple   The Tuple to get the size of.
 //! @tparam     Ts      The types of the elements in the Tuple.
 //! @return     The size of the Tuple tuple.
-// ==========================================================================================================
+// ========================================================================================================== 
 template <typename... Ts>
-size_t size(Tuple<Ts...>& tuple) { return sizeof...(Ts); };
+size_t size(Tuple<Ts...>& tuple) { return sizeof...(Ts); }
 
 }
 
