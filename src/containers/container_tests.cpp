@@ -22,7 +22,8 @@
 #include <iostream>
 
 #include "tuple.h"
-#include "ordered_map.h"
+#include "index_map.h"
+
 #include <string>
 
 TEST( frnnTuple, CanCreateTupleWithMultipleTypes )
@@ -55,54 +56,66 @@ TEST( frnnTuple, CanSetTupleElement )
     EXPECT_EQ( 4.5, frnn::get<2>(tuple) );
 }
 
-TEST( frnnOrderedMap, CanCreateVariadicMapAndGetSize ) 
+TEST( frnnIndexMap, CanCreateVariadicMapAndGetSize ) 
 {
-    frnn::OrderedMap<int> omap(4, 2, 1);
-    EXPECT_EQ( 3, omap.size() );
+    frnn::IndexMap<frnn::Index> imap(4, 2, 1);
+    EXPECT_EQ( 3, imap.size() );
 }
 
-TEST( frnnOrderedMap, CanIterateOverMap ) 
+TEST( frnnIndexMap, CanIterateOverMap ) 
 {
-    frnn::OrderedMap<int> omap(4, 2, 1, 5, 6);
+    frnn::IndexMap<frnn::Index> imap(4, 2, 1, 5, 6);
     
     int sum = 0;            // Sum of elements
     
-    for (auto& element : omap ) sum += element.first;
+    // Note that returned keys are functors
+    for (auto& element : imap ) sum += element.first();
             
     EXPECT_EQ( sum, 18 );
 }
 
-TEST( frnnOrderedMap, CanFindElementsInMap ) 
+TEST( frnnIndexMap, CanFindElementsInMap ) 
 {
-    frnn::OrderedMap<int> omap(4, 2, 1, 5, 6);
+    frnn::IndexMap<frnn::Index> imap(4, 2, 1, 5, 6);
     
-    auto element = omap.find(2);
+    auto element = imap.find(2);
     
-    EXPECT_EQ( element->first , 2 );
-    EXPECT_EQ( element->second, 1 );
+    EXPECT_EQ( element->first() , 2 );
+    EXPECT_EQ( element->second  , 1 );
 }
 
-TEST( frnnOrderedMap, CanInsertElementIntoMap )
+TEST( frnnIndexMap, CanInsertElementIntoMap )
 {
-    frnn::OrderedMap<int> omap(4, 2, 1, 5, 6);
+    frnn::IndexMap<frnn::Index> imap(4, 2, 1, 5, 6);
     int x =10;    
     
-    omap.insert(9);         // Check r-value ref works
-    omap.insert(x);         // Check l-value ref works
+    imap.insert(9);         // Check r-value ref works
+    imap.insert(x);         // Check l-value ref works
     
-    auto element = omap.find(9);
+    auto element = imap.find(9);
     
-    EXPECT_EQ( element->first , 9 );
-    EXPECT_EQ( element->second, 5 );
+    EXPECT_EQ( element->first() , 9 );
+    EXPECT_EQ( element->second  , 5 );
 }   
 
-TEST( frnnOrderedMap, CanInsertIteratorIntoMap )
+TEST( frnnIndexMap, CanInsertIteratorIntoMap )
 {
-    frnn::OrderedMap<int> omap_1(4, 2, 1, 5, 6);
-    frnn::OrderedMap<int> omap_2;
+    frnn::IndexMap<frnn::Index> imap_1(4, 2, 1, 5, 6);
+    frnn::IndexMap<frnn::Index> imap_2;
     
     // Insert into map 2 from map 1
-    omap_2.insert(omap_1.find(2));
+    imap_2.insert(imap_1.find(2));
     
-    EXPECT_EQ( omap_2.size(), 1 );
-}    
+    EXPECT_EQ( imap_2.size(), 1 );
+}   
+
+TEST( frnnIndexMap, CanInsertUsingFunctors )
+{ 
+    using namespace frnn::index;
+    frnn::IndexMap<frnn::Index> imap(i, j);
+
+    auto element = imap.find(i);
+    
+    EXPECT_EQ( element->first(), 0 );
+    EXPECT_EQ( element->second , 0 );
+}

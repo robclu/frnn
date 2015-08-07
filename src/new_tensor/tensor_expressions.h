@@ -27,6 +27,7 @@
 
 #include "tensor_utils.h"
 #include "../containers/tuple.h"
+#include "../containers/index_map.h"
 #include "../util/errors.h"
 
 namespace frnn {
@@ -187,29 +188,31 @@ public:
 
 // ==========================================================================================================
 //! @class      TensorMultiplier
-//! @brief      Expression class for multiplying two Tensors
+//! @brief      Expression class for creating an argument for a TensorMultiplication expression.
 //! @tparam     T       Type of the data used by the Tensors.
 //! @tparam     E1      Expression to multiply.
-//! @tparam     E2      Expression to multilpy.
+//! @tparam     I       The type of the variables used for the indices to multiply over.
 // ==========================================================================================================
-template <typename T, typename E1, typename E2>
-class TensorMultiplier : public TensorExpression<T, TensorMultiplier<T,E1,E2>> {
+template <typename T, typename E1, typename I>
+class TensorMultiplier : public TensorExpression<T, TensorMultiplier<T, E1, I>> {
 public:
     /* ====================================== Typedefs ==================================================== */
-    using typename TensorExpression<T, TensorMultiplier<T,E1,E2>>::container_type;
-    using typename TensorExpression<T, TensorMultiplier<T,E1,E2>>::size_type;
-    using typename TensorExpression<T, TensorMultiplier<T,E1,E2>>::value_type;
+    using typename TensorExpression<T, TensorMultiplier<T, E1, I>>::container_type;
+    using typename TensorExpression<T, TensorMultiplier<T, E1, I>>::size_type;
+    using typename TensorExpression<T, TensorMultiplier<T, E1, I>>::value_type;
     /* ==================================================================================================== */
+    
+    IndexMap<I>     _mult_dims;                         //!< Dimensions of _x to multiply
 private:
-    E1 const& _x;       //!< First expression for multiplication
-    E2 const& _y;       //!< Second expression for multiplication
+    E1 const&       _x;                                 //!< First expression for multiplication
 public:
      // =====================================================================================================
      //! @brief     Sets the expressions for multiplication.
      //! @param[in] x       The first expression for addition.
-     //! @param[in] y       The second expression for addition
      // =====================================================================================================
-    TensorAddition(TensorExpression<T,E1> const& x, TensorExpression<T,E2> const& y) : _x(x), _y(y) 
+    template <typename... Is>
+    TensorMultiplier(TensorExpression<T,E1> const& x, I dim, Is... dims) 
+    : _x(x), _mult_dims(dim, dims...)
     { 
         // Will need to check that the dimension checkout
     }
@@ -231,7 +234,7 @@ public:
     //! @param[in] i   The element in the expression which must be fetched.
     //! @return    The result of the multiplication of the Tensors.
     // ======================================================================================================
-    value_type operator[](size_type i) const { return _x[i] + _y[i]; }
+    value_type operator[](size_type i) const { return _x[i]; }
 
 private:
     // ======================================================================================================

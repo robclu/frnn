@@ -204,10 +204,26 @@ public:
     //! @tparam     Ts      The types of the dimension variables.
     // ======================================================================================================
     template <typename... Ts>
-    TensorSlice<T, Tensor<T,R>, Ts...> operator()(Ts... dims) const 
+    TensorSlice<T, Tensor<T,R>, Ts...> slice(Ts... dims) const 
     {
         return TensorSlice<T, Tensor<T,R>, Ts...>(static_cast<Tensor<T,R> const&>(*this),
                                                   Tuple<Ts...>(dims...)                 );          
+    }
+   
+    // ======================================================================================================
+    //! @brief      Returns a TensorMultiplier which can then be used with the overloaded multiplication     \n
+    //!             operator to multiply two Tensors.
+    //! @param[in]  dims    The dimensions of the Tensor which must be multiplied.
+    //! @return     A TensorMultiplier which stores the dimensions to multiply over.
+    //! @tparam     I       The type of the first dimension variable.
+    //! @tparam     Is      The types of the rest of the dimension variables.
+    // ======================================================================================================
+    template <typename I, typename... Is>
+    TensorMultiplier<T, Tensor<T, R>, I> operator()(I dim, Is... dims) const
+    {
+        return TensorMultiplier<T, Tensor<T, R>, I>(static_cast<Tensor<T, R> const&>(*this) ,
+                                                    dim                                     ,                    
+                                                    dims...                                 );
     }
     
     // ======================================================================================================

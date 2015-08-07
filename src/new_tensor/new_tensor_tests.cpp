@@ -215,9 +215,9 @@ TEST( frnnTensor, ThrowsErrorForOutOfRangeElementAccess)
 
 TEST( frnnTensor, CanCreateNewTensorFromSlice ) 
 {
-    using namespace frnn::tensor::dim;
+    using namespace frnn::index;
     frnn::Tensor<int, 3> tensor         = {3, 2, 3};
-    frnn::Tensor<int, 2> sliced_tensor  = tensor(j, i);
+    frnn::Tensor<int, 2> sliced_tensor  = tensor.slice(j, i);
     
     // Check that dimensions were correctly swapped
     size_t slice_dim_size_i = sliced_tensor.size(0);    
@@ -225,4 +225,14 @@ TEST( frnnTensor, CanCreateNewTensorFromSlice )
     
     EXPECT_EQ( slice_dim_size_i, tensor.size(1) );
     EXPECT_EQ( slice_dim_size_j, tensor.size(0) );
+}
+
+TEST( frnnTensor, CanCreateTensorMultiplier )
+{
+    frnn::Tensor<int, 3> tensor = {2, 2, 2};
+
+    using namespace frnn::index;
+    frnn::TensorMultiplier<int, frnn::Tensor<int, 3>, frnn::Index> tensor_multiplier = tensor(j, i);
+    
+    EXPECT_EQ( 1, 1);
 }

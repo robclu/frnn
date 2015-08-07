@@ -1,6 +1,6 @@
 // ==========================================================================================================
-//! @file ordered_map.h
-//!       Header file for the fastRNN OrderedMap class to create a hastable where the keys are specified and 
+//! @file index_map.h
+//!       Header file for the fastRNN IndexMap class to create a hastable where the keys as Indexes and
 //!       each key has a value which is equal to number the element was inserted into the map.
 // ==========================================================================================================
 
@@ -27,34 +27,40 @@
 #ifndef _FRNN_CONTAINERS_ORDERED_MAP_
 #define _FRNN_CONTAINERS_ORDERED_MAP_
 
+#include "index.h"
+
 #include <unordered_map>
+#include <algorithm>
 #include <typeinfo>
 
 namespace frnn {
 
 // ==========================================================================================================
-//! @struct     OrderedMap
-//! @brief      Creates an OrderedMap  where each of the arguments are the keys and the values are the 
-//!             indeices of the arguments. Essentially this is just a list of elements that can be searched
+//! @struct     IndexMap
+//! @brief      Creates an IndexMap  where each of the arguments are the keys (an Index) and the values are 
+//!             position the key was inserted into the map i.e it is its index in the map as if the map
+//!             was a vector, thus the map can be searched for an Index quickly (since it is the key) but the
+//!             index of the Index in the map can also be found (which is usefull when passing a variable 
+//!             number of Index elements as arguments to a function).
 //!             in constant time while still being able to determine their order.
-//! @tparam     K       The type of the keys for the map.
+//! @tparam     K       The type of the keys for the map (the Index class or a similar functor class).
 // ==========================================================================================================
 template <typename K>    
-struct OrderedMap {
+struct IndexMap {
 public:
     /* ======================================== Typedefs ================================================== */
-    typedef std::unordered_map<K, size_t>   map;
-    typedef typename map::size_type         size_type;
-    typedef typename map::iterator          iterator;
-    typedef typename map::const_iterator    const_iterator;
+    typedef std::unordered_map<K, size_t, IndexHasher>      map;
+    typedef typename map::size_type                         size_type;
+    typedef typename map::iterator                          iterator;
+    typedef typename map::const_iterator                    const_iterator;
     /* ==================================================================================================== */ 
 private:
-    std::unordered_map<K, size_type>    _elements;                              //!< Key-value pair elements   
+    std::unordered_map<K, size_type, IndexHasher>           _elements;          //!< Key-value pair elements   
 public:
     // ======================================================================================================
     //! @brief      Default constructor.
     // ======================================================================================================
-    OrderedMap() {}
+    IndexMap() {}
     
     // ======================================================================================================
     //! @brief      Adds all arguments as keys in the map, which the value being the element's argument index.
@@ -63,7 +69,7 @@ public:
     //! @tparam     Ks          The types of the other elements (keys) to add to the map.
     // ======================================================================================================
     template <typename... Ks>
-    OrderedMap(K element, Ks... elements) 
+    IndexMap(K element, Ks... elements) 
     {
         createMap<0>(element, elements...);
     }    
@@ -81,7 +87,7 @@ public:
     }
     
     // ======================================================================================================
-    //! @brief  Creates an unordered_map - case for all but the terminating case.
+    //! @brief      Creates an unordered_map - case for all but the terminating case.
     //! @param[in]  element     The element to add to the map.
     //! @param[in]  elements    The other elements still to be added to the map.
     //! @tparam     iter        The iteration number of the createMapfunction.
@@ -119,8 +125,9 @@ public:
     // ======================================================================================================
     void insert(K& key) 
     {
-        _elements.insert(std::make_pair<K, size_type>(std::move(key), _elements.size()));
+        _elements.insert(std::make_pair<K, size_type>(std::move(key()), _elements.size()));
     }
+
     // ======================================================================================================
     //! @brief  Gets the size of the map.
     //! @return The size of the map.
@@ -158,7 +165,7 @@ public:
     //! @return An iterator which points to the element with a key key if key is a valid key for the map,
     //!         otherwise an iterator to the end of the map.
     // ======================================================================================================
-    iterator find(const K& key) { return _elements.find(key); }
+    iterator find(const K& key) { return _elements.find(key()); }
 
     // ======================================================================================================
     //! @brief  Searches for an element in the map, and if found, returns an iterator to the element,
@@ -167,7 +174,7 @@ public:
     //! @return A constant iterator which points to the element with a key key if key is a valid key for the 
     //!         map, otherwise an iterator to the end of the map.
     // ======================================================================================================
-    const_iterator find(const K& key) const { return _elements.find(key); }
+    const_iterator find(const K& key) const { return _elements.find(key()); }
 };
 
 }       // End namespace frnn

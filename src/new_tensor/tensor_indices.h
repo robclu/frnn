@@ -63,6 +63,16 @@ public:
      //! @return        The dimension which the Index instance is representing.
      // =====================================================================================================
     constexpr size_t operator()() const { return _idx; }
+    
+    bool operator==(const Index& other) const {return _idx == other(); }
+};
+
+class IndexHasher {
+public:
+    size_t operator()(const Index& idx) const 
+    {
+        return std::hash<size_t>()(idx);
+    }
 };
 
 /* ================================================ Typedefs ============================================== */
