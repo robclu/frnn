@@ -214,7 +214,7 @@ public:
     TensorMultiplier(TensorExpression<T,E1> const& x, I dim, Is... dims) 
     : _x(x), _mult_dims(dim, dims...)
     { 
-        // Will need to check that the dimension checkout
+        for (auto& elem : _mult_dims) std::cout << elem.first() << " : " << elem.second << std::endl;
     }
    
     // ======================================================================================================
@@ -236,15 +236,72 @@ public:
     // ======================================================================================================
     value_type operator[](size_type i) const { return _x[i]; }
 
-private:
     // ======================================================================================================
+    //! @brief      Gets the dimensions of _x which are used in the multiplication. If for a Tensor x, with  \n 
+    //!             say 3 dimensions (i,j,k) each of size 2, then if the multiplication was:                 \n
+    //!                                                                                                      \n
+    //!             z(j) = y(i) * x(i, j)                                                                    \n
+    //!                                                                                                      \n
+    //!             Where z and y are also Tensors, then this function returns a map with keys i and j,      \n
+    //!             with values 0 and 1 respectively, since those are their indices as arguments to the      \n
+    //!             () operator.
+    //! @return     The map of dimensions to use for the multiplication and their argument numbers.
     // ======================================================================================================
-    template <typename... Ts>
-    void buildReductionLists(Ts... dims) 
-    {
-        
-    }
+    const IndexMap<I>& multDims() const { return _mult_dims; }
 };    
+
+// ==========================================================================================================
+//! @class      TensorMultiplication    
+//! @brief      Expression class which multiplies 2 TensorExpressions.
+//! @tparam     T   The data type used by the Expressions.
+//! @tparam     E1  The first expression to multiply.
+//! @tparam     E2  The second expression to multiply.
+// ==========================================================================================================
+template <typename T, typename E1, typename E2>
+class TensorMultiplication : public TensorExpression<T, TensorMultiplication<T, E1, E2>> {
+public:
+    /* ====================================== Typedefs ==================================================== */
+    using typename TensorExpression<T, TensorMultiplication<T, E1, E2>>::container_type;
+    using typename TensorExpression<T, TensorMultiplication<T, E1, E2>>::size_type;
+    using typename TensorExpression<T, TensorMultiplication<T, E1, E2>>::value_type;
+    /* ==================================================================================================== */ 
+private:
+    E1 const&   _x;                     //!< The expression to multiply on the left side of the * operator
+    E1 const&   _y;                     //!< The expression to multiply on the right side of the * operator
+    IndexMap<T> _reduce_dims;           //!< Dimensions of the expressions that must be reuced (summed over)
+    IndexMap<T> _nreduce_dims;          //!< Dimensions of the expressions that must not be reduced
+public:
+    // ======================================================================================================
+    //! @brief      Sets the expressions and created the maps of dimensions to reduce and to not reduce.
+    //! @param[in]  x   The first (left) expression for multiplication.
+    //! @param[in]  y   The second (right) epression for multiplication.
+    // ======================================================================================================
+    TensorMultiplication(TensorExpression<T, E1> const& x, TensorExpression<T, E2> const& y)
+    : _x(x), _y(y) 
+    {}
+        
+    // CHANGE    
+    // ======================================================================================================
+    //! @brief     Gets the sizes of the all the dimensions of the expression.
+    //! @return    A constant reference to the dimension size vector of the expression.
+    // ======================================================================================================
+    const std::vector<size_type>& dimSizes() const { return _x.dimSizes(); }
+    
+    // CHANGE
+    // ======================================================================================================
+    //! @brief     Returns the size of the expression.
+    //! @return    The size of the TensorMultiplier.
+    // ====================================================================================================== 
+    size_type size() const { return _x.size(); }
+    
+    // CHANGE
+    // ======================================================================================================
+    //! @brief     Multiplies two elements (one from each Tensor) from the Tensor expression data.
+    //! @param[in] i   The element in the expression which must be fetched.
+    //! @return    The result of the multiplication of the Tensors.
+    // ======================================================================================================
+    value_type operator[](size_type i) const { return _x[i]; }
+};
 
 // ==========================================================================================================
 //! @class      TensorSlice

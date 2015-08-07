@@ -27,7 +27,6 @@
 
 #include "tensor_expressions.h"
 #include "tensor_exceptions.h"
-#include "tensor_indices.h"
 #include "../containers/tuple.h"
 
 #include <iostream>
