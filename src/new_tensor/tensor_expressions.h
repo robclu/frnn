@@ -285,6 +285,7 @@ private:
     std::unordered_map<size_t, size_t>  _reduce_dims;       //!< Dimensions of expressions to be reduced
     std::set<size_t>                    _nreduce_dims_x;    //!< Dimensions of x not to be reduced
     std::set<size_t>                    _nreduce_dims_y;    //!< Dimensions of y not to be reduced
+    std::vector<size_type>              _dim_sizes;         //!< Sizes of the dimensions of the result
 public:
     // ======================================================================================================
     //! @brief      Sets the expressions and created the maps of dimensions to reduce and to not reduce.
@@ -294,17 +295,17 @@ public:
     //!             temporary expression).
     // ======================================================================================================
     TensorMultiplication(TensorExpression<T, E1>& x, TensorExpression<T, E2>& y)
-    : _x(x), _y(y) 
+    : _x(x), _y(y), _dim_sizes(0)
     {
         buildDimensions();
+        setDimSizes();
     }
         
-    // CHANGE    
     // ======================================================================================================
     //! @brief     Gets the sizes of the all the dimensions of the expression.
     //! @return    A constant reference to the dimension size vector of the expression.
     // ======================================================================================================
-    const std::vector<size_type>& dimSizes() const { return _x.dimSizes(); }
+    const std::vector<size_type>& dimSizes() const { return _dim_sizes; }
     
     // CHANGE
     // ======================================================================================================
@@ -370,6 +371,15 @@ public:
             // the dimension in y's subscript list
             _nreduce_dims_y.insert(dim_y.second);                              
         }
+    }
+    
+    // ======================================================================================================
+    //! @brief      Sets the sizes of the dimensions of the result of the multiplication
+    // ======================================================================================================
+    void setDimSizes() 
+    {
+        for (auto& dim : _nreduce_dims_x) _dim_sizes.push_back(_x.dimSizes()[dim]);
+        for (auto& dim : _nreduce_dims_y) _dim_sizes.push_back(_y.dimSizes()[dim]);
     }
 };
 

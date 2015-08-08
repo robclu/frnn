@@ -233,12 +233,16 @@ TEST( frnnTensor, CanCreateTensorMultiplier )
     frnn::Tensor<int, 4> tensor_2 = {4, 2, 2, 1};
 
     using namespace frnn::index;
-    frnn::TensorMultiplier<int, frnn::Tensor<int, 3>, frnn::Index> tensor_multiplier_1 = tensor_1(i, j, k, o);
+    frnn::TensorMultiplier<int, frnn::Tensor<int, 3>, frnn::Index> tensor_multiplier_1 = tensor_1(i, j, k);
     frnn::TensorMultiplier<int, frnn::Tensor<int, 4>, frnn::Index> tensor_multiplier_2 = tensor_2(j, i, l, m);
     
     frnn::TensorMultiplication<int,
                                 frnn::TensorMultiplier<int, frnn::Tensor<int, 3>, frnn::Index>,
                                 frnn::TensorMultiplier<int, frnn::Tensor<int, 4>, frnn::Index>> tmult(tensor_multiplier_1, tensor_multiplier_2);
                                    
-    EXPECT_EQ( 1, 1);
+    const std::vector<size_t> vect = tmult.dimSizes();
+    
+    EXPECT_EQ( vect[0], 2 );
+    EXPECT_EQ( vect[1], 2 );
+    EXPECT_EQ( vect[2], 1 );
 }
