@@ -25,6 +25,7 @@
 #include "index_map.h"
 
 #include <string>
+#include <algorithm>
 
 TEST( frnnTuple, CanCreateTupleWithMultipleTypes )
 {
@@ -118,4 +119,35 @@ TEST( frnnIndexMap, CanInsertUsingFunctors )
     
     EXPECT_EQ( element->first(), 0 );
     EXPECT_EQ( element->second , 0 );
+}
+
+TEST( frnnIndexMap, CanEraseUsingKey)
+{
+    using namespace frnn::index;
+    frnn::IndexMap<frnn::Index> imap(i, k, j);
+    
+    size_t size_before      = imap.size();
+    size_t elements_removed = imap.erase(k);
+    size_t size_after       = imap.size();
+    
+    EXPECT_EQ( elements_removed , 1 );
+    EXPECT_EQ( size_before      , 3 );
+    EXPECT_EQ( size_after       , 2 );
+}
+
+TEST( frnnIndexMap, CanEraseASingleElementWithAnIterator )
+{
+    using namespace frnn::index;
+    frnn::IndexMap<frnn::Index> imap_1(i, k, j);
+    frnn::IndexMap<frnn::Index> imap_2(k, i);
+    
+    for (auto& elem : imap_1) { 
+        if (imap_2.find(elem.first()) != imap_2.end()) {
+            imap_2.erase(imap_2.find(elem.first()));
+        }
+    };
+    
+    size_t size_after = imap_2.size();
+    
+    EXPECT_EQ( size_after, 0 ); 
 }

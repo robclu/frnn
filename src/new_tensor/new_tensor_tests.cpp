@@ -229,10 +229,16 @@ TEST( frnnTensor, CanCreateNewTensorFromSlice )
 
 TEST( frnnTensor, CanCreateTensorMultiplier )
 {
-    frnn::Tensor<int, 3> tensor = {2, 2, 2};
+    frnn::Tensor<int, 3> tensor_1 = {2, 2, 2};
+    frnn::Tensor<int, 4> tensor_2 = {4, 2, 2, 1};
 
     using namespace frnn::index;
-    frnn::TensorMultiplier<int, frnn::Tensor<int, 3>, frnn::Index> tensor_multiplier = tensor(j, i);
+    frnn::TensorMultiplier<int, frnn::Tensor<int, 3>, frnn::Index> tensor_multiplier_1 = tensor_1(i, j, k, o);
+    frnn::TensorMultiplier<int, frnn::Tensor<int, 4>, frnn::Index> tensor_multiplier_2 = tensor_2(j, i, l, m);
     
+    frnn::TensorMultiplication<int,
+                                frnn::TensorMultiplier<int, frnn::Tensor<int, 3>, frnn::Index>,
+                                frnn::TensorMultiplier<int, frnn::Tensor<int, 4>, frnn::Index>> tmult(tensor_multiplier_1, tensor_multiplier_2);
+                                   
     EXPECT_EQ( 1, 1);
 }

@@ -30,6 +30,8 @@
 #include "../containers/index_map.h"
 #include "../util/errors.h"
 
+#include <set>
+
 namespace frnn {
 
 // ==========================================================================================================
@@ -201,10 +203,9 @@ public:
     using typename TensorExpression<T, TensorMultiplier<T, E1, I>>::size_type;
     using typename TensorExpression<T, TensorMultiplier<T, E1, I>>::value_type;
     /* ==================================================================================================== */
-    
-    IndexMap<I>     _mult_dims;                         //!< Dimensions of _x to multiply
 private:
     E1 const&       _x;                                 //!< First expression for multiplication
+    IndexMap<I>     _mult_dims;                         //!< Dimensions of _x to multiply
 public:
      // =====================================================================================================
      //! @brief     Sets the expressions for multiplication.
@@ -213,9 +214,7 @@ public:
     template <typename... Is>
     TensorMultiplier(TensorExpression<T,E1> const& x, I dim, Is... dims) 
     : _x(x), _mult_dims(dim, dims...)
-    { 
-        for (auto& elem : _mult_dims) std::cout << elem.first() << " : " << elem.second << std::endl;
-    }
+    {}
    
     // ======================================================================================================
     //! @brief     Gets the sizes of the all the dimensions of the expression.
@@ -237,8 +236,9 @@ public:
     value_type operator[](size_type i) const { return _x[i]; }
 
     // ======================================================================================================
-    //! @brief      Gets the dimensions of _x which are used in the multiplication. If for a Tensor x, with  \n 
-    //!             say 3 dimensions (i,j,k) each of size 2, then if the multiplication was:                 \n
+    //! @brief      Const version. Gets the dimensions of _x which are used in the multiplication.           \n
+    //!             If for a Tensor x, with say 3 dimensions (i,j,k) each of size 2, then if the             \n
+    //!             multiplication (note Tensor multiplication) was:                                         \n
     //!                                                                                                      \n
     //!             z(j) = y(i) * x(i, j)                                                                    \n
     //!                                                                                                      \n
@@ -248,6 +248,20 @@ public:
     //! @return     The map of dimensions to use for the multiplication and their argument numbers.
     // ======================================================================================================
     const IndexMap<I>& multDims() const { return _mult_dims; }
+   
+    // ======================================================================================================
+    //! @brief      Non-const version. Gets the dimensions of _x which are used in the multiplication.       \n
+    //!             If for a Tensor x, with say 3 dimensions (i,j,k) each of size 2, then if the             \n
+    //!             multiplication (note Tensor multiplication) was:                                         \n
+    //!                                                                                                      \n
+    //!             z(j) = y(i) * x(i, j)                                                                    \n
+    //!                                                                                                      \n
+    //!             Where z and y are also Tensors, then this function returns a map with keys i and j,      \n
+    //!             with values 0 and 1 respectively, since those are their indices as arguments to the      \n
+    //!             () operator.
+    //! @return     The map of dimensions to use for the multiplication and their argument numbers.
+    // ======================================================================================================
+    IndexMap<I>& multDims() { return _mult_dims; }
 };    
 
 // ==========================================================================================================
@@ -266,19 +280,24 @@ public:
     using typename TensorExpression<T, TensorMultiplication<T, E1, E2>>::value_type;
     /* ==================================================================================================== */ 
 private:
-    E1 const&   _x;                     //!< The expression to multiply on the left side of the * operator
-    E1 const&   _y;                     //!< The expression to multiply on the right side of the * operator
-    IndexMap<T> _reduce_dims;           //!< Dimensions of the expressions that must be reuced (summed over)
-    IndexMap<T> _nreduce_dims;          //!< Dimensions of the expressions that must not be reduced
+    E1&                                 _x;                 //!< Left side expression to multiple
+    E2&                                 _y;                 //!< Right side expression to multiply
+    std::unordered_map<size_t, size_t>  _reduce_dims;       //!< Dimensions of expressions to be reduced
+    std::set<size_t>                    _nreduce_dims_x;    //!< Dimensions of x not to be reduced
+    std::set<size_t>                    _nreduce_dims_y;    //!< Dimensions of y not to be reduced
 public:
     // ======================================================================================================
     //! @brief      Sets the expressions and created the maps of dimensions to reduce and to not reduce.
-    //! @param[in]  x   The first (left) expression for multiplication.
-    //! @param[in]  y   The second (right) epression for multiplication.
+    //! @param[in]  x   The first (left) expression for multiplication. (Not const as it is intended to be a 
+    //!             temporary expression).
+    //! @param[in]  y   The second (right) epression for multiplication. (Not const as it is intended to be a
+    //!             temporary expression).
     // ======================================================================================================
-    TensorMultiplication(TensorExpression<T, E1> const& x, TensorExpression<T, E2> const& y)
+    TensorMultiplication(TensorExpression<T, E1>& x, TensorExpression<T, E2>& y)
     : _x(x), _y(y) 
-    {}
+    {
+        buildDimensions();
+    }
         
     // CHANGE    
     // ======================================================================================================
@@ -301,6 +320,57 @@ public:
     //! @return    The result of the multiplication of the Tensors.
     // ======================================================================================================
     value_type operator[](size_type i) const { return _x[i]; }
+    
+    // ======================================================================================================
+    //! @brief      Creates a unordered_map of common dimensions which must be reduced or contracted (see    \n
+    //!             Tensor contraction), and two sets of dimensions which must not be - one for each of the  \n
+    //!             expressions to multiply. For example, if there are two tensors, say x and y, and they    \n
+    //!             are being multiplied to make a Tensor z, then as per Tensor multiplication when using    \n
+    //!             Einstein summation convention, the result is:                                            \n
+    //!                                                                                                      \n
+    //!             z_ik = x_ijk * y_jilm                                                                    \n
+    //!                                                                                                      \n
+    //!             Since j and i are common to both, they are reduced dimensions, while k, l and m are not  \n
+    //!             reduced. To perform the multiplication, the reduced and non-reduced dimensions and their \n
+    //!             indices in the subscript notation need to be known, thus the function builds the         \n
+    //!             following maps:                                                                          \n
+    //!                                                                                                      \n
+    //!             reduced = [{key, value}...]         , key = index in 1st expression to multiply (x)
+    //!                                                 , value = index in 2nd expression to multiply (y)    \n
+    //!                                                                                                      \n
+    //!             nreduced_x = [value, ...]           , value = index in 1st expression to multiply (x)    \n
+    //!             nreduced_y = [value, ...]           , value = index in 2st expression to multiply (y)    \n
+    //!                                                                                                      \n
+    //!             Thus for the example above the maps would be built as:                                   \n
+    //!                                                                                                      \n
+    //!             reduced = [ {0, 1}, {1, 0} ]                                                             \n
+    //!             nreduced_x = [ 2 ]                                                                       \n
+    //!             nreduced_y = [ 2, 3 ]
+    // ======================================================================================================
+    void buildDimensions() 
+    {
+        for (auto& dim_x : _x.multDims()) {                                     // Search all x dims
+            auto dim_y = _y.multDims().find(dim_x.first());                     // Check is dim_x is in y dims
+            if (dim_y != _y.multDims().end()) { 
+                // Insert the dimension using the index of the element in
+                // x's subscript list(see above) as the key and the index 
+                // of the element in y's subscript list as the value
+                _reduce_dims.emplace(dim_x.second, dim_y->second);
+                _y.multDims().erase(dim_y);                                     // Remove found element
+            } else {
+                // Insert the dimension in the set of dimensions not 
+                // to reduce for x, the value inserted is the index of
+                // the dimension in x's subscript list
+                _nreduce_dims_x.insert(dim_x.second);
+            }
+        }
+        for (auto& dim_y : _y.multDims()) {
+            // Insert the dimension in the set of dimensions not 
+            // to reduce for y, the value inserted is the index of
+            // the dimension in y's subscript list
+            _nreduce_dims_y.insert(dim_y.second);                              
+        }
+    }
 };
 
 // ==========================================================================================================
@@ -491,6 +561,22 @@ frnn::TensorAddition<T, E1 ,E2> const operator+(frnn::TensorExpression<T, E1> co
     return frnn::TensorAddition<T, E1, E2>(x, y);
 }
 
+// ==========================================================================================================
+//! @brief      Multiplies two TensorExpressions (actually only multiplies two TensorMultipliers for the
+//!             moment
+//! @param[in]  x   The TensorExpression on the left of the multiplcication operand..
+//! @param[in]  y   The TensorExpression to the right of the multiplication operand.
+//! @return     The result of the addition of the two TensorExpressions.
+//! @tparam     T   The type of data used by the expressions.
+//! @tparam     E1  The type of the left expression to multiply.
+//! @tparam     E2  The type of the right expression to multiply.
+// ==========================================================================================================
+template <typename T, typename E1, typename E2>
+frnn::TensorMultiplication<T, E1 ,E2> const operator*(frnn::TensorExpression<T, E1>& x, 
+                                                      frnn::TensorExpression<T, E2>& y)    
+{
+    return frnn::TensorMultiplication<T, E1, E2>(x, y);
+}
 } // End global namespace
 
 #endif

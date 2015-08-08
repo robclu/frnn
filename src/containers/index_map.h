@@ -129,6 +129,27 @@ public:
     }
 
     // ======================================================================================================
+    //! @brief      Erases an element with a specified key, if the key is valid for the map, otherwise leaves 
+    //!             the map unchanged.
+    //! @param[in]  key     The key of the element to remove.
+    //! @return     The number of elements which were removed from the map.
+    // ======================================================================================================
+    size_type erase(const K& key) 
+    {
+        return _elements.erase(key);
+    }
+   
+    // ======================================================================================================
+    //! @brief      Erases an element pointer to by an iterator.
+    //! @param[in]  pos     The position of the element to remove.
+    //! @return     A new iterator pointing to the element after the removed one.
+    // ======================================================================================================
+    iterator erase(iterator pos) 
+    {
+        return _elements.erase(pos);
+    }
+    
+    // ======================================================================================================
     //! @brief  Gets the size of the map.
     //! @return The size of the map.
     // ======================================================================================================
