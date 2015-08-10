@@ -10,7 +10,7 @@ Support will be provided for both CPU-GPU and CPU-only systems, and will determi
 
 The code is well documented, with descripitons being provided for all classes, structs, functions and variables. 
 
-Additionally more thourough documentation will be provided on the [fastRNN website](http://robclu.github.io/fastRNN/), however, this will be slow as the primary focus is to first provide functionality with documentation in the code, and then for thorough documentation.
+Additionally more thourough documentation will be provided on the [frnn website](http://robclu.github.io/fastRNN/), however, this will be slow as the primary focus is to first provide functionality with documentation in the code, and then for thorough documentation.
 
 ## Compiling and Running
 
