@@ -2,7 +2,7 @@
 
 ## Overview
 
-fastRNN is a fast Recurrent Neural Network library, which uses C++, CUDA and OpenMP. It supports all possible configurations of RNN's.
+frnn is a fast recurrent neural network library written in c++, and uses CUDA and OpenMP for paralelization. It supports all possible configurations of RNN's.
 
 Support will be provided for both CPU-GPU and CPU-only systems, and will determine which device to use for each function based on its complexity.
 
